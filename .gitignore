@@ -1,0 +1,12 @@
+build/
+build-*/
+.cache/
+compile_commands.json
+*.o
+*.a
+*.so
+*.wasm
+__pycache__/
+.venv/
+node_modules/
+dist/
