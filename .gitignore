@@ -1,6 +1,7 @@
 build/
 build-*/
 .cache/
+# A symlink to build/<preset>/compile_commands.json, for clangd.
 compile_commands.json
 *.o
 *.a
