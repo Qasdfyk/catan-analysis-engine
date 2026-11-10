@@ -51,3 +51,7 @@ if(CATAN_BUILD_TESTS)
   enable_testing()
   add_subdirectory(tests)
 endif()
+
+if(CATAN_BUILD_BENCHMARKS)
+  add_subdirectory(benchmarks)
+endif()
