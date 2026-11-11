@@ -1,0 +1,2 @@
+add_executable(catan_replay replay.cpp)
+target_link_libraries(catan_replay PRIVATE catan_record catan_warnings)
