@@ -1,6 +1,10 @@
 {
   "version": 6,
-  "cmakeMinimumRequired": { "major": 3, "minor": 25, "patch": 0 },
+  "cmakeMinimumRequired": {
+    "major": 3,
+    "minor": 25,
+    "patch": 0
+  },
   "configurePresets": [
     {
       "name": "base",
@@ -21,7 +25,9 @@
       "name": "release",
       "displayName": "Release (default compiler)",
       "inherits": "base",
-      "cacheVariables": { "CMAKE_BUILD_TYPE": "Release" }
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release"
+      }
     },
     {
       "name": "clang-release",
@@ -31,19 +37,49 @@
         "CMAKE_BUILD_TYPE": "Release",
         "CMAKE_CXX_COMPILER": "clang++"
       }
+    },
+    {
+      "name": "python",
+      "displayName": "Release Python module for tools/difftest.py",
+      "inherits": "base",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "CATAN_BUILD_PYTHON": "ON",
+        "CATAN_BUILD_TESTS": "OFF",
+        "CATAN_BUILD_BENCHMARKS": "OFF",
+        "Python_EXECUTABLE": "${sourceDir}/../catan-project/backend/.venv/bin/python"
+      }
     }
   ],
   "buildPresets": [
-    { "name": "debug", "configurePreset": "debug" },
-    { "name": "release", "configurePreset": "release" },
-    { "name": "clang-release", "configurePreset": "clang-release" }
+    {
+      "name": "debug",
+      "configurePreset": "debug"
+    },
+    {
+      "name": "release",
+      "configurePreset": "release"
+    },
+    {
+      "name": "clang-release",
+      "configurePreset": "clang-release"
+    },
+    {
+      "name": "python",
+      "configurePreset": "python"
+    }
   ],
   "testPresets": [
     {
       "name": "base",
       "hidden": true,
-      "output": { "outputOnFailure": true },
-      "execution": { "noTestsAction": "error", "stopOnFailure": false }
+      "output": {
+        "outputOnFailure": true
+      },
+      "execution": {
+        "noTestsAction": "error",
+        "stopOnFailure": false
+      }
     },
     {
       "name": "debug",
@@ -54,7 +90,15 @@
         "UBSAN_OPTIONS": "halt_on_error=1:print_stacktrace=1"
       }
     },
-    { "name": "release", "inherits": "base", "configurePreset": "release" },
-    { "name": "clang-release", "inherits": "base", "configurePreset": "clang-release" }
+    {
+      "name": "release",
+      "inherits": "base",
+      "configurePreset": "release"
+    },
+    {
+      "name": "clang-release",
+      "inherits": "base",
+      "configurePreset": "clang-release"
+    }
   ]
 }
