@@ -70,4 +70,79 @@ constexpr void for_each_node(NodeMask mask, F&& f) {
 // Human-readable form for test failures and debugging, e.g. "{0, 5, 53}".
 [[nodiscard]] std::string to_string(NodeMask mask);
 
+// Number of edges ("sides" where roads go) on the standard board.
+inline constexpr int kEdgeCount = 72;
+
+// A set of edges. 72 bits do not fit one 64-bit word, so the set is two
+// words: edges 0..63 in `lo`, edges 64..71 in the low 8 bits of `hi`. The
+// upper 56 bits of `hi` are always zero; every operation keeps them zero, so
+// == and count() need no masking.
+//
+// Why not std::bitset<72>? It would work, but its operations are not
+// constexpr in C++20 and its layout is up to the library; two plain words are
+// as fast and easy to reason about.
+struct EdgeMask {
+  std::uint64_t lo = 0;
+  std::uint64_t hi = 0;
+
+  [[nodiscard]] static constexpr EdgeMask of(int edge) noexcept {
+    EdgeMask m;
+    m.set(edge);
+    return m;
+  }
+  constexpr void set(int edge) noexcept {
+    if (edge < 64) {
+      lo |= std::uint64_t{1} << edge;
+    } else {
+      hi |= std::uint64_t{1} << (edge - 64);
+    }
+  }
+  constexpr void reset(int edge) noexcept {
+    if (edge < 64) {
+      lo &= ~(std::uint64_t{1} << edge);
+    } else {
+      hi &= ~(std::uint64_t{1} << (edge - 64));
+    }
+  }
+  [[nodiscard]] constexpr bool test(int edge) const noexcept {
+    return edge < 64 ? ((lo >> edge) & 1U) != 0 : ((hi >> (edge - 64)) & 1U) != 0;
+  }
+  [[nodiscard]] constexpr bool any() const noexcept { return (lo | hi) != 0; }
+  [[nodiscard]] constexpr int count() const noexcept {
+    return std::popcount(lo) + std::popcount(hi);
+  }
+
+  constexpr EdgeMask& operator|=(EdgeMask o) noexcept {
+    lo |= o.lo;
+    hi |= o.hi;
+    return *this;
+  }
+  constexpr EdgeMask& operator&=(EdgeMask o) noexcept {
+    lo &= o.lo;
+    hi &= o.hi;
+    return *this;
+  }
+  [[nodiscard]] friend constexpr EdgeMask operator|(EdgeMask a, EdgeMask b) noexcept { return a |= b; }
+  [[nodiscard]] friend constexpr EdgeMask operator&(EdgeMask a, EdgeMask b) noexcept { return a &= b; }
+  // Complement within the 72 edges: the unused upper bits of `hi` stay zero.
+  [[nodiscard]] friend constexpr EdgeMask operator~(EdgeMask a) noexcept {
+    return EdgeMask{~a.lo, ~a.hi & ((std::uint64_t{1} << (kEdgeCount - 64)) - 1)};
+  }
+  friend constexpr bool operator==(EdgeMask, EdgeMask) noexcept = default;
+};
+
+// Calls f(edge) for every edge in the set, lowest index first (same trick as
+// for_each_node, once per word).
+template <typename F>
+constexpr void for_each_edge(EdgeMask mask, F&& f) {
+  while (mask.lo != 0) {
+    f(std::countr_zero(mask.lo));
+    mask.lo &= mask.lo - 1;
+  }
+  while (mask.hi != 0) {
+    f(64 + std::countr_zero(mask.hi));
+    mask.hi &= mask.hi - 1;
+  }
+}
+
 }  // namespace cae

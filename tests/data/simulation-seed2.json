@@ -1,0 +1,7262 @@
+{
+ "format": "catan-game-record",
+ "version": 1,
+ "source": "simulation",
+ "game_id": null,
+ "started_at": "2026-11-11T14:29:37+00:00",
+ "finished_at": "2026-11-11T14:29:38+00:00",
+ "settings": {
+  "victory_points": 10,
+  "discard_limit": 7,
+  "desert": "random",
+  "friendly_robber": false,
+  "turn_seconds": null
+ },
+ "first_seat": 0,
+ "players": [
+  {
+   "seat": 0,
+   "name": "Alice",
+   "color": "red",
+   "kind": "bot",
+   "bot_level": "random"
+  },
+  {
+   "seat": 1,
+   "name": "Bob",
+   "color": "blue",
+   "kind": "bot",
+   "bot_level": "random"
+  },
+  {
+   "seat": 2,
+   "name": "Charlie",
+   "color": "white",
+   "kind": "bot",
+   "bot_level": "random"
+  }
+ ],
+ "board": {
+  "tiles": [
+   {
+    "hex": {
+     "q": -2,
+     "r": 0,
+     "s": 2
+    },
+    "resource": "brick",
+    "number": 5
+   },
+   {
+    "hex": {
+     "q": -2,
+     "r": 1,
+     "s": 1
+    },
+    "resource": "ore",
+    "number": 9
+   },
+   {
+    "hex": {
+     "q": -2,
+     "r": 2,
+     "s": 0
+    },
+    "resource": "sheep",
+    "number": 10
+   },
+   {
+    "hex": {
+     "q": -1,
+     "r": -1,
+     "s": 2
+    },
+    "resource": "ore",
+    "number": 8
+   },
+   {
+    "hex": {
+     "q": -1,
+     "r": 0,
+     "s": 1
+    },
+    "resource": "wheat",
+    "number": 4
+   },
+   {
+    "hex": {
+     "q": -1,
+     "r": 1,
+     "s": 0
+    },
+    "resource": "brick",
+    "number": 3
+   },
+   {
+    "hex": {
+     "q": -1,
+     "r": 2,
+     "s": -1
+    },
+    "resource": "wood",
+    "number": 6
+   },
+   {
+    "hex": {
+     "q": 0,
+     "r": -2,
+     "s": 2
+    },
+    "resource": "wheat",
+    "number": 11
+   },
+   {
+    "hex": {
+     "q": 0,
+     "r": -1,
+     "s": 1
+    },
+    "resource": "sheep",
+    "number": 9
+   },
+   {
+    "hex": {
+     "q": 0,
+     "r": 0,
+     "s": 0
+    },
+    "resource": "sheep",
+    "number": 4
+   },
+   {
+    "hex": {
+     "q": 0,
+     "r": 1,
+     "s": -1
+    },
+    "resource": "wood",
+    "number": 12
+   },
+   {
+    "hex": {
+     "q": 0,
+     "r": 2,
+     "s": -2
+    },
+    "resource": "wood",
+    "number": 3
+   },
+   {
+    "hex": {
+     "q": 1,
+     "r": -2,
+     "s": 1
+    },
+    "resource": "brick",
+    "number": 11
+   },
+   {
+    "hex": {
+     "q": 1,
+     "r": -1,
+     "s": 0
+    },
+    "resource": "ore",
+    "number": 2
+   },
+   {
+    "hex": {
+     "q": 1,
+     "r": 0,
+     "s": -1
+    },
+    "resource": "wood",
+    "number": 6
+   },
+   {
+    "hex": {
+     "q": 1,
+     "r": 1,
+     "s": -2
+    },
+    "resource": "desert",
+    "number": null
+   },
+   {
+    "hex": {
+     "q": 2,
+     "r": -2,
+     "s": 0
+    },
+    "resource": "sheep",
+    "number": 8
+   },
+   {
+    "hex": {
+     "q": 2,
+     "r": -1,
+     "s": -1
+    },
+    "resource": "wheat",
+    "number": 10
+   },
+   {
+    "hex": {
+     "q": 2,
+     "r": 0,
+     "s": -2
+    },
+    "resource": "wheat",
+    "number": 5
+   }
+  ],
+  "ports": [
+   {
+    "type": "3:1",
+    "vertices": [
+     {
+      "hex": {
+       "q": -3,
+       "r": 0,
+       "s": 3
+      },
+      "direction": 0
+     },
+     {
+      "hex": {
+       "q": -3,
+       "r": 0,
+       "s": 3
+      },
+      "direction": 1
+     }
+    ]
+   },
+   {
+    "type": "ore_2:1",
+    "vertices": [
+     {
+      "hex": {
+       "q": -3,
+       "r": 1,
+       "s": 2
+      },
+      "direction": 1
+     },
+     {
+      "hex": {
+       "q": -3,
+       "r": 2,
+       "s": 1
+      },
+      "direction": 0
+     }
+    ]
+   },
+   {
+    "type": "sheep_2:1",
+    "vertices": [
+     {
+      "hex": {
+       "q": -2,
+       "r": 2,
+       "s": 0
+      },
+      "direction": 1
+     },
+     {
+      "hex": {
+       "q": -3,
+       "r": 3,
+       "s": 0
+      },
+      "direction": 0
+     }
+    ]
+   },
+   {
+    "type": "wheat_2:1",
+    "vertices": [
+     {
+      "hex": {
+       "q": 0,
+       "r": 2,
+       "s": -2
+      },
+      "direction": 1
+     },
+     {
+      "hex": {
+       "q": -1,
+       "r": 3,
+       "s": -2
+      },
+      "direction": 0
+     }
+    ]
+   },
+   {
+    "type": "3:1",
+    "vertices": [
+     {
+      "hex": {
+       "q": 1,
+       "r": 1,
+       "s": -2
+      },
+      "direction": 0
+     },
+     {
+      "hex": {
+       "q": 1,
+       "r": 1,
+       "s": -2
+      },
+      "direction": 1
+     }
+    ]
+   },
+   {
+    "type": "brick_2:1",
+    "vertices": [
+     {
+      "hex": {
+       "q": 2,
+       "r": -1,
+       "s": -1
+      },
+      "direction": 1
+     },
+     {
+      "hex": {
+       "q": 2,
+       "r": 0,
+       "s": -2
+      },
+      "direction": 0
+     }
+    ]
+   },
+   {
+    "type": "wood_2:1",
+    "vertices": [
+     {
+      "hex": {
+       "q": 2,
+       "r": -3,
+       "s": 1
+      },
+      "direction": 1
+     },
+     {
+      "hex": {
+       "q": 2,
+       "r": -2,
+       "s": 0
+      },
+      "direction": 0
+     }
+    ]
+   },
+   {
+    "type": "3:1",
+    "vertices": [
+     {
+      "hex": {
+       "q": 1,
+       "r": -3,
+       "s": 2
+      },
+      "direction": 1
+     },
+     {
+      "hex": {
+       "q": 0,
+       "r": -2,
+       "s": 2
+      },
+      "direction": 0
+     }
+    ]
+   },
+   {
+    "type": "3:1",
+    "vertices": [
+     {
+      "hex": {
+       "q": -1,
+       "r": -2,
+       "s": 3
+      },
+      "direction": 0
+     },
+     {
+      "hex": {
+       "q": -1,
+       "r": -2,
+       "s": 3
+      },
+      "direction": 1
+     }
+    ]
+   }
+  ],
+  "robber": {
+   "q": 1,
+   "r": 1,
+   "s": -2
+  }
+ },
+ "dev_deck": {
+  "cards": [
+   "knight",
+   "knight",
+   "knight",
+   "knight",
+   "knight",
+   "monopoly",
+   "victory_point",
+   "victory_point",
+   "victory_point",
+   "knight",
+   "knight",
+   "knight",
+   "road_building",
+   "year_of_plenty",
+   "knight",
+   "knight",
+   "knight",
+   "victory_point",
+   "knight",
+   "road_building",
+   "year_of_plenty",
+   "monopoly",
+   "knight",
+   "victory_point",
+   "knight"
+  ],
+  "visible_to": []
+ },
+ "events": [
+  {
+   "turn": 0,
+   "seat": 0,
+   "action": "build_settlement",
+   "payload": {
+    "hex": {
+     "q": 1,
+     "r": 1,
+     "s": -2
+    },
+    "direction": 0
+   }
+  },
+  {
+   "turn": 0,
+   "seat": 0,
+   "action": "build_road",
+   "payload": {
+    "hex": {
+     "q": 1,
+     "r": 1,
+     "s": -2
+    },
+    "direction": 0
+   }
+  },
+  {
+   "turn": 1,
+   "seat": 1,
+   "action": "build_settlement",
+   "payload": {
+    "hex": {
+     "q": -1,
+     "r": 3,
+     "s": -2
+    },
+    "direction": 0
+   }
+  },
+  {
+   "turn": 1,
+   "seat": 1,
+   "action": "build_road",
+   "payload": {
+    "hex": {
+     "q": 0,
+     "r": 2,
+     "s": -2
+    },
+    "direction": 1
+   }
+  },
+  {
+   "turn": 2,
+   "seat": 2,
+   "action": "build_settlement",
+   "payload": {
+    "hex": {
+     "q": 1,
+     "r": -1,
+     "s": 0
+    },
+    "direction": 1
+   }
+  },
+  {
+   "turn": 2,
+   "seat": 2,
+   "action": "build_road",
+   "payload": {
+    "hex": {
+     "q": 1,
+     "r": 0,
+     "s": -1
+    },
+    "direction": 5
+   }
+  },
+  {
+   "turn": 3,
+   "seat": 2,
+   "action": "build_settlement",
+   "payload": {
+    "hex": {
+     "q": -1,
+     "r": 1,
+     "s": 0
+    },
+    "direction": 0
+   }
+  },
+  {
+   "turn": 3,
+   "seat": 2,
+   "action": "build_road",
+   "payload": {
+    "hex": {
+     "q": 0,
+     "r": 0,
+     "s": 0
+    },
+    "direction": 1
+   }
+  },
+  {
+   "turn": 4,
+   "seat": 1,
+   "action": "build_settlement",
+   "payload": {
+    "hex": {
+     "q": -3,
+     "r": 3,
+     "s": 0
+    },
+    "direction": 0
+   }
+  },
+  {
+   "turn": 4,
+   "seat": 1,
+   "action": "build_road",
+   "payload": {
+    "hex": {
+     "q": -2,
+     "r": 2,
+     "s": 0
+    },
+    "direction": 1
+   }
+  },
+  {
+   "turn": 5,
+   "seat": 0,
+   "action": "build_settlement",
+   "payload": {
+    "hex": {
+     "q": -2,
+     "r": 0,
+     "s": 2
+    },
+    "direction": 1
+   }
+  },
+  {
+   "turn": 5,
+   "seat": 0,
+   "action": "build_road",
+   "payload": {
+    "hex": {
+     "q": -2,
+     "r": 0,
+     "s": 2
+    },
+    "direction": 0
+   }
+  },
+  {
+   "turn": 6,
+   "seat": 0,
+   "action": "roll_dice",
+   "payload": {},
+   "outcome": {
+    "dice": [
+     1,
+     6
+    ]
+   }
+  },
+  {
+   "turn": 6,
+   "seat": 0,
+   "action": "move_robber",
+   "payload": {
+    "hex": {
+     "q": -1,
+     "r": 1,
+     "s": 0
+    }
+   }
+  },
+  {
+   "turn": 6,
+   "seat": 0,
+   "action": "steal",
+   "payload": {
+    "victim_seat": 2
+   },
+   "outcome": {
+    "resource": "wood"
+   },
+   "visible_to": [
+    0,
+    2
+   ]
+  },
+  {
+   "turn": 6,
+   "seat": 0,
+   "action": "end_turn",
+   "payload": {}
+  },
+  {
+   "turn": 7,
+   "seat": 1,
+   "action": "roll_dice",
+   "payload": {},
+   "outcome": {
+    "dice": [
+     3,
+     1
+    ]
+   }
+  },
+  {
+   "turn": 7,
+   "seat": 1,
+   "action": "end_turn",
+   "payload": {}
+  },
+  {
+   "turn": 8,
+   "seat": 2,
+   "action": "roll_dice",
+   "payload": {},
+   "outcome": {
+    "dice": [
+     5,
+     1
+    ]
+   }
+  },
+  {
+   "turn": 8,
+   "seat": 2,
+   "action": "build_road",
+   "payload": {
+    "hex": {
+     "q": -1,
+     "r": 1,
+     "s": 0
+    },
+    "direction": 0
+   }
+  },
+  {
+   "turn": 8,
+   "seat": 2,
+   "action": "end_turn",
+   "payload": {}
+  },
+  {
+   "turn": 9,
+   "seat": 0,
+   "action": "roll_dice",
+   "payload": {},
+   "outcome": {
+    "dice": [
+     5,
+     3
+    ]
+   }
+  },
+  {
+   "turn": 9,
+   "seat": 0,
+   "action": "end_turn",
+   "payload": {}
+  },
+  {
+   "turn": 10,
+   "seat": 1,
+   "action": "roll_dice",
+   "payload": {},
+   "outcome": {
+    "dice": [
+     3,
+     6
+    ]
+   }
+  },
+  {
+   "turn": 10,
+   "seat": 1,
+   "action": "end_turn",
+   "payload": {}
+  },
+  {
+   "turn": 11,
+   "seat": 2,
+   "action": "roll_dice",
+   "payload": {},
+   "outcome": {
+    "dice": [
+     3,
+     3
+    ]
+   }
+  },
+  {
+   "turn": 11,
+   "seat": 2,
+   "action": "end_turn",
+   "payload": {}
+  },
+  {
+   "turn": 12,
+   "seat": 0,
+   "action": "roll_dice",
+   "payload": {},
+   "outcome": {
+    "dice": [
+     1,
+     6
+    ]
+   }
+  },
+  {
+   "turn": 12,
+   "seat": 0,
+   "action": "move_robber",
+   "payload": {
+    "hex": {
+     "q": 1,
+     "r": -1,
+     "s": 0
+    }
+   }
+  },
+  {
+   "turn": 12,
+   "seat": 0,
+   "action": "steal",
+   "payload": {
+    "victim_seat": 2
+   },
+   "outcome": {
+    "resource": "sheep"
+   },
+   "visible_to": [
+    0,
+    2
+   ]
+  },
+  {
+   "turn": 12,
+   "seat": 0,
+   "action": "build_road",
+   "payload": {
+    "hex": {
+     "q": -2,
+     "r": 0,
+     "s": 2
+    },
+    "direction": 1
+   }
+  },
+  {
+   "turn": 12,
+   "seat": 0,
+   "action": "buy_dev_card",
+   "payload": {},
+   "outcome": {
+    "card": "knight"
+   },
+   "visible_to": [
+    0
+   ]
+  },
+  {
+   "turn": 12,
+   "seat": 0,
+   "action": "end_turn",
+   "payload": {}
+  },
+  {
+   "turn": 13,
+   "seat": 1,
+   "action": "roll_dice",
+   "payload": {},
+   "outcome": {
+    "dice": [
+     1,
+     1
+    ]
+   }
+  },
+  {
+   "turn": 13,
+   "seat": 1,
+   "action": "end_turn",
+   "payload": {}
+  },
+  {
+   "turn": 14,
+   "seat": 2,
+   "action": "roll_dice",
+   "payload": {},
+   "outcome": {
+    "dice": [
+     3,
+     2
+    ]
+   }
+  },
+  {
+   "turn": 14,
+   "seat": 2,
+   "action": "end_turn",
+   "payload": {}
+  },
+  {
+   "turn": 15,
+   "seat": 0,
+   "action": "play_knight",
+   "payload": {}
+  },
+  {
+   "turn": 15,
+   "seat": 0,
+   "action": "move_robber",
+   "payload": {
+    "hex": {
+     "q": 1,
+     "r": 1,
+     "s": -2
+    }
+   }
+  },
+  {
+   "turn": 15,
+   "seat": 0,
+   "action": "roll_dice",
+   "payload": {},
+   "outcome": {
+    "dice": [
+     6,
+     1
+    ]
+   }
+  },
+  {
+   "turn": 15,
+   "seat": 0,
+   "action": "move_robber",
+   "payload": {
+    "hex": {
+     "q": 1,
+     "r": -1,
+     "s": 0
+    }
+   }
+  },
+  {
+   "turn": 15,
+   "seat": 0,
+   "action": "steal",
+   "payload": {
+    "victim_seat": 2
+   },
+   "outcome": {
+    "resource": "sheep"
+   },
+   "visible_to": [
+    0,
+    2
+   ]
+  },
+  {
+   "turn": 15,
+   "seat": 0,
+   "action": "buy_dev_card",
+   "payload": {},
+   "outcome": {
+    "card": "knight"
+   },
+   "visible_to": [
+    0
+   ]
+  },
+  {
+   "turn": 15,
+   "seat": 0,
+   "action": "end_turn",
+   "payload": {}
+  },
+  {
+   "turn": 16,
+   "seat": 1,
+   "action": "roll_dice",
+   "payload": {},
+   "outcome": {
+    "dice": [
+     1,
+     4
+    ]
+   }
+  },
+  {
+   "turn": 16,
+   "seat": 1,
+   "action": "end_turn",
+   "payload": {}
+  },
+  {
+   "turn": 17,
+   "seat": 2,
+   "action": "roll_dice",
+   "payload": {},
+   "outcome": {
+    "dice": [
+     6,
+     4
+    ]
+   }
+  },
+  {
+   "turn": 17,
+   "seat": 2,
+   "action": "end_turn",
+   "payload": {}
+  },
+  {
+   "turn": 18,
+   "seat": 0,
+   "action": "play_knight",
+   "payload": {}
+  },
+  {
+   "turn": 18,
+   "seat": 0,
+   "action": "move_robber",
+   "payload": {
+    "hex": {
+     "q": 2,
+     "r": -1,
+     "s": -1
+    }
+   }
+  },
+  {
+   "turn": 18,
+   "seat": 0,
+   "action": "steal",
+   "payload": {
+    "victim_seat": 2
+   },
+   "outcome": {
+    "resource": "wheat"
+   },
+   "visible_to": [
+    0,
+    2
+   ]
+  },
+  {
+   "turn": 18,
+   "seat": 0,
+   "action": "roll_dice",
+   "payload": {},
+   "outcome": {
+    "dice": [
+     2,
+     5
+    ]
+   }
+  },
+  {
+   "turn": 18,
+   "seat": 0,
+   "action": "move_robber",
+   "payload": {
+    "hex": {
+     "q": 1,
+     "r": 1,
+     "s": -2
+    }
+   }
+  },
+  {
+   "turn": 18,
+   "seat": 0,
+   "action": "trade_with_bank",
+   "payload": {
+    "give": "wheat",
+    "get": "ore"
+   }
+  },
+  {
+   "turn": 18,
+   "seat": 0,
+   "action": "end_turn",
+   "payload": {}
+  },
+  {
+   "turn": 19,
+   "seat": 1,
+   "action": "roll_dice",
+   "payload": {},
+   "outcome": {
+    "dice": [
+     5,
+     1
+    ]
+   }
+  },
+  {
+   "turn": 19,
+   "seat": 1,
+   "action": "trade_with_bank",
+   "payload": {
+    "give": "sheep",
+    "get": "wheat"
+   }
+  },
+  {
+   "turn": 19,
+   "seat": 1,
+   "action": "end_turn",
+   "payload": {}
+  },
+  {
+   "turn": 20,
+   "seat": 2,
+   "action": "roll_dice",
+   "payload": {},
+   "outcome": {
+    "dice": [
+     1,
+     3
+    ]
+   }
+  },
+  {
+   "turn": 20,
+   "seat": 2,
+   "action": "end_turn",
+   "payload": {}
+  },
+  {
+   "turn": 21,
+   "seat": 0,
+   "action": "roll_dice",
+   "payload": {},
+   "outcome": {
+    "dice": [
+     1,
+     3
+    ]
+   }
+  },
+  {
+   "turn": 21,
+   "seat": 0,
+   "action": "end_turn",
+   "payload": {}
+  },
+  {
+   "turn": 22,
+   "seat": 1,
+   "action": "roll_dice",
+   "payload": {},
+   "outcome": {
+    "dice": [
+     3,
+     6
+    ]
+   }
+  },
+  {
+   "turn": 22,
+   "seat": 1,
+   "action": "end_turn",
+   "payload": {}
+  },
+  {
+   "turn": 23,
+   "seat": 2,
+   "action": "roll_dice",
+   "payload": {},
+   "outcome": {
+    "dice": [
+     1,
+     2
+    ]
+   }
+  },
+  {
+   "turn": 23,
+   "seat": 2,
+   "action": "build_road",
+   "payload": {
+    "hex": {
+     "q": 0,
+     "r": 1,
+     "s": -1
+    },
+    "direction": 5
+   }
+  },
+  {
+   "turn": 23,
+   "seat": 2,
+   "action": "end_turn",
+   "payload": {}
+  },
+  {
+   "turn": 24,
+   "seat": 0,
+   "action": "roll_dice",
+   "payload": {},
+   "outcome": {
+    "dice": [
+     4,
+     2
+    ]
+   }
+  },
+  {
+   "turn": 24,
+   "seat": 0,
+   "action": "end_turn",
+   "payload": {}
+  },
+  {
+   "turn": 25,
+   "seat": 1,
+   "action": "roll_dice",
+   "payload": {},
+   "outcome": {
+    "dice": [
+     1,
+     5
+    ]
+   }
+  },
+  {
+   "turn": 25,
+   "seat": 1,
+   "action": "end_turn",
+   "payload": {}
+  },
+  {
+   "turn": 26,
+   "seat": 2,
+   "action": "roll_dice",
+   "payload": {},
+   "outcome": {
+    "dice": [
+     3,
+     4
+    ]
+   }
+  },
+  {
+   "turn": 26,
+   "seat": 2,
+   "action": "move_robber",
+   "payload": {
+    "hex": {
+     "q": -1,
+     "r": 1,
+     "s": 0
+    }
+   }
+  },
+  {
+   "turn": 26,
+   "seat": 2,
+   "action": "end_turn",
+   "payload": {}
+  },
+  {
+   "turn": 27,
+   "seat": 0,
+   "action": "roll_dice",
+   "payload": {},
+   "outcome": {
+    "dice": [
+     6,
+     4
+    ]
+   }
+  },
+  {
+   "turn": 27,
+   "seat": 0,
+   "action": "end_turn",
+   "payload": {}
+  },
+  {
+   "turn": 28,
+   "seat": 1,
+   "action": "roll_dice",
+   "payload": {},
+   "outcome": {
+    "dice": [
+     2,
+     3
+    ]
+   }
+  },
+  {
+   "turn": 28,
+   "seat": 1,
+   "action": "end_turn",
+   "payload": {}
+  },
+  {
+   "turn": 29,
+   "seat": 2,
+   "action": "roll_dice",
+   "payload": {},
+   "outcome": {
+    "dice": [
+     4,
+     1
+    ]
+   }
+  },
+  {
+   "turn": 29,
+   "seat": 2,
+   "action": "end_turn",
+   "payload": {}
+  },
+  {
+   "turn": 30,
+   "seat": 0,
+   "action": "roll_dice",
+   "payload": {},
+   "outcome": {
+    "dice": [
+     3,
+     1
+    ]
+   }
+  },
+  {
+   "turn": 30,
+   "seat": 0,
+   "action": "trade_with_bank",
+   "payload": {
+    "give": "brick",
+    "get": "ore"
+   }
+  },
+  {
+   "turn": 30,
+   "seat": 0,
+   "action": "upgrade_city",
+   "payload": {
+    "hex": {
+     "q": 1,
+     "r": 1,
+     "s": -2
+    },
+    "direction": 0
+   }
+  },
+  {
+   "turn": 30,
+   "seat": 0,
+   "action": "trade_with_bank",
+   "payload": {
+    "give": "wheat",
+    "get": "sheep"
+   }
+  },
+  {
+   "turn": 30,
+   "seat": 0,
+   "action": "end_turn",
+   "payload": {}
+  },
+  {
+   "turn": 31,
+   "seat": 1,
+   "action": "roll_dice",
+   "payload": {},
+   "outcome": {
+    "dice": [
+     1,
+     1
+    ]
+   }
+  },
+  {
+   "turn": 31,
+   "seat": 1,
+   "action": "end_turn",
+   "payload": {}
+  },
+  {
+   "turn": 32,
+   "seat": 2,
+   "action": "roll_dice",
+   "payload": {},
+   "outcome": {
+    "dice": [
+     5,
+     3
+    ]
+   }
+  },
+  {
+   "turn": 32,
+   "seat": 2,
+   "action": "end_turn",
+   "payload": {}
+  },
+  {
+   "turn": 33,
+   "seat": 0,
+   "action": "roll_dice",
+   "payload": {},
+   "outcome": {
+    "dice": [
+     6,
+     4
+    ]
+   }
+  },
+  {
+   "turn": 33,
+   "seat": 0,
+   "action": "end_turn",
+   "payload": {}
+  },
+  {
+   "turn": 34,
+   "seat": 1,
+   "action": "roll_dice",
+   "payload": {},
+   "outcome": {
+    "dice": [
+     2,
+     6
+    ]
+   }
+  },
+  {
+   "turn": 34,
+   "seat": 1,
+   "action": "trade_with_bank",
+   "payload": {
+    "give": "sheep",
+    "get": "wood"
+   }
+  },
+  {
+   "turn": 34,
+   "seat": 1,
+   "action": "offer_trade",
+   "payload": {
+    "give": {
+     "wheat": 1
+    },
+    "get": {
+     "brick": 1
+    }
+   }
+  },
+  {
+   "turn": 34,
+   "seat": 0,
+   "action": "respond_trade",
+   "payload": {
+    "accept": true
+   }
+  },
+  {
+   "turn": 34,
+   "seat": 1,
+   "action": "confirm_trade",
+   "payload": {
+    "partner_seat": 0
+   }
+  },
+  {
+   "turn": 34,
+   "seat": 1,
+   "action": "end_turn",
+   "payload": {}
+  },
+  {
+   "turn": 35,
+   "seat": 2,
+   "action": "roll_dice",
+   "payload": {},
+   "outcome": {
+    "dice": [
+     1,
+     1
+    ]
+   }
+  },
+  {
+   "turn": 35,
+   "seat": 2,
+   "action": "buy_dev_card",
+   "payload": {},
+   "outcome": {
+    "card": "knight"
+   },
+   "visible_to": [
+    2
+   ]
+  },
+  {
+   "turn": 35,
+   "seat": 2,
+   "action": "end_turn",
+   "payload": {}
+  },
+  {
+   "turn": 36,
+   "seat": 0,
+   "action": "roll_dice",
+   "payload": {},
+   "outcome": {
+    "dice": [
+     5,
+     6
+    ]
+   }
+  },
+  {
+   "turn": 36,
+   "seat": 0,
+   "action": "end_turn",
+   "payload": {}
+  },
+  {
+   "turn": 37,
+   "seat": 1,
+   "action": "roll_dice",
+   "payload": {},
+   "outcome": {
+    "dice": [
+     4,
+     1
+    ]
+   }
+  },
+  {
+   "turn": 37,
+   "seat": 1,
+   "action": "offer_trade",
+   "payload": {
+    "give": {
+     "wood": 1
+    },
+    "get": {
+     "wheat": 1
+    }
+   }
+  },
+  {
+   "turn": 37,
+   "seat": 0,
+   "action": "respond_trade",
+   "payload": {
+    "accept": true
+   }
+  },
+  {
+   "turn": 37,
+   "seat": 1,
+   "action": "confirm_trade",
+   "payload": {
+    "partner_seat": 0
+   }
+  },
+  {
+   "turn": 37,
+   "seat": 1,
+   "action": "build_road",
+   "payload": {
+    "hex": {
+     "q": -2,
+     "r": 2,
+     "s": 0
+    },
+    "direction": 0
+   }
+  },
+  {
+   "turn": 37,
+   "seat": 1,
+   "action": "offer_trade",
+   "payload": {
+    "give": {
+     "wheat": 1
+    },
+    "get": {
+     "wood": 1
+    }
+   }
+  },
+  {
+   "turn": 37,
+   "seat": 0,
+   "action": "respond_trade",
+   "payload": {
+    "accept": true
+   }
+  },
+  {
+   "turn": 37,
+   "seat": 1,
+   "action": "confirm_trade",
+   "payload": {
+    "partner_seat": 0
+   }
+  },
+  {
+   "turn": 37,
+   "seat": 1,
+   "action": "end_turn",
+   "payload": {}
+  },
+  {
+   "turn": 38,
+   "seat": 2,
+   "action": "roll_dice",
+   "payload": {},
+   "outcome": {
+    "dice": [
+     6,
+     6
+    ]
+   }
+  },
+  {
+   "turn": 38,
+   "seat": 2,
+   "action": "buy_dev_card",
+   "payload": {},
+   "outcome": {
+    "card": "knight"
+   },
+   "visible_to": [
+    2
+   ]
+  },
+  {
+   "turn": 38,
+   "seat": 2,
+   "action": "trade_with_bank",
+   "payload": {
+    "give": "wood",
+    "get": "ore"
+   }
+  },
+  {
+   "turn": 38,
+   "seat": 2,
+   "action": "play_knight",
+   "payload": {}
+  },
+  {
+   "turn": 38,
+   "seat": 2,
+   "action": "move_robber",
+   "payload": {
+    "hex": {
+     "q": -1,
+     "r": 0,
+     "s": 1
+    }
+   }
+  },
+  {
+   "turn": 38,
+   "seat": 2,
+   "action": "steal",
+   "payload": {
+    "victim_seat": 0
+   },
+   "outcome": {
+    "resource": "wheat"
+   },
+   "visible_to": [
+    0,
+    2
+   ]
+  },
+  {
+   "turn": 38,
+   "seat": 2,
+   "action": "offer_trade",
+   "payload": {
+    "give": {
+     "wheat": 1
+    },
+    "get": {
+     "brick": 1
+    }
+   }
+  },
+  {
+   "turn": 38,
+   "seat": 0,
+   "action": "respond_trade",
+   "payload": {
+    "accept": true
+   }
+  },
+  {
+   "turn": 38,
+   "seat": 2,
+   "action": "confirm_trade",
+   "payload": {
+    "partner_seat": 0
+   }
+  },
+  {
+   "turn": 38,
+   "seat": 2,
+   "action": "end_turn",
+   "payload": {}
+  },
+  {
+   "turn": 39,
+   "seat": 0,
+   "action": "roll_dice",
+   "payload": {},
+   "outcome": {
+    "dice": [
+     3,
+     3
+    ]
+   }
+  },
+  {
+   "turn": 39,
+   "seat": 0,
+   "action": "trade_with_bank",
+   "payload": {
+    "give": "wheat",
+    "get": "wood"
+   }
+  },
+  {
+   "turn": 39,
+   "seat": 0,
+   "action": "end_turn",
+   "payload": {}
+  },
+  {
+   "turn": 40,
+   "seat": 1,
+   "action": "roll_dice",
+   "payload": {},
+   "outcome": {
+    "dice": [
+     4,
+     2
+    ]
+   }
+  },
+  {
+   "turn": 40,
+   "seat": 1,
+   "action": "end_turn",
+   "payload": {}
+  },
+  {
+   "turn": 41,
+   "seat": 2,
+   "action": "play_knight",
+   "payload": {}
+  },
+  {
+   "turn": 41,
+   "seat": 2,
+   "action": "move_robber",
+   "payload": {
+    "hex": {
+     "q": 2,
+     "r": -2,
+     "s": 0
+    }
+   }
+  },
+  {
+   "turn": 41,
+   "seat": 2,
+   "action": "roll_dice",
+   "payload": {},
+   "outcome": {
+    "dice": [
+     3,
+     3
+    ]
+   }
+  },
+  {
+   "turn": 41,
+   "seat": 2,
+   "action": "build_road",
+   "payload": {
+    "hex": {
+     "q": -1,
+     "r": 1,
+     "s": 0
+    },
+    "direction": 1
+   }
+  },
+  {
+   "turn": 41,
+   "seat": 2,
+   "action": "end_turn",
+   "payload": {}
+  },
+  {
+   "turn": 42,
+   "seat": 0,
+   "action": "roll_dice",
+   "payload": {},
+   "outcome": {
+    "dice": [
+     4,
+     5
+    ]
+   }
+  },
+  {
+   "turn": 42,
+   "seat": 0,
+   "action": "end_turn",
+   "payload": {}
+  },
+  {
+   "turn": 43,
+   "seat": 1,
+   "action": "roll_dice",
+   "payload": {},
+   "outcome": {
+    "dice": [
+     4,
+     6
+    ]
+   }
+  },
+  {
+   "turn": 43,
+   "seat": 1,
+   "action": "end_turn",
+   "payload": {}
+  },
+  {
+   "turn": 44,
+   "seat": 2,
+   "action": "roll_dice",
+   "payload": {},
+   "outcome": {
+    "dice": [
+     6,
+     4
+    ]
+   }
+  },
+  {
+   "turn": 44,
+   "seat": 2,
+   "action": "buy_dev_card",
+   "payload": {},
+   "outcome": {
+    "card": "knight"
+   },
+   "visible_to": [
+    2
+   ]
+  },
+  {
+   "turn": 44,
+   "seat": 2,
+   "action": "end_turn",
+   "payload": {}
+  },
+  {
+   "turn": 45,
+   "seat": 0,
+   "action": "roll_dice",
+   "payload": {},
+   "outcome": {
+    "dice": [
+     4,
+     6
+    ]
+   }
+  },
+  {
+   "turn": 45,
+   "seat": 0,
+   "action": "end_turn",
+   "payload": {}
+  },
+  {
+   "turn": 46,
+   "seat": 1,
+   "action": "roll_dice",
+   "payload": {},
+   "outcome": {
+    "dice": [
+     3,
+     4
+    ]
+   }
+  },
+  {
+   "turn": 46,
+   "seat": 1,
+   "action": "move_robber",
+   "payload": {
+    "hex": {
+     "q": 0,
+     "r": 1,
+     "s": -1
+    }
+   }
+  },
+  {
+   "turn": 46,
+   "seat": 1,
+   "action": "steal",
+   "payload": {
+    "victim_seat": 2
+   },
+   "outcome": {
+    "resource": "wood"
+   },
+   "visible_to": [
+    1,
+    2
+   ]
+  },
+  {
+   "turn": 46,
+   "seat": 1,
+   "action": "trade_with_bank",
+   "payload": {
+    "give": "sheep",
+    "get": "ore"
+   }
+  },
+  {
+   "turn": 46,
+   "seat": 1,
+   "action": "end_turn",
+   "payload": {}
+  },
+  {
+   "turn": 47,
+   "seat": 2,
+   "action": "play_knight",
+   "payload": {}
+  },
+  {
+   "turn": 47,
+   "seat": 2,
+   "action": "move_robber",
+   "payload": {
+    "hex": {
+     "q": -2,
+     "r": 1,
+     "s": 1
+    }
+   }
+  },
+  {
+   "turn": 47,
+   "seat": 2,
+   "action": "steal",
+   "payload": {
+    "victim_seat": 0
+   },
+   "outcome": {
+    "resource": "ore"
+   },
+   "visible_to": [
+    0,
+    2
+   ]
+  },
+  {
+   "turn": 47,
+   "seat": 2,
+   "action": "roll_dice",
+   "payload": {},
+   "outcome": {
+    "dice": [
+     4,
+     5
+    ]
+   }
+  },
+  {
+   "turn": 47,
+   "seat": 2,
+   "action": "offer_trade",
+   "payload": {
+    "give": {
+     "wood": 1
+    },
+    "get": {
+     "sheep": 1
+    }
+   }
+  },
+  {
+   "turn": 47,
+   "seat": 0,
+   "action": "respond_trade",
+   "payload": {
+    "accept": true
+   }
+  },
+  {
+   "turn": 47,
+   "seat": 2,
+   "action": "confirm_trade",
+   "payload": {
+    "partner_seat": 0
+   }
+  },
+  {
+   "turn": 47,
+   "seat": 2,
+   "action": "buy_dev_card",
+   "payload": {},
+   "outcome": {
+    "card": "monopoly"
+   },
+   "visible_to": [
+    2
+   ]
+  },
+  {
+   "turn": 47,
+   "seat": 2,
+   "action": "end_turn",
+   "payload": {}
+  },
+  {
+   "turn": 48,
+   "seat": 0,
+   "action": "roll_dice",
+   "payload": {},
+   "outcome": {
+    "dice": [
+     3,
+     5
+    ]
+   }
+  },
+  {
+   "turn": 48,
+   "seat": 0,
+   "action": "end_turn",
+   "payload": {}
+  },
+  {
+   "turn": 49,
+   "seat": 1,
+   "action": "roll_dice",
+   "payload": {},
+   "outcome": {
+    "dice": [
+     4,
+     6
+    ]
+   }
+  },
+  {
+   "turn": 49,
+   "seat": 1,
+   "action": "trade_with_bank",
+   "payload": {
+    "give": "sheep",
+    "get": "brick"
+   }
+  },
+  {
+   "turn": 49,
+   "seat": 1,
+   "action": "build_road",
+   "payload": {
+    "hex": {
+     "q": -2,
+     "r": 3,
+     "s": -1
+    },
+    "direction": 5
+   }
+  },
+  {
+   "turn": 49,
+   "seat": 1,
+   "action": "end_turn",
+   "payload": {}
+  },
+  {
+   "turn": 50,
+   "seat": 2,
+   "action": "play_monopoly",
+   "payload": {
+    "resource": "sheep"
+   }
+  },
+  {
+   "turn": 50,
+   "seat": 2,
+   "action": "roll_dice",
+   "payload": {},
+   "outcome": {
+    "dice": [
+     6,
+     6
+    ]
+   }
+  },
+  {
+   "turn": 50,
+   "seat": 2,
+   "action": "end_turn",
+   "payload": {}
+  },
+  {
+   "turn": 51,
+   "seat": 0,
+   "action": "roll_dice",
+   "payload": {},
+   "outcome": {
+    "dice": [
+     1,
+     5
+    ]
+   }
+  },
+  {
+   "turn": 51,
+   "seat": 0,
+   "action": "end_turn",
+   "payload": {}
+  },
+  {
+   "turn": 52,
+   "seat": 1,
+   "action": "roll_dice",
+   "payload": {},
+   "outcome": {
+    "dice": [
+     6,
+     5
+    ]
+   }
+  },
+  {
+   "turn": 52,
+   "seat": 1,
+   "action": "end_turn",
+   "payload": {}
+  },
+  {
+   "turn": 53,
+   "seat": 2,
+   "action": "roll_dice",
+   "payload": {},
+   "outcome": {
+    "dice": [
+     1,
+     1
+    ]
+   }
+  },
+  {
+   "turn": 53,
+   "seat": 2,
+   "action": "end_turn",
+   "payload": {}
+  },
+  {
+   "turn": 54,
+   "seat": 0,
+   "action": "roll_dice",
+   "payload": {},
+   "outcome": {
+    "dice": [
+     3,
+     2
+    ]
+   }
+  },
+  {
+   "turn": 54,
+   "seat": 0,
+   "action": "build_road",
+   "payload": {
+    "hex": {
+     "q": -3,
+     "r": 1,
+     "s": 2
+    },
+    "direction": 5
+   }
+  },
+  {
+   "turn": 54,
+   "seat": 0,
+   "action": "end_turn",
+   "payload": {}
+  },
+  {
+   "turn": 55,
+   "seat": 1,
+   "action": "roll_dice",
+   "payload": {},
+   "outcome": {
+    "dice": [
+     5,
+     2
+    ]
+   }
+  },
+  {
+   "turn": 55,
+   "seat": 1,
+   "action": "move_robber",
+   "payload": {
+    "hex": {
+     "q": -1,
+     "r": 0,
+     "s": 1
+    }
+   }
+  },
+  {
+   "turn": 55,
+   "seat": 1,
+   "action": "steal",
+   "payload": {
+    "victim_seat": 0
+   },
+   "outcome": {
+    "resource": "wheat"
+   },
+   "visible_to": [
+    0,
+    1
+   ]
+  },
+  {
+   "turn": 55,
+   "seat": 1,
+   "action": "end_turn",
+   "payload": {}
+  },
+  {
+   "turn": 56,
+   "seat": 2,
+   "action": "roll_dice",
+   "payload": {},
+   "outcome": {
+    "dice": [
+     1,
+     1
+    ]
+   }
+  },
+  {
+   "turn": 56,
+   "seat": 2,
+   "action": "end_turn",
+   "payload": {}
+  },
+  {
+   "turn": 57,
+   "seat": 0,
+   "action": "roll_dice",
+   "payload": {},
+   "outcome": {
+    "dice": [
+     6,
+     6
+    ]
+   }
+  },
+  {
+   "turn": 57,
+   "seat": 0,
+   "action": "end_turn",
+   "payload": {}
+  },
+  {
+   "turn": 58,
+   "seat": 1,
+   "action": "roll_dice",
+   "payload": {},
+   "outcome": {
+    "dice": [
+     1,
+     2
+    ]
+   }
+  },
+  {
+   "turn": 58,
+   "seat": 1,
+   "action": "end_turn",
+   "payload": {}
+  },
+  {
+   "turn": 59,
+   "seat": 2,
+   "action": "roll_dice",
+   "payload": {},
+   "outcome": {
+    "dice": [
+     3,
+     4
+    ]
+   }
+  },
+  {
+   "turn": 59,
+   "seat": 2,
+   "action": "discard",
+   "payload": {
+    "cards": {
+     "ore": 1,
+     "wood": 2,
+     "wheat": 1
+    }
+   }
+  },
+  {
+   "turn": 59,
+   "seat": 2,
+   "action": "move_robber",
+   "payload": {
+    "hex": {
+     "q": 1,
+     "r": -1,
+     "s": 0
+    }
+   }
+  },
+  {
+   "turn": 59,
+   "seat": 2,
+   "action": "end_turn",
+   "payload": {}
+  },
+  {
+   "turn": 60,
+   "seat": 0,
+   "action": "roll_dice",
+   "payload": {},
+   "outcome": {
+    "dice": [
+     2,
+     6
+    ]
+   }
+  },
+  {
+   "turn": 60,
+   "seat": 0,
+   "action": "end_turn",
+   "payload": {}
+  },
+  {
+   "turn": 61,
+   "seat": 1,
+   "action": "roll_dice",
+   "payload": {},
+   "outcome": {
+    "dice": [
+     6,
+     6
+    ]
+   }
+  },
+  {
+   "turn": 61,
+   "seat": 1,
+   "action": "end_turn",
+   "payload": {}
+  },
+  {
+   "turn": 62,
+   "seat": 2,
+   "action": "roll_dice",
+   "payload": {},
+   "outcome": {
+    "dice": [
+     3,
+     4
+    ]
+   }
+  },
+  {
+   "turn": 62,
+   "seat": 2,
+   "action": "move_robber",
+   "payload": {
+    "hex": {
+     "q": 1,
+     "r": 0,
+     "s": -1
+    }
+   }
+  },
+  {
+   "turn": 62,
+   "seat": 2,
+   "action": "build_road",
+   "payload": {
+    "hex": {
+     "q": 2,
+     "r": -1,
+     "s": -1
+    },
+    "direction": 1
+   }
+  },
+  {
+   "turn": 62,
+   "seat": 2,
+   "action": "end_turn",
+   "payload": {}
+  },
+  {
+   "turn": 63,
+   "seat": 0,
+   "action": "roll_dice",
+   "payload": {},
+   "outcome": {
+    "dice": [
+     2,
+     5
+    ]
+   }
+  },
+  {
+   "turn": 63,
+   "seat": 0,
+   "action": "move_robber",
+   "payload": {
+    "hex": {
+     "q": 2,
+     "r": -1,
+     "s": -1
+    }
+   }
+  },
+  {
+   "turn": 63,
+   "seat": 0,
+   "action": "steal",
+   "payload": {
+    "victim_seat": 2
+   },
+   "outcome": {
+    "resource": "wheat"
+   },
+   "visible_to": [
+    0,
+    2
+   ]
+  },
+  {
+   "turn": 63,
+   "seat": 0,
+   "action": "end_turn",
+   "payload": {}
+  },
+  {
+   "turn": 64,
+   "seat": 1,
+   "action": "roll_dice",
+   "payload": {},
+   "outcome": {
+    "dice": [
+     1,
+     2
+    ]
+   }
+  },
+  {
+   "turn": 64,
+   "seat": 1,
+   "action": "end_turn",
+   "payload": {}
+  },
+  {
+   "turn": 65,
+   "seat": 2,
+   "action": "roll_dice",
+   "payload": {},
+   "outcome": {
+    "dice": [
+     5,
+     4
+    ]
+   }
+  },
+  {
+   "turn": 65,
+   "seat": 2,
+   "action": "build_road",
+   "payload": {
+    "hex": {
+     "q": 1,
+     "r": -1,
+     "s": 0
+    },
+    "direction": 1
+   }
+  },
+  {
+   "turn": 65,
+   "seat": 2,
+   "action": "end_turn",
+   "payload": {}
+  },
+  {
+   "turn": 66,
+   "seat": 0,
+   "action": "roll_dice",
+   "payload": {},
+   "outcome": {
+    "dice": [
+     1,
+     3
+    ]
+   }
+  },
+  {
+   "turn": 66,
+   "seat": 0,
+   "action": "trade_with_bank",
+   "payload": {
+    "give": "wheat",
+    "get": "sheep"
+   }
+  },
+  {
+   "turn": 66,
+   "seat": 0,
+   "action": "end_turn",
+   "payload": {}
+  },
+  {
+   "turn": 67,
+   "seat": 1,
+   "action": "roll_dice",
+   "payload": {},
+   "outcome": {
+    "dice": [
+     5,
+     2
+    ]
+   }
+  },
+  {
+   "turn": 67,
+   "seat": 1,
+   "action": "move_robber",
+   "payload": {
+    "hex": {
+     "q": 1,
+     "r": -1,
+     "s": 0
+    }
+   }
+  },
+  {
+   "turn": 67,
+   "seat": 1,
+   "action": "steal",
+   "payload": {
+    "victim_seat": 2
+   },
+   "outcome": {
+    "resource": "ore"
+   },
+   "visible_to": [
+    1,
+    2
+   ]
+  },
+  {
+   "turn": 67,
+   "seat": 1,
+   "action": "end_turn",
+   "payload": {}
+  },
+  {
+   "turn": 68,
+   "seat": 2,
+   "action": "roll_dice",
+   "payload": {},
+   "outcome": {
+    "dice": [
+     2,
+     2
+    ]
+   }
+  },
+  {
+   "turn": 68,
+   "seat": 2,
+   "action": "end_turn",
+   "payload": {}
+  },
+  {
+   "turn": 69,
+   "seat": 0,
+   "action": "roll_dice",
+   "payload": {},
+   "outcome": {
+    "dice": [
+     4,
+     6
+    ]
+   }
+  },
+  {
+   "turn": 69,
+   "seat": 0,
+   "action": "end_turn",
+   "payload": {}
+  },
+  {
+   "turn": 70,
+   "seat": 1,
+   "action": "roll_dice",
+   "payload": {},
+   "outcome": {
+    "dice": [
+     2,
+     4
+    ]
+   }
+  },
+  {
+   "turn": 70,
+   "seat": 1,
+   "action": "buy_dev_card",
+   "payload": {},
+   "outcome": {
+    "card": "victory_point"
+   },
+   "visible_to": [
+    1
+   ]
+  },
+  {
+   "turn": 70,
+   "seat": 1,
+   "action": "end_turn",
+   "payload": {}
+  },
+  {
+   "turn": 71,
+   "seat": 2,
+   "action": "roll_dice",
+   "payload": {},
+   "outcome": {
+    "dice": [
+     3,
+     5
+    ]
+   }
+  },
+  {
+   "turn": 71,
+   "seat": 2,
+   "action": "end_turn",
+   "payload": {}
+  },
+  {
+   "turn": 72,
+   "seat": 0,
+   "action": "roll_dice",
+   "payload": {},
+   "outcome": {
+    "dice": [
+     6,
+     2
+    ]
+   }
+  },
+  {
+   "turn": 72,
+   "seat": 0,
+   "action": "end_turn",
+   "payload": {}
+  },
+  {
+   "turn": 73,
+   "seat": 1,
+   "action": "roll_dice",
+   "payload": {},
+   "outcome": {
+    "dice": [
+     4,
+     4
+    ]
+   }
+  },
+  {
+   "turn": 73,
+   "seat": 1,
+   "action": "offer_trade",
+   "payload": {
+    "give": {
+     "ore": 1
+    },
+    "get": {
+     "wheat": 1
+    }
+   }
+  },
+  {
+   "turn": 73,
+   "seat": 0,
+   "action": "respond_trade",
+   "payload": {
+    "accept": true
+   }
+  },
+  {
+   "turn": 73,
+   "seat": 1,
+   "action": "confirm_trade",
+   "payload": {
+    "partner_seat": 0
+   }
+  },
+  {
+   "turn": 73,
+   "seat": 1,
+   "action": "end_turn",
+   "payload": {}
+  },
+  {
+   "turn": 74,
+   "seat": 2,
+   "action": "roll_dice",
+   "payload": {},
+   "outcome": {
+    "dice": [
+     6,
+     1
+    ]
+   }
+  },
+  {
+   "turn": 74,
+   "seat": 2,
+   "action": "move_robber",
+   "payload": {
+    "hex": {
+     "q": -2,
+     "r": 2,
+     "s": 0
+    }
+   }
+  },
+  {
+   "turn": 74,
+   "seat": 2,
+   "action": "steal",
+   "payload": {
+    "victim_seat": 1
+   },
+   "outcome": {
+    "resource": "wood"
+   },
+   "visible_to": [
+    1,
+    2
+   ]
+  },
+  {
+   "turn": 74,
+   "seat": 2,
+   "action": "end_turn",
+   "payload": {}
+  },
+  {
+   "turn": 75,
+   "seat": 0,
+   "action": "roll_dice",
+   "payload": {},
+   "outcome": {
+    "dice": [
+     6,
+     2
+    ]
+   }
+  },
+  {
+   "turn": 75,
+   "seat": 0,
+   "action": "end_turn",
+   "payload": {}
+  },
+  {
+   "turn": 76,
+   "seat": 1,
+   "action": "roll_dice",
+   "payload": {},
+   "outcome": {
+    "dice": [
+     4,
+     5
+    ]
+   }
+  },
+  {
+   "turn": 76,
+   "seat": 1,
+   "action": "end_turn",
+   "payload": {}
+  },
+  {
+   "turn": 77,
+   "seat": 2,
+   "action": "roll_dice",
+   "payload": {},
+   "outcome": {
+    "dice": [
+     1,
+     4
+    ]
+   }
+  },
+  {
+   "turn": 77,
+   "seat": 2,
+   "action": "end_turn",
+   "payload": {}
+  },
+  {
+   "turn": 78,
+   "seat": 0,
+   "action": "roll_dice",
+   "payload": {},
+   "outcome": {
+    "dice": [
+     3,
+     4
+    ]
+   }
+  },
+  {
+   "turn": 78,
+   "seat": 0,
+   "action": "discard",
+   "payload": {
+    "cards": {
+     "sheep": 1,
+     "ore": 3
+    }
+   }
+  },
+  {
+   "turn": 78,
+   "seat": 0,
+   "action": "move_robber",
+   "payload": {
+    "hex": {
+     "q": -1,
+     "r": 0,
+     "s": 1
+    }
+   }
+  },
+  {
+   "turn": 78,
+   "seat": 0,
+   "action": "build_road",
+   "payload": {
+    "hex": {
+     "q": -3,
+     "r": 1,
+     "s": 2
+    },
+    "direction": 0
+   }
+  },
+  {
+   "turn": 78,
+   "seat": 0,
+   "action": "end_turn",
+   "payload": {}
+  },
+  {
+   "turn": 79,
+   "seat": 1,
+   "action": "roll_dice",
+   "payload": {},
+   "outcome": {
+    "dice": [
+     3,
+     6
+    ]
+   }
+  },
+  {
+   "turn": 79,
+   "seat": 1,
+   "action": "end_turn",
+   "payload": {}
+  },
+  {
+   "turn": 80,
+   "seat": 2,
+   "action": "roll_dice",
+   "payload": {},
+   "outcome": {
+    "dice": [
+     6,
+     4
+    ]
+   }
+  },
+  {
+   "turn": 80,
+   "seat": 2,
+   "action": "end_turn",
+   "payload": {}
+  },
+  {
+   "turn": 81,
+   "seat": 0,
+   "action": "roll_dice",
+   "payload": {},
+   "outcome": {
+    "dice": [
+     6,
+     6
+    ]
+   }
+  },
+  {
+   "turn": 81,
+   "seat": 0,
+   "action": "offer_trade",
+   "payload": {
+    "give": {
+     "wheat": 1
+    },
+    "get": {
+     "sheep": 1
+    }
+   }
+  },
+  {
+   "turn": 81,
+   "seat": 2,
+   "action": "respond_trade",
+   "payload": {
+    "accept": true
+   }
+  },
+  {
+   "turn": 81,
+   "seat": 0,
+   "action": "confirm_trade",
+   "payload": {
+    "partner_seat": 2
+   }
+  },
+  {
+   "turn": 81,
+   "seat": 0,
+   "action": "end_turn",
+   "payload": {}
+  },
+  {
+   "turn": 82,
+   "seat": 1,
+   "action": "roll_dice",
+   "payload": {},
+   "outcome": {
+    "dice": [
+     4,
+     3
+    ]
+   }
+  },
+  {
+   "turn": 82,
+   "seat": 1,
+   "action": "move_robber",
+   "payload": {
+    "hex": {
+     "q": -1,
+     "r": 1,
+     "s": 0
+    }
+   }
+  },
+  {
+   "turn": 82,
+   "seat": 1,
+   "action": "steal",
+   "payload": {
+    "victim_seat": 2
+   },
+   "outcome": {
+    "resource": "wheat"
+   },
+   "visible_to": [
+    1,
+    2
+   ]
+  },
+  {
+   "turn": 82,
+   "seat": 1,
+   "action": "trade_with_bank",
+   "payload": {
+    "give": "wheat",
+    "get": "ore"
+   }
+  },
+  {
+   "turn": 82,
+   "seat": 1,
+   "action": "end_turn",
+   "payload": {}
+  },
+  {
+   "turn": 83,
+   "seat": 2,
+   "action": "roll_dice",
+   "payload": {},
+   "outcome": {
+    "dice": [
+     3,
+     6
+    ]
+   }
+  },
+  {
+   "turn": 83,
+   "seat": 2,
+   "action": "end_turn",
+   "payload": {}
+  },
+  {
+   "turn": 84,
+   "seat": 0,
+   "action": "roll_dice",
+   "payload": {},
+   "outcome": {
+    "dice": [
+     6,
+     6
+    ]
+   }
+  },
+  {
+   "turn": 84,
+   "seat": 0,
+   "action": "buy_dev_card",
+   "payload": {},
+   "outcome": {
+    "card": "victory_point"
+   },
+   "visible_to": [
+    0
+   ]
+  },
+  {
+   "turn": 84,
+   "seat": 0,
+   "action": "end_turn",
+   "payload": {}
+  },
+  {
+   "turn": 85,
+   "seat": 1,
+   "action": "roll_dice",
+   "payload": {},
+   "outcome": {
+    "dice": [
+     1,
+     6
+    ]
+   }
+  },
+  {
+   "turn": 85,
+   "seat": 1,
+   "action": "move_robber",
+   "payload": {
+    "hex": {
+     "q": 1,
+     "r": -1,
+     "s": 0
+    }
+   }
+  },
+  {
+   "turn": 85,
+   "seat": 1,
+   "action": "steal",
+   "payload": {
+    "victim_seat": 2
+   },
+   "outcome": {
+    "resource": "wood"
+   },
+   "visible_to": [
+    1,
+    2
+   ]
+  },
+  {
+   "turn": 85,
+   "seat": 1,
+   "action": "end_turn",
+   "payload": {}
+  },
+  {
+   "turn": 86,
+   "seat": 2,
+   "action": "roll_dice",
+   "payload": {},
+   "outcome": {
+    "dice": [
+     5,
+     5
+    ]
+   }
+  },
+  {
+   "turn": 86,
+   "seat": 2,
+   "action": "end_turn",
+   "payload": {}
+  },
+  {
+   "turn": 87,
+   "seat": 0,
+   "action": "roll_dice",
+   "payload": {},
+   "outcome": {
+    "dice": [
+     2,
+     4
+    ]
+   }
+  },
+  {
+   "turn": 87,
+   "seat": 0,
+   "action": "end_turn",
+   "payload": {}
+  },
+  {
+   "turn": 88,
+   "seat": 1,
+   "action": "roll_dice",
+   "payload": {},
+   "outcome": {
+    "dice": [
+     6,
+     4
+    ]
+   }
+  },
+  {
+   "turn": 88,
+   "seat": 1,
+   "action": "trade_with_bank",
+   "payload": {
+    "give": "sheep",
+    "get": "wood"
+   }
+  },
+  {
+   "turn": 88,
+   "seat": 1,
+   "action": "trade_with_bank",
+   "payload": {
+    "give": "wood",
+    "get": "brick"
+   }
+  },
+  {
+   "turn": 88,
+   "seat": 1,
+   "action": "end_turn",
+   "payload": {}
+  },
+  {
+   "turn": 89,
+   "seat": 2,
+   "action": "roll_dice",
+   "payload": {},
+   "outcome": {
+    "dice": [
+     6,
+     1
+    ]
+   }
+  },
+  {
+   "turn": 89,
+   "seat": 2,
+   "action": "discard",
+   "payload": {
+    "cards": {
+     "wheat": 2,
+     "wood": 2
+    }
+   }
+  },
+  {
+   "turn": 89,
+   "seat": 2,
+   "action": "move_robber",
+   "payload": {
+    "hex": {
+     "q": -2,
+     "r": 2,
+     "s": 0
+    }
+   }
+  },
+  {
+   "turn": 89,
+   "seat": 2,
+   "action": "steal",
+   "payload": {
+    "victim_seat": 1
+   },
+   "outcome": {
+    "resource": "brick"
+   },
+   "visible_to": [
+    1,
+    2
+   ]
+  },
+  {
+   "turn": 89,
+   "seat": 2,
+   "action": "build_settlement",
+   "payload": {
+    "hex": {
+     "q": 2,
+     "r": -1,
+     "s": -1
+    },
+    "direction": 1
+   }
+  },
+  {
+   "turn": 89,
+   "seat": 2,
+   "action": "end_turn",
+   "payload": {}
+  },
+  {
+   "turn": 90,
+   "seat": 0,
+   "action": "roll_dice",
+   "payload": {},
+   "outcome": {
+    "dice": [
+     4,
+     5
+    ]
+   }
+  },
+  {
+   "turn": 90,
+   "seat": 0,
+   "action": "end_turn",
+   "payload": {}
+  },
+  {
+   "turn": 91,
+   "seat": 1,
+   "action": "roll_dice",
+   "payload": {},
+   "outcome": {
+    "dice": [
+     6,
+     4
+    ]
+   }
+  },
+  {
+   "turn": 91,
+   "seat": 1,
+   "action": "end_turn",
+   "payload": {}
+  },
+  {
+   "turn": 92,
+   "seat": 2,
+   "action": "roll_dice",
+   "payload": {},
+   "outcome": {
+    "dice": [
+     6,
+     2
+    ]
+   }
+  },
+  {
+   "turn": 92,
+   "seat": 2,
+   "action": "end_turn",
+   "payload": {}
+  },
+  {
+   "turn": 93,
+   "seat": 0,
+   "action": "roll_dice",
+   "payload": {},
+   "outcome": {
+    "dice": [
+     1,
+     1
+    ]
+   }
+  },
+  {
+   "turn": 93,
+   "seat": 0,
+   "action": "end_turn",
+   "payload": {}
+  },
+  {
+   "turn": 94,
+   "seat": 1,
+   "action": "roll_dice",
+   "payload": {},
+   "outcome": {
+    "dice": [
+     4,
+     2
+    ]
+   }
+  },
+  {
+   "turn": 94,
+   "seat": 1,
+   "action": "end_turn",
+   "payload": {}
+  },
+  {
+   "turn": 95,
+   "seat": 2,
+   "action": "roll_dice",
+   "payload": {},
+   "outcome": {
+    "dice": [
+     6,
+     5
+    ]
+   }
+  },
+  {
+   "turn": 95,
+   "seat": 2,
+   "action": "end_turn",
+   "payload": {}
+  },
+  {
+   "turn": 96,
+   "seat": 0,
+   "action": "roll_dice",
+   "payload": {},
+   "outcome": {
+    "dice": [
+     5,
+     4
+    ]
+   }
+  },
+  {
+   "turn": 96,
+   "seat": 0,
+   "action": "trade_with_bank",
+   "payload": {
+    "give": "ore",
+    "get": "sheep"
+   }
+  },
+  {
+   "turn": 96,
+   "seat": 0,
+   "action": "end_turn",
+   "payload": {}
+  },
+  {
+   "turn": 97,
+   "seat": 1,
+   "action": "roll_dice",
+   "payload": {},
+   "outcome": {
+    "dice": [
+     2,
+     1
+    ]
+   }
+  },
+  {
+   "turn": 97,
+   "seat": 1,
+   "action": "end_turn",
+   "payload": {}
+  },
+  {
+   "turn": 98,
+   "seat": 2,
+   "action": "roll_dice",
+   "payload": {},
+   "outcome": {
+    "dice": [
+     4,
+     5
+    ]
+   }
+  },
+  {
+   "turn": 98,
+   "seat": 2,
+   "action": "end_turn",
+   "payload": {}
+  },
+  {
+   "turn": 99,
+   "seat": 0,
+   "action": "roll_dice",
+   "payload": {},
+   "outcome": {
+    "dice": [
+     2,
+     3
+    ]
+   }
+  },
+  {
+   "turn": 99,
+   "seat": 0,
+   "action": "offer_trade",
+   "payload": {
+    "give": {
+     "wheat": 1
+    },
+    "get": {
+     "wood": 1
+    }
+   }
+  },
+  {
+   "turn": 99,
+   "seat": 1,
+   "action": "respond_trade",
+   "payload": {
+    "accept": true
+   }
+  },
+  {
+   "turn": 99,
+   "seat": 0,
+   "action": "confirm_trade",
+   "payload": {
+    "partner_seat": 1
+   }
+  },
+  {
+   "turn": 99,
+   "seat": 0,
+   "action": "buy_dev_card",
+   "payload": {},
+   "outcome": {
+    "card": "victory_point"
+   },
+   "visible_to": [
+    0
+   ]
+  },
+  {
+   "turn": 99,
+   "seat": 0,
+   "action": "build_road",
+   "payload": {
+    "hex": {
+     "q": -3,
+     "r": 0,
+     "s": 3
+    },
+    "direction": 0
+   }
+  },
+  {
+   "turn": 99,
+   "seat": 0,
+   "action": "end_turn",
+   "payload": {}
+  },
+  {
+   "turn": 100,
+   "seat": 1,
+   "action": "roll_dice",
+   "payload": {},
+   "outcome": {
+    "dice": [
+     6,
+     5
+    ]
+   }
+  },
+  {
+   "turn": 100,
+   "seat": 1,
+   "action": "buy_dev_card",
+   "payload": {},
+   "outcome": {
+    "card": "knight"
+   },
+   "visible_to": [
+    1
+   ]
+  },
+  {
+   "turn": 100,
+   "seat": 1,
+   "action": "end_turn",
+   "payload": {}
+  },
+  {
+   "turn": 101,
+   "seat": 2,
+   "action": "roll_dice",
+   "payload": {},
+   "outcome": {
+    "dice": [
+     5,
+     2
+    ]
+   }
+  },
+  {
+   "turn": 101,
+   "seat": 2,
+   "action": "discard",
+   "payload": {
+    "cards": {
+     "brick": 1,
+     "wheat": 3
+    }
+   }
+  },
+  {
+   "turn": 101,
+   "seat": 2,
+   "action": "move_robber",
+   "payload": {
+    "hex": {
+     "q": -1,
+     "r": 2,
+     "s": -1
+    }
+   }
+  },
+  {
+   "turn": 101,
+   "seat": 2,
+   "action": "end_turn",
+   "payload": {}
+  },
+  {
+   "turn": 102,
+   "seat": 0,
+   "action": "roll_dice",
+   "payload": {},
+   "outcome": {
+    "dice": [
+     4,
+     5
+    ]
+   }
+  },
+  {
+   "turn": 102,
+   "seat": 0,
+   "action": "offer_trade",
+   "payload": {
+    "give": {
+     "ore": 1
+    },
+    "get": {
+     "wheat": 1
+    }
+   }
+  },
+  {
+   "turn": 102,
+   "seat": 2,
+   "action": "respond_trade",
+   "payload": {
+    "accept": true
+   }
+  },
+  {
+   "turn": 102,
+   "seat": 0,
+   "action": "confirm_trade",
+   "payload": {
+    "partner_seat": 2
+   }
+  },
+  {
+   "turn": 102,
+   "seat": 0,
+   "action": "end_turn",
+   "payload": {}
+  },
+  {
+   "turn": 103,
+   "seat": 1,
+   "action": "play_knight",
+   "payload": {}
+  },
+  {
+   "turn": 103,
+   "seat": 1,
+   "action": "move_robber",
+   "payload": {
+    "hex": {
+     "q": 1,
+     "r": -2,
+     "s": 1
+    }
+   }
+  },
+  {
+   "turn": 103,
+   "seat": 1,
+   "action": "roll_dice",
+   "payload": {},
+   "outcome": {
+    "dice": [
+     2,
+     1
+    ]
+   }
+  },
+  {
+   "turn": 103,
+   "seat": 1,
+   "action": "end_turn",
+   "payload": {}
+  },
+  {
+   "turn": 104,
+   "seat": 2,
+   "action": "roll_dice",
+   "payload": {},
+   "outcome": {
+    "dice": [
+     5,
+     6
+    ]
+   }
+  },
+  {
+   "turn": 104,
+   "seat": 2,
+   "action": "end_turn",
+   "payload": {}
+  },
+  {
+   "turn": 105,
+   "seat": 0,
+   "action": "roll_dice",
+   "payload": {},
+   "outcome": {
+    "dice": [
+     4,
+     4
+    ]
+   }
+  },
+  {
+   "turn": 105,
+   "seat": 0,
+   "action": "end_turn",
+   "payload": {}
+  },
+  {
+   "turn": 106,
+   "seat": 1,
+   "action": "roll_dice",
+   "payload": {},
+   "outcome": {
+    "dice": [
+     3,
+     5
+    ]
+   }
+  },
+  {
+   "turn": 106,
+   "seat": 1,
+   "action": "end_turn",
+   "payload": {}
+  },
+  {
+   "turn": 107,
+   "seat": 2,
+   "action": "roll_dice",
+   "payload": {},
+   "outcome": {
+    "dice": [
+     5,
+     2
+    ]
+   }
+  },
+  {
+   "turn": 107,
+   "seat": 2,
+   "action": "move_robber",
+   "payload": {
+    "hex": {
+     "q": 0,
+     "r": -2,
+     "s": 2
+    }
+   }
+  },
+  {
+   "turn": 107,
+   "seat": 2,
+   "action": "build_road",
+   "payload": {
+    "hex": {
+     "q": 1,
+     "r": 0,
+     "s": -1
+    },
+    "direction": 1
+   }
+  },
+  {
+   "turn": 107,
+   "seat": 2,
+   "action": "end_turn",
+   "payload": {}
+  },
+  {
+   "turn": 108,
+   "seat": 0,
+   "action": "roll_dice",
+   "payload": {},
+   "outcome": {
+    "dice": [
+     4,
+     6
+    ]
+   }
+  },
+  {
+   "turn": 108,
+   "seat": 0,
+   "action": "end_turn",
+   "payload": {}
+  },
+  {
+   "turn": 109,
+   "seat": 1,
+   "action": "roll_dice",
+   "payload": {},
+   "outcome": {
+    "dice": [
+     2,
+     1
+    ]
+   }
+  },
+  {
+   "turn": 109,
+   "seat": 1,
+   "action": "end_turn",
+   "payload": {}
+  },
+  {
+   "turn": 110,
+   "seat": 2,
+   "action": "roll_dice",
+   "payload": {},
+   "outcome": {
+    "dice": [
+     3,
+     1
+    ]
+   }
+  },
+  {
+   "turn": 110,
+   "seat": 2,
+   "action": "build_settlement",
+   "payload": {
+    "hex": {
+     "q": 0,
+     "r": 1,
+     "s": -1
+    },
+    "direction": 0
+   }
+  },
+  {
+   "turn": 110,
+   "seat": 2,
+   "action": "end_turn",
+   "payload": {}
+  },
+  {
+   "turn": 111,
+   "seat": 0,
+   "action": "roll_dice",
+   "payload": {},
+   "outcome": {
+    "dice": [
+     4,
+     5
+    ]
+   }
+  },
+  {
+   "turn": 111,
+   "seat": 0,
+   "action": "end_turn",
+   "payload": {}
+  },
+  {
+   "turn": 112,
+   "seat": 1,
+   "action": "roll_dice",
+   "payload": {},
+   "outcome": {
+    "dice": [
+     6,
+     6
+    ]
+   }
+  },
+  {
+   "turn": 112,
+   "seat": 1,
+   "action": "offer_trade",
+   "payload": {
+    "give": {
+     "sheep": 1
+    },
+    "get": {
+     "wheat": 1
+    }
+   }
+  },
+  {
+   "turn": 112,
+   "seat": 0,
+   "action": "respond_trade",
+   "payload": {
+    "accept": true
+   }
+  },
+  {
+   "turn": 112,
+   "seat": 1,
+   "action": "confirm_trade",
+   "payload": {
+    "partner_seat": 0
+   }
+  },
+  {
+   "turn": 112,
+   "seat": 1,
+   "action": "end_turn",
+   "payload": {}
+  },
+  {
+   "turn": 113,
+   "seat": 2,
+   "action": "roll_dice",
+   "payload": {},
+   "outcome": {
+    "dice": [
+     1,
+     5
+    ]
+   }
+  },
+  {
+   "turn": 113,
+   "seat": 2,
+   "action": "trade_with_bank",
+   "payload": {
+    "give": "wood",
+    "get": "sheep"
+   }
+  },
+  {
+   "turn": 113,
+   "seat": 2,
+   "action": "end_turn",
+   "payload": {}
+  },
+  {
+   "turn": 114,
+   "seat": 0,
+   "action": "roll_dice",
+   "payload": {},
+   "outcome": {
+    "dice": [
+     4,
+     6
+    ]
+   }
+  },
+  {
+   "turn": 114,
+   "seat": 0,
+   "action": "buy_dev_card",
+   "payload": {},
+   "outcome": {
+    "card": "knight"
+   },
+   "visible_to": [
+    0
+   ]
+  },
+  {
+   "turn": 114,
+   "seat": 0,
+   "action": "end_turn",
+   "payload": {}
+  },
+  {
+   "turn": 115,
+   "seat": 1,
+   "action": "roll_dice",
+   "payload": {},
+   "outcome": {
+    "dice": [
+     3,
+     4
+    ]
+   }
+  },
+  {
+   "turn": 115,
+   "seat": 1,
+   "action": "move_robber",
+   "payload": {
+    "hex": {
+     "q": -2,
+     "r": 0,
+     "s": 2
+    }
+   }
+  },
+  {
+   "turn": 115,
+   "seat": 1,
+   "action": "end_turn",
+   "payload": {}
+  },
+  {
+   "turn": 116,
+   "seat": 2,
+   "action": "roll_dice",
+   "payload": {},
+   "outcome": {
+    "dice": [
+     3,
+     5
+    ]
+   }
+  },
+  {
+   "turn": 116,
+   "seat": 2,
+   "action": "buy_dev_card",
+   "payload": {},
+   "outcome": {
+    "card": "knight"
+   },
+   "visible_to": [
+    2
+   ]
+  },
+  {
+   "turn": 116,
+   "seat": 2,
+   "action": "end_turn",
+   "payload": {}
+  },
+  {
+   "turn": 117,
+   "seat": 0,
+   "action": "roll_dice",
+   "payload": {},
+   "outcome": {
+    "dice": [
+     4,
+     1
+    ]
+   }
+  },
+  {
+   "turn": 117,
+   "seat": 0,
+   "action": "end_turn",
+   "payload": {}
+  },
+  {
+   "turn": 118,
+   "seat": 1,
+   "action": "roll_dice",
+   "payload": {},
+   "outcome": {
+    "dice": [
+     1,
+     5
+    ]
+   }
+  },
+  {
+   "turn": 118,
+   "seat": 1,
+   "action": "end_turn",
+   "payload": {}
+  },
+  {
+   "turn": 119,
+   "seat": 2,
+   "action": "play_knight",
+   "payload": {}
+  },
+  {
+   "turn": 119,
+   "seat": 2,
+   "action": "move_robber",
+   "payload": {
+    "hex": {
+     "q": 2,
+     "r": -2,
+     "s": 0
+    }
+   }
+  },
+  {
+   "turn": 119,
+   "seat": 2,
+   "action": "roll_dice",
+   "payload": {},
+   "outcome": {
+    "dice": [
+     3,
+     2
+    ]
+   }
+  },
+  {
+   "turn": 119,
+   "seat": 2,
+   "action": "trade_with_bank",
+   "payload": {
+    "give": "wheat",
+    "get": "sheep"
+   }
+  },
+  {
+   "turn": 119,
+   "seat": 2,
+   "action": "end_turn",
+   "payload": {}
+  },
+  {
+   "turn": 120,
+   "seat": 0,
+   "action": "play_knight",
+   "payload": {}
+  },
+  {
+   "turn": 120,
+   "seat": 0,
+   "action": "move_robber",
+   "payload": {
+    "hex": {
+     "q": -2,
+     "r": 0,
+     "s": 2
+    }
+   }
+  },
+  {
+   "turn": 120,
+   "seat": 0,
+   "action": "roll_dice",
+   "payload": {},
+   "outcome": {
+    "dice": [
+     4,
+     3
+    ]
+   }
+  },
+  {
+   "turn": 120,
+   "seat": 0,
+   "action": "move_robber",
+   "payload": {
+    "hex": {
+     "q": -1,
+     "r": -1,
+     "s": 2
+    }
+   }
+  },
+  {
+   "turn": 120,
+   "seat": 0,
+   "action": "trade_with_bank",
+   "payload": {
+    "give": "wheat",
+    "get": "sheep"
+   }
+  },
+  {
+   "turn": 120,
+   "seat": 0,
+   "action": "end_turn",
+   "payload": {}
+  },
+  {
+   "turn": 121,
+   "seat": 1,
+   "action": "roll_dice",
+   "payload": {},
+   "outcome": {
+    "dice": [
+     6,
+     6
+    ]
+   }
+  },
+  {
+   "turn": 121,
+   "seat": 1,
+   "action": "end_turn",
+   "payload": {}
+  },
+  {
+   "turn": 122,
+   "seat": 2,
+   "action": "roll_dice",
+   "payload": {},
+   "outcome": {
+    "dice": [
+     6,
+     2
+    ]
+   }
+  },
+  {
+   "turn": 122,
+   "seat": 2,
+   "action": "trade_with_bank",
+   "payload": {
+    "give": "wood",
+    "get": "ore"
+   }
+  },
+  {
+   "turn": 122,
+   "seat": 2,
+   "action": "end_turn",
+   "payload": {}
+  },
+  {
+   "turn": 123,
+   "seat": 0,
+   "action": "roll_dice",
+   "payload": {},
+   "outcome": {
+    "dice": [
+     1,
+     2
+    ]
+   }
+  },
+  {
+   "turn": 123,
+   "seat": 0,
+   "action": "end_turn",
+   "payload": {}
+  },
+  {
+   "turn": 124,
+   "seat": 1,
+   "action": "roll_dice",
+   "payload": {},
+   "outcome": {
+    "dice": [
+     4,
+     4
+    ]
+   }
+  },
+  {
+   "turn": 124,
+   "seat": 1,
+   "action": "end_turn",
+   "payload": {}
+  },
+  {
+   "turn": 125,
+   "seat": 2,
+   "action": "roll_dice",
+   "payload": {},
+   "outcome": {
+    "dice": [
+     4,
+     6
+    ]
+   }
+  },
+  {
+   "turn": 125,
+   "seat": 2,
+   "action": "buy_dev_card",
+   "payload": {},
+   "outcome": {
+    "card": "road_building"
+   },
+   "visible_to": [
+    2
+   ]
+  },
+  {
+   "turn": 125,
+   "seat": 2,
+   "action": "end_turn",
+   "payload": {}
+  },
+  {
+   "turn": 126,
+   "seat": 0,
+   "action": "roll_dice",
+   "payload": {},
+   "outcome": {
+    "dice": [
+     3,
+     2
+    ]
+   }
+  },
+  {
+   "turn": 126,
+   "seat": 0,
+   "action": "trade_with_bank",
+   "payload": {
+    "give": "wheat",
+    "get": "sheep"
+   }
+  },
+  {
+   "turn": 126,
+   "seat": 0,
+   "action": "end_turn",
+   "payload": {}
+  },
+  {
+   "turn": 127,
+   "seat": 1,
+   "action": "roll_dice",
+   "payload": {},
+   "outcome": {
+    "dice": [
+     1,
+     3
+    ]
+   }
+  },
+  {
+   "turn": 127,
+   "seat": 1,
+   "action": "trade_with_bank",
+   "payload": {
+    "give": "sheep",
+    "get": "ore"
+   }
+  },
+  {
+   "turn": 127,
+   "seat": 1,
+   "action": "end_turn",
+   "payload": {}
+  },
+  {
+   "turn": 128,
+   "seat": 2,
+   "action": "roll_dice",
+   "payload": {},
+   "outcome": {
+    "dice": [
+     5,
+     4
+    ]
+   }
+  },
+  {
+   "turn": 128,
+   "seat": 2,
+   "action": "play_road_building",
+   "payload": {}
+  },
+  {
+   "turn": 128,
+   "seat": 2,
+   "action": "build_road",
+   "payload": {
+    "hex": {
+     "q": -1,
+     "r": 2,
+     "s": -1
+    },
+    "direction": 5
+   }
+  },
+  {
+   "turn": 128,
+   "seat": 2,
+   "action": "build_road",
+   "payload": {
+    "hex": {
+     "q": -1,
+     "r": 2,
+     "s": -1
+    },
+    "direction": 0
+   }
+  },
+  {
+   "turn": 128,
+   "seat": 2,
+   "action": "end_turn",
+   "payload": {}
+  },
+  {
+   "turn": 129,
+   "seat": 0,
+   "action": "roll_dice",
+   "payload": {},
+   "outcome": {
+    "dice": [
+     1,
+     3
+    ]
+   }
+  },
+  {
+   "turn": 129,
+   "seat": 0,
+   "action": "buy_dev_card",
+   "payload": {},
+   "outcome": {
+    "card": "year_of_plenty"
+   },
+   "visible_to": [
+    0
+   ]
+  },
+  {
+   "turn": 129,
+   "seat": 0,
+   "action": "end_turn",
+   "payload": {}
+  },
+  {
+   "turn": 130,
+   "seat": 1,
+   "action": "roll_dice",
+   "payload": {},
+   "outcome": {
+    "dice": [
+     1,
+     5
+    ]
+   }
+  },
+  {
+   "turn": 130,
+   "seat": 1,
+   "action": "end_turn",
+   "payload": {}
+  },
+  {
+   "turn": 131,
+   "seat": 2,
+   "action": "roll_dice",
+   "payload": {},
+   "outcome": {
+    "dice": [
+     4,
+     5
+    ]
+   }
+  },
+  {
+   "turn": 131,
+   "seat": 2,
+   "action": "buy_dev_card",
+   "payload": {},
+   "outcome": {
+    "card": "knight"
+   },
+   "visible_to": [
+    2
+   ]
+  },
+  {
+   "turn": 131,
+   "seat": 2,
+   "action": "build_settlement",
+   "payload": {
+    "hex": {
+     "q": -1,
+     "r": 2,
+     "s": -1
+    },
+    "direction": 0
+   }
+  },
+  {
+   "turn": 131,
+   "seat": 2,
+   "action": "end_turn",
+   "payload": {}
+  },
+  {
+   "turn": 132,
+   "seat": 0,
+   "action": "play_year_of_plenty",
+   "payload": {
+    "first": "ore",
+    "second": "ore"
+   }
+  },
+  {
+   "turn": 132,
+   "seat": 0,
+   "action": "roll_dice",
+   "payload": {},
+   "outcome": {
+    "dice": [
+     4,
+     2
+    ]
+   }
+  },
+  {
+   "turn": 132,
+   "seat": 0,
+   "action": "buy_dev_card",
+   "payload": {},
+   "outcome": {
+    "card": "knight"
+   },
+   "visible_to": [
+    0
+   ]
+  },
+  {
+   "turn": 132,
+   "seat": 0,
+   "action": "end_turn",
+   "payload": {}
+  },
+  {
+   "turn": 133,
+   "seat": 1,
+   "action": "roll_dice",
+   "payload": {},
+   "outcome": {
+    "dice": [
+     6,
+     3
+    ]
+   }
+  },
+  {
+   "turn": 133,
+   "seat": 1,
+   "action": "end_turn",
+   "payload": {}
+  },
+  {
+   "turn": 134,
+   "seat": 2,
+   "action": "play_knight",
+   "payload": {}
+  },
+  {
+   "turn": 134,
+   "seat": 2,
+   "action": "move_robber",
+   "payload": {
+    "hex": {
+     "q": 2,
+     "r": -1,
+     "s": -1
+    }
+   }
+  },
+  {
+   "turn": 134,
+   "seat": 2,
+   "action": "roll_dice",
+   "payload": {},
+   "outcome": {
+    "dice": [
+     4,
+     6
+    ]
+   }
+  },
+  {
+   "turn": 134,
+   "seat": 2,
+   "action": "trade_with_bank",
+   "payload": {
+    "give": "wood",
+    "get": "wheat"
+   }
+  },
+  {
+   "turn": 134,
+   "seat": 2,
+   "action": "offer_trade",
+   "payload": {
+    "give": {
+     "wheat": 1
+    },
+    "get": {
+     "ore": 1
+    }
+   }
+  },
+  {
+   "turn": 134,
+   "seat": 1,
+   "action": "respond_trade",
+   "payload": {
+    "accept": true
+   }
+  },
+  {
+   "turn": 134,
+   "seat": 2,
+   "action": "confirm_trade",
+   "payload": {
+    "partner_seat": 1
+   }
+  },
+  {
+   "turn": 134,
+   "seat": 2,
+   "action": "end_turn",
+   "payload": {}
+  },
+  {
+   "turn": 135,
+   "seat": 0,
+   "action": "play_knight",
+   "payload": {}
+  },
+  {
+   "turn": 135,
+   "seat": 0,
+   "action": "move_robber",
+   "payload": {
+    "hex": {
+     "q": 1,
+     "r": -2,
+     "s": 1
+    }
+   }
+  },
+  {
+   "turn": 135,
+   "seat": 0,
+   "action": "roll_dice",
+   "payload": {},
+   "outcome": {
+    "dice": [
+     2,
+     4
+    ]
+   }
+  },
+  {
+   "turn": 135,
+   "seat": 0,
+   "action": "trade_with_bank",
+   "payload": {
+    "give": "ore",
+    "get": "brick"
+   }
+  },
+  {
+   "turn": 135,
+   "seat": 0,
+   "action": "trade_with_bank",
+   "payload": {
+    "give": "brick",
+    "get": "wood"
+   }
+  },
+  {
+   "turn": 135,
+   "seat": 0,
+   "action": "end_turn",
+   "payload": {}
+  },
+  {
+   "turn": 136,
+   "seat": 1,
+   "action": "roll_dice",
+   "payload": {},
+   "outcome": {
+    "dice": [
+     6,
+     5
+    ]
+   }
+  },
+  {
+   "turn": 136,
+   "seat": 1,
+   "action": "trade_with_bank",
+   "payload": {
+    "give": "wheat",
+    "get": "ore"
+   }
+  },
+  {
+   "turn": 136,
+   "seat": 1,
+   "action": "end_turn",
+   "payload": {}
+  },
+  {
+   "turn": 137,
+   "seat": 2,
+   "action": "roll_dice",
+   "payload": {},
+   "outcome": {
+    "dice": [
+     6,
+     3
+    ]
+   }
+  },
+  {
+   "turn": 137,
+   "seat": 2,
+   "action": "end_turn",
+   "payload": {}
+  },
+  {
+   "turn": 138,
+   "seat": 0,
+   "action": "roll_dice",
+   "payload": {},
+   "outcome": {
+    "dice": [
+     1,
+     3
+    ]
+   }
+  },
+  {
+   "turn": 138,
+   "seat": 0,
+   "action": "end_turn",
+   "payload": {}
+  },
+  {
+   "turn": 139,
+   "seat": 1,
+   "action": "roll_dice",
+   "payload": {},
+   "outcome": {
+    "dice": [
+     3,
+     3
+    ]
+   }
+  },
+  {
+   "turn": 139,
+   "seat": 1,
+   "action": "end_turn",
+   "payload": {}
+  },
+  {
+   "turn": 140,
+   "seat": 2,
+   "action": "roll_dice",
+   "payload": {},
+   "outcome": {
+    "dice": [
+     3,
+     6
+    ]
+   }
+  },
+  {
+   "turn": 140,
+   "seat": 2,
+   "action": "trade_with_bank",
+   "payload": {
+    "give": "wood",
+    "get": "sheep"
+   }
+  },
+  {
+   "turn": 140,
+   "seat": 2,
+   "action": "end_turn",
+   "payload": {}
+  },
+  {
+   "turn": 141,
+   "seat": 0,
+   "action": "roll_dice",
+   "payload": {},
+   "outcome": {
+    "dice": [
+     3,
+     6
+    ]
+   }
+  },
+  {
+   "turn": 141,
+   "seat": 0,
+   "action": "trade_with_bank",
+   "payload": {
+    "give": "ore",
+    "get": "wood"
+   }
+  },
+  {
+   "turn": 141,
+   "seat": 0,
+   "action": "end_turn",
+   "payload": {}
+  },
+  {
+   "turn": 142,
+   "seat": 1,
+   "action": "roll_dice",
+   "payload": {},
+   "outcome": {
+    "dice": [
+     6,
+     4
+    ]
+   }
+  },
+  {
+   "turn": 142,
+   "seat": 1,
+   "action": "trade_with_bank",
+   "payload": {
+    "give": "sheep",
+    "get": "wheat"
+   }
+  },
+  {
+   "turn": 142,
+   "seat": 1,
+   "action": "end_turn",
+   "payload": {}
+  },
+  {
+   "turn": 143,
+   "seat": 2,
+   "action": "roll_dice",
+   "payload": {},
+   "outcome": {
+    "dice": [
+     5,
+     1
+    ]
+   }
+  },
+  {
+   "turn": 143,
+   "seat": 2,
+   "action": "buy_dev_card",
+   "payload": {},
+   "outcome": {
+    "card": "knight"
+   },
+   "visible_to": [
+    2
+   ]
+  },
+  {
+   "turn": 143,
+   "seat": 2,
+   "action": "trade_with_bank",
+   "payload": {
+    "give": "wood",
+    "get": "ore"
+   }
+  },
+  {
+   "turn": 143,
+   "seat": 2,
+   "action": "end_turn",
+   "payload": {}
+  },
+  {
+   "turn": 144,
+   "seat": 0,
+   "action": "roll_dice",
+   "payload": {},
+   "outcome": {
+    "dice": [
+     5,
+     6
+    ]
+   }
+  },
+  {
+   "turn": 144,
+   "seat": 0,
+   "action": "end_turn",
+   "payload": {}
+  },
+  {
+   "turn": 145,
+   "seat": 1,
+   "action": "roll_dice",
+   "payload": {},
+   "outcome": {
+    "dice": [
+     2,
+     4
+    ]
+   }
+  },
+  {
+   "turn": 145,
+   "seat": 1,
+   "action": "end_turn",
+   "payload": {}
+  },
+  {
+   "turn": 146,
+   "seat": 2,
+   "action": "play_knight",
+   "payload": {}
+  },
+  {
+   "turn": 146,
+   "seat": 2,
+   "action": "move_robber",
+   "payload": {
+    "hex": {
+     "q": 1,
+     "r": -1,
+     "s": 0
+    }
+   }
+  },
+  {
+   "turn": 146,
+   "seat": 2,
+   "action": "roll_dice",
+   "payload": {},
+   "outcome": {
+    "dice": [
+     5,
+     5
+    ]
+   }
+  },
+  {
+   "turn": 146,
+   "seat": 2,
+   "action": "trade_with_bank",
+   "payload": {
+    "give": "wood",
+    "get": "wheat"
+   }
+  },
+  {
+   "turn": 146,
+   "seat": 2,
+   "action": "trade_with_bank",
+   "payload": {
+    "give": "wheat",
+    "get": "wood"
+   }
+  },
+  {
+   "turn": 146,
+   "seat": 2,
+   "action": "end_turn",
+   "payload": {}
+  },
+  {
+   "turn": 147,
+   "seat": 0,
+   "action": "roll_dice",
+   "payload": {},
+   "outcome": {
+    "dice": [
+     2,
+     5
+    ]
+   }
+  },
+  {
+   "turn": 147,
+   "seat": 0,
+   "action": "move_robber",
+   "payload": {
+    "hex": {
+     "q": 1,
+     "r": -2,
+     "s": 1
+    }
+   }
+  },
+  {
+   "turn": 147,
+   "seat": 0,
+   "action": "end_turn",
+   "payload": {}
+  },
+  {
+   "turn": 148,
+   "seat": 1,
+   "action": "roll_dice",
+   "payload": {},
+   "outcome": {
+    "dice": [
+     6,
+     1
+    ]
+   }
+  },
+  {
+   "turn": 148,
+   "seat": 1,
+   "action": "move_robber",
+   "payload": {
+    "hex": {
+     "q": 0,
+     "r": -1,
+     "s": 1
+    }
+   }
+  },
+  {
+   "turn": 148,
+   "seat": 1,
+   "action": "buy_dev_card",
+   "payload": {},
+   "outcome": {
+    "card": "victory_point"
+   },
+   "visible_to": [
+    1
+   ]
+  },
+  {
+   "turn": 148,
+   "seat": 1,
+   "action": "end_turn",
+   "payload": {}
+  },
+  {
+   "turn": 149,
+   "seat": 2,
+   "action": "roll_dice",
+   "payload": {},
+   "outcome": {
+    "dice": [
+     3,
+     1
+    ]
+   }
+  },
+  {
+   "turn": 149,
+   "seat": 2,
+   "action": "end_turn",
+   "payload": {}
+  },
+  {
+   "turn": 150,
+   "seat": 0,
+   "action": "roll_dice",
+   "payload": {},
+   "outcome": {
+    "dice": [
+     2,
+     4
+    ]
+   }
+  },
+  {
+   "turn": 150,
+   "seat": 0,
+   "action": "end_turn",
+   "payload": {}
+  },
+  {
+   "turn": 151,
+   "seat": 1,
+   "action": "roll_dice",
+   "payload": {},
+   "outcome": {
+    "dice": [
+     5,
+     2
+    ]
+   }
+  },
+  {
+   "turn": 151,
+   "seat": 1,
+   "action": "move_robber",
+   "payload": {
+    "hex": {
+     "q": 1,
+     "r": -1,
+     "s": 0
+    }
+   }
+  },
+  {
+   "turn": 151,
+   "seat": 1,
+   "action": "steal",
+   "payload": {
+    "victim_seat": 2
+   },
+   "outcome": {
+    "resource": "sheep"
+   },
+   "visible_to": [
+    1,
+    2
+   ]
+  },
+  {
+   "turn": 151,
+   "seat": 1,
+   "action": "end_turn",
+   "payload": {}
+  },
+  {
+   "turn": 152,
+   "seat": 2,
+   "action": "roll_dice",
+   "payload": {},
+   "outcome": {
+    "dice": [
+     3,
+     1
+    ]
+   }
+  },
+  {
+   "turn": 152,
+   "seat": 2,
+   "action": "trade_with_bank",
+   "payload": {
+    "give": "wood",
+    "get": "sheep"
+   }
+  },
+  {
+   "turn": 152,
+   "seat": 2,
+   "action": "end_turn",
+   "payload": {}
+  },
+  {
+   "turn": 153,
+   "seat": 0,
+   "action": "roll_dice",
+   "payload": {},
+   "outcome": {
+    "dice": [
+     1,
+     1
+    ]
+   }
+  },
+  {
+   "turn": 153,
+   "seat": 0,
+   "action": "trade_with_bank",
+   "payload": {
+    "give": "wheat",
+    "get": "ore"
+   }
+  },
+  {
+   "turn": 153,
+   "seat": 0,
+   "action": "offer_trade",
+   "payload": {
+    "give": {
+     "wood": 1
+    },
+    "get": {
+     "sheep": 1
+    }
+   }
+  },
+  {
+   "turn": 153,
+   "seat": 2,
+   "action": "respond_trade",
+   "payload": {
+    "accept": true
+   }
+  },
+  {
+   "turn": 153,
+   "seat": 0,
+   "action": "confirm_trade",
+   "payload": {
+    "partner_seat": 2
+   }
+  },
+  {
+   "turn": 153,
+   "seat": 0,
+   "action": "end_turn",
+   "payload": {}
+  },
+  {
+   "turn": 154,
+   "seat": 1,
+   "action": "roll_dice",
+   "payload": {},
+   "outcome": {
+    "dice": [
+     6,
+     4
+    ]
+   }
+  },
+  {
+   "turn": 154,
+   "seat": 1,
+   "action": "trade_with_bank",
+   "payload": {
+    "give": "sheep",
+    "get": "brick"
+   }
+  },
+  {
+   "turn": 154,
+   "seat": 1,
+   "action": "build_road",
+   "payload": {
+    "hex": {
+     "q": -3,
+     "r": 3,
+     "s": 0
+    },
+    "direction": 5
+   }
+  },
+  {
+   "turn": 154,
+   "seat": 1,
+   "action": "offer_trade",
+   "payload": {
+    "give": {
+     "wood": 1
+    },
+    "get": {
+     "ore": 1
+    }
+   }
+  },
+  {
+   "turn": 154,
+   "seat": 0,
+   "action": "respond_trade",
+   "payload": {
+    "accept": true
+   }
+  },
+  {
+   "turn": 154,
+   "seat": 1,
+   "action": "confirm_trade",
+   "payload": {
+    "partner_seat": 0
+   }
+  },
+  {
+   "turn": 154,
+   "seat": 1,
+   "action": "end_turn",
+   "payload": {}
+  },
+  {
+   "turn": 155,
+   "seat": 2,
+   "action": "roll_dice",
+   "payload": {},
+   "outcome": {
+    "dice": [
+     3,
+     2
+    ]
+   }
+  },
+  {
+   "turn": 155,
+   "seat": 2,
+   "action": "buy_dev_card",
+   "payload": {},
+   "outcome": {
+    "card": "knight"
+   },
+   "visible_to": [
+    2
+   ]
+  },
+  {
+   "turn": 155,
+   "seat": 2,
+   "action": "end_turn",
+   "payload": {}
+  },
+  {
+   "turn": 156,
+   "seat": 0,
+   "action": "roll_dice",
+   "payload": {},
+   "outcome": {
+    "dice": [
+     3,
+     3
+    ]
+   }
+  },
+  {
+   "turn": 156,
+   "seat": 0,
+   "action": "build_settlement",
+   "payload": {
+    "hex": {
+     "q": -3,
+     "r": 0,
+     "s": 3
+    },
+    "direction": 1
+   }
+  },
+  {
+   "turn": 156,
+   "seat": 0,
+   "action": "end_turn",
+   "payload": {}
+  },
+  {
+   "turn": 157,
+   "seat": 1,
+   "action": "roll_dice",
+   "payload": {},
+   "outcome": {
+    "dice": [
+     1,
+     3
+    ]
+   }
+  },
+  {
+   "turn": 157,
+   "seat": 1,
+   "action": "offer_trade",
+   "payload": {
+    "give": {
+     "wood": 1
+    },
+    "get": {
+     "sheep": 1
+    }
+   }
+  },
+  {
+   "turn": 157,
+   "seat": 2,
+   "action": "respond_trade",
+   "payload": {
+    "accept": true
+   }
+  },
+  {
+   "turn": 157,
+   "seat": 1,
+   "action": "confirm_trade",
+   "payload": {
+    "partner_seat": 2
+   }
+  },
+  {
+   "turn": 157,
+   "seat": 1,
+   "action": "end_turn",
+   "payload": {}
+  },
+  {
+   "turn": 158,
+   "seat": 2,
+   "action": "roll_dice",
+   "payload": {},
+   "outcome": {
+    "dice": [
+     4,
+     3
+    ]
+   }
+  },
+  {
+   "turn": 158,
+   "seat": 2,
+   "action": "discard",
+   "payload": {
+    "cards": {
+     "wheat": 2,
+     "wood": 2
+    }
+   }
+  },
+  {
+   "turn": 158,
+   "seat": 2,
+   "action": "move_robber",
+   "payload": {
+    "hex": {
+     "q": 0,
+     "r": 1,
+     "s": -1
+    }
+   }
+  },
+  {
+   "turn": 158,
+   "seat": 2,
+   "action": "play_knight",
+   "payload": {}
+  },
+  {
+   "turn": 158,
+   "seat": 2,
+   "action": "move_robber",
+   "payload": {
+    "hex": {
+     "q": 0,
+     "r": 2,
+     "s": -2
+    }
+   }
+  },
+  {
+   "turn": 158,
+   "seat": 2,
+   "action": "steal",
+   "payload": {
+    "victim_seat": 1
+   },
+   "outcome": {
+    "resource": "sheep"
+   },
+   "visible_to": [
+    1,
+    2
+   ]
+  },
+  {
+   "turn": 158,
+   "seat": 2,
+   "action": "end_turn",
+   "payload": {}
+  },
+  {
+   "turn": 159,
+   "seat": 0,
+   "action": "roll_dice",
+   "payload": {},
+   "outcome": {
+    "dice": [
+     4,
+     4
+    ]
+   }
+  },
+  {
+   "turn": 159,
+   "seat": 0,
+   "action": "offer_trade",
+   "payload": {
+    "give": {
+     "wheat": 1
+    },
+    "get": {
+     "sheep": 1
+    }
+   }
+  },
+  {
+   "turn": 159,
+   "seat": 2,
+   "action": "respond_trade",
+   "payload": {
+    "accept": true
+   }
+  },
+  {
+   "turn": 159,
+   "seat": 0,
+   "action": "confirm_trade",
+   "payload": {
+    "partner_seat": 2
+   }
+  },
+  {
+   "turn": 159,
+   "seat": 0,
+   "action": "end_turn",
+   "payload": {}
+  },
+  {
+   "turn": 160,
+   "seat": 1,
+   "action": "roll_dice",
+   "payload": {},
+   "outcome": {
+    "dice": [
+     3,
+     4
+    ]
+   }
+  },
+  {
+   "turn": 160,
+   "seat": 1,
+   "action": "move_robber",
+   "payload": {
+    "hex": {
+     "q": -2,
+     "r": 2,
+     "s": 0
+    }
+   }
+  },
+  {
+   "turn": 160,
+   "seat": 1,
+   "action": "end_turn",
+   "payload": {}
+  },
+  {
+   "turn": 161,
+   "seat": 2,
+   "action": "roll_dice",
+   "payload": {},
+   "outcome": {
+    "dice": [
+     2,
+     6
+    ]
+   }
+  },
+  {
+   "turn": 161,
+   "seat": 2,
+   "action": "end_turn",
+   "payload": {}
+  },
+  {
+   "turn": 162,
+   "seat": 0,
+   "action": "roll_dice",
+   "payload": {},
+   "outcome": {
+    "dice": [
+     4,
+     6
+    ]
+   }
+  },
+  {
+   "turn": 162,
+   "seat": 0,
+   "action": "end_turn",
+   "payload": {}
+  },
+  {
+   "turn": 163,
+   "seat": 1,
+   "action": "roll_dice",
+   "payload": {},
+   "outcome": {
+    "dice": [
+     2,
+     3
+    ]
+   }
+  },
+  {
+   "turn": 163,
+   "seat": 1,
+   "action": "end_turn",
+   "payload": {}
+  },
+  {
+   "turn": 164,
+   "seat": 2,
+   "action": "roll_dice",
+   "payload": {},
+   "outcome": {
+    "dice": [
+     3,
+     2
+    ]
+   }
+  },
+  {
+   "turn": 164,
+   "seat": 2,
+   "action": "trade_with_bank",
+   "payload": {
+    "give": "wheat",
+    "get": "ore"
+   }
+  },
+  {
+   "turn": 164,
+   "seat": 2,
+   "action": "buy_dev_card",
+   "payload": {},
+   "outcome": {
+    "card": "road_building"
+   },
+   "visible_to": [
+    2
+   ]
+  },
+  {
+   "turn": 164,
+   "seat": 2,
+   "action": "end_turn",
+   "payload": {}
+  },
+  {
+   "turn": 165,
+   "seat": 0,
+   "action": "roll_dice",
+   "payload": {},
+   "outcome": {
+    "dice": [
+     1,
+     2
+    ]
+   }
+  },
+  {
+   "turn": 165,
+   "seat": 0,
+   "action": "build_settlement",
+   "payload": {
+    "hex": {
+     "q": -3,
+     "r": 1,
+     "s": 2
+    },
+    "direction": 1
+   }
+  },
+  {
+   "turn": 165,
+   "seat": 0,
+   "action": "trade_with_bank",
+   "payload": {
+    "give": "brick",
+    "get": "sheep"
+   }
+  },
+  {
+   "turn": 165,
+   "seat": 0,
+   "action": "trade_with_bank",
+   "payload": {
+    "give": "wheat",
+    "get": "brick"
+   }
+  },
+  {
+   "turn": 165,
+   "seat": 0,
+   "action": "offer_trade",
+   "payload": {
+    "give": {
+     "sheep": 1
+    },
+    "get": {
+     "wood": 1
+    }
+   }
+  },
+  {
+   "turn": 165,
+   "seat": 2,
+   "action": "respond_trade",
+   "payload": {
+    "accept": true
+   }
+  },
+  {
+   "turn": 165,
+   "seat": 0,
+   "action": "confirm_trade",
+   "payload": {
+    "partner_seat": 2
+   }
+  },
+  {
+   "turn": 165,
+   "seat": 0,
+   "action": "build_road",
+   "payload": {
+    "hex": {
+     "q": 1,
+     "r": 1,
+     "s": -2
+    },
+    "direction": 5
+   }
+  },
+  {
+   "turn": 165,
+   "seat": 0,
+   "action": "end_turn",
+   "payload": {}
+  },
+  {
+   "turn": 166,
+   "seat": 1,
+   "action": "roll_dice",
+   "payload": {},
+   "outcome": {
+    "dice": [
+     4,
+     2
+    ]
+   }
+  },
+  {
+   "turn": 166,
+   "seat": 1,
+   "action": "end_turn",
+   "payload": {}
+  },
+  {
+   "turn": 167,
+   "seat": 2,
+   "action": "play_road_building",
+   "payload": {}
+  },
+  {
+   "turn": 167,
+   "seat": 2,
+   "action": "build_road",
+   "payload": {
+    "hex": {
+     "q": 2,
+     "r": 0,
+     "s": -2
+    },
+    "direction": 5
+   }
+  },
+  {
+   "turn": 167,
+   "seat": 2,
+   "action": "build_road",
+   "payload": {
+    "hex": {
+     "q": 0,
+     "r": 0,
+     "s": 0
+    },
+    "direction": 0
+   }
+  },
+  {
+   "turn": 167,
+   "seat": 2,
+   "action": "roll_dice",
+   "payload": {},
+   "outcome": {
+    "dice": [
+     6,
+     3
+    ]
+   }
+  },
+  {
+   "turn": 167,
+   "seat": 2,
+   "action": "trade_with_bank",
+   "payload": {
+    "give": "wood",
+    "get": "ore"
+   }
+  },
+  {
+   "turn": 167,
+   "seat": 2,
+   "action": "build_road",
+   "payload": {
+    "hex": {
+     "q": 0,
+     "r": 1,
+     "s": -1
+    },
+    "direction": 0
+   }
+  },
+  {
+   "turn": 167,
+   "seat": 2,
+   "action": "offer_trade",
+   "payload": {
+    "give": {
+     "wood": 1
+    },
+    "get": {
+     "wheat": 1
+    }
+   }
+  },
+  {
+   "turn": 167,
+   "seat": 0,
+   "action": "respond_trade",
+   "payload": {
+    "accept": true
+   }
+  },
+  {
+   "turn": 167,
+   "seat": 2,
+   "action": "confirm_trade",
+   "payload": {
+    "partner_seat": 0
+   }
+  },
+  {
+   "turn": 167,
+   "seat": 2,
+   "action": "buy_dev_card",
+   "payload": {},
+   "outcome": {
+    "card": "year_of_plenty"
+   },
+   "visible_to": [
+    2
+   ]
+  },
+  {
+   "turn": 167,
+   "seat": 2,
+   "action": "end_turn",
+   "payload": {}
+  },
+  {
+   "turn": 168,
+   "seat": 0,
+   "action": "roll_dice",
+   "payload": {},
+   "outcome": {
+    "dice": [
+     2,
+     3
+    ]
+   }
+  },
+  {
+   "turn": 168,
+   "seat": 0,
+   "action": "build_road",
+   "payload": {
+    "hex": {
+     "q": -1,
+     "r": -1,
+     "s": 2
+    },
+    "direction": 1
+   }
+  },
+  {
+   "turn": 168,
+   "seat": 0,
+   "action": "trade_with_bank",
+   "payload": {
+    "give": "ore",
+    "get": "wheat"
+   }
+  },
+  {
+   "turn": 168,
+   "seat": 0,
+   "action": "offer_trade",
+   "payload": {
+    "give": {
+     "brick": 1
+    },
+    "get": {
+     "wood": 1
+    }
+   }
+  },
+  {
+   "turn": 168,
+   "seat": 1,
+   "action": "respond_trade",
+   "payload": {
+    "accept": true
+   }
+  },
+  {
+   "turn": 168,
+   "seat": 0,
+   "action": "confirm_trade",
+   "payload": {
+    "partner_seat": 1
+   }
+  },
+  {
+   "turn": 168,
+   "seat": 0,
+   "action": "trade_with_bank",
+   "payload": {
+    "give": "wheat",
+    "get": "wood"
+   }
+  },
+  {
+   "turn": 168,
+   "seat": 0,
+   "action": "end_turn",
+   "payload": {}
+  },
+  {
+   "turn": 169,
+   "seat": 1,
+   "action": "roll_dice",
+   "payload": {},
+   "outcome": {
+    "dice": [
+     2,
+     2
+    ]
+   }
+  },
+  {
+   "turn": 169,
+   "seat": 1,
+   "action": "end_turn",
+   "payload": {}
+  },
+  {
+   "turn": 170,
+   "seat": 2,
+   "action": "roll_dice",
+   "payload": {},
+   "outcome": {
+    "dice": [
+     2,
+     3
+    ]
+   }
+  },
+  {
+   "turn": 170,
+   "seat": 2,
+   "action": "play_year_of_plenty",
+   "payload": {
+    "first": "ore",
+    "second": "ore"
+   }
+  },
+  {
+   "turn": 170,
+   "seat": 2,
+   "action": "end_turn",
+   "payload": {}
+  },
+  {
+   "turn": 171,
+   "seat": 0,
+   "action": "roll_dice",
+   "payload": {},
+   "outcome": {
+    "dice": [
+     5,
+     6
+    ]
+   }
+  },
+  {
+   "turn": 171,
+   "seat": 0,
+   "action": "build_road",
+   "payload": {
+    "hex": {
+     "q": 1,
+     "r": 0,
+     "s": -1
+    },
+    "direction": 0
+   }
+  },
+  {
+   "turn": 171,
+   "seat": 0,
+   "action": "build_road",
+   "payload": {
+    "hex": {
+     "q": -1,
+     "r": -1,
+     "s": 2
+    },
+    "direction": 0
+   }
+  },
+  {
+   "turn": 171,
+   "seat": 0,
+   "action": "trade_with_bank",
+   "payload": {
+    "give": "wheat",
+    "get": "sheep"
+   }
+  },
+  {
+   "turn": 171,
+   "seat": 0,
+   "action": "end_turn",
+   "payload": {}
+  },
+  {
+   "turn": 172,
+   "seat": 1,
+   "action": "roll_dice",
+   "payload": {},
+   "outcome": {
+    "dice": [
+     4,
+     4
+    ]
+   }
+  },
+  {
+   "turn": 172,
+   "seat": 1,
+   "action": "end_turn",
+   "payload": {}
+  },
+  {
+   "turn": 173,
+   "seat": 2,
+   "action": "roll_dice",
+   "payload": {},
+   "outcome": {
+    "dice": [
+     6,
+     3
+    ]
+   }
+  },
+  {
+   "turn": 173,
+   "seat": 2,
+   "action": "end_turn",
+   "payload": {}
+  },
+  {
+   "turn": 174,
+   "seat": 0,
+   "action": "roll_dice",
+   "payload": {},
+   "outcome": {
+    "dice": [
+     3,
+     6
+    ]
+   }
+  },
+  {
+   "turn": 174,
+   "seat": 0,
+   "action": "trade_with_bank",
+   "payload": {
+    "give": "ore",
+    "get": "wood"
+   }
+  },
+  {
+   "turn": 174,
+   "seat": 0,
+   "action": "trade_with_bank",
+   "payload": {
+    "give": "ore",
+    "get": "sheep"
+   }
+  },
+  {
+   "turn": 174,
+   "seat": 0,
+   "action": "end_turn",
+   "payload": {}
+  },
+  {
+   "turn": 175,
+   "seat": 1,
+   "action": "roll_dice",
+   "payload": {},
+   "outcome": {
+    "dice": [
+     5,
+     5
+    ]
+   }
+  },
+  {
+   "turn": 175,
+   "seat": 1,
+   "action": "end_turn",
+   "payload": {}
+  },
+  {
+   "turn": 176,
+   "seat": 2,
+   "action": "roll_dice",
+   "payload": {},
+   "outcome": {
+    "dice": [
+     5,
+     6
+    ]
+   }
+  },
+  {
+   "turn": 176,
+   "seat": 2,
+   "action": "buy_dev_card",
+   "payload": {},
+   "outcome": {
+    "card": "monopoly"
+   },
+   "visible_to": [
+    2
+   ]
+  },
+  {
+   "turn": 176,
+   "seat": 2,
+   "action": "end_turn",
+   "payload": {}
+  },
+  {
+   "turn": 177,
+   "seat": 0,
+   "action": "roll_dice",
+   "payload": {},
+   "outcome": {
+    "dice": [
+     6,
+     3
+    ]
+   }
+  },
+  {
+   "turn": 177,
+   "seat": 0,
+   "action": "trade_with_bank",
+   "payload": {
+    "give": "ore",
+    "get": "wood"
+   }
+  },
+  {
+   "turn": 177,
+   "seat": 0,
+   "action": "offer_trade",
+   "payload": {
+    "give": {
+     "wood": 1
+    },
+    "get": {
+     "brick": 1
+    }
+   }
+  },
+  {
+   "turn": 177,
+   "seat": 1,
+   "action": "respond_trade",
+   "payload": {
+    "accept": true
+   }
+  },
+  {
+   "turn": 177,
+   "seat": 0,
+   "action": "confirm_trade",
+   "payload": {
+    "partner_seat": 1
+   }
+  },
+  {
+   "turn": 177,
+   "seat": 0,
+   "action": "build_road",
+   "payload": {
+    "hex": {
+     "q": -1,
+     "r": -1,
+     "s": 2
+    },
+    "direction": 5
+   }
+  },
+  {
+   "turn": 177,
+   "seat": 0,
+   "action": "end_turn",
+   "payload": {}
+  },
+  {
+   "turn": 178,
+   "seat": 1,
+   "action": "roll_dice",
+   "payload": {},
+   "outcome": {
+    "dice": [
+     6,
+     4
+    ]
+   }
+  },
+  {
+   "turn": 178,
+   "seat": 1,
+   "action": "end_turn",
+   "payload": {}
+  },
+  {
+   "turn": 179,
+   "seat": 2,
+   "action": "play_monopoly",
+   "payload": {
+    "resource": "ore"
+   }
+  },
+  {
+   "turn": 179,
+   "seat": 2,
+   "action": "roll_dice",
+   "payload": {},
+   "outcome": {
+    "dice": [
+     6,
+     6
+    ]
+   }
+  },
+  {
+   "turn": 179,
+   "seat": 2,
+   "action": "offer_trade",
+   "payload": {
+    "give": {
+     "wood": 1
+    },
+    "get": {
+     "sheep": 1
+    }
+   }
+  },
+  {
+   "turn": 179,
+   "seat": 0,
+   "action": "respond_trade",
+   "payload": {
+    "accept": true
+   }
+  },
+  {
+   "turn": 179,
+   "seat": 2,
+   "action": "confirm_trade",
+   "payload": {
+    "partner_seat": 0
+   }
+  },
+  {
+   "turn": 179,
+   "seat": 2,
+   "action": "trade_with_bank",
+   "payload": {
+    "give": "wheat",
+    "get": "brick"
+   }
+  },
+  {
+   "turn": 179,
+   "seat": 2,
+   "action": "build_road",
+   "payload": {
+    "hex": {
+     "q": 0,
+     "r": 0,
+     "s": 0
+    },
+    "direction": 5
+   }
+  },
+  {
+   "turn": 179,
+   "seat": 2,
+   "action": "end_turn",
+   "payload": {}
+  },
+  {
+   "turn": 180,
+   "seat": 0,
+   "action": "roll_dice",
+   "payload": {},
+   "outcome": {
+    "dice": [
+     6,
+     6
+    ]
+   }
+  },
+  {
+   "turn": 180,
+   "seat": 0,
+   "action": "end_turn",
+   "payload": {}
+  },
+  {
+   "turn": 181,
+   "seat": 1,
+   "action": "roll_dice",
+   "payload": {},
+   "outcome": {
+    "dice": [
+     3,
+     5
+    ]
+   }
+  },
+  {
+   "turn": 181,
+   "seat": 1,
+   "action": "end_turn",
+   "payload": {}
+  },
+  {
+   "turn": 182,
+   "seat": 2,
+   "action": "roll_dice",
+   "payload": {},
+   "outcome": {
+    "dice": [
+     5,
+     6
+    ]
+   }
+  },
+  {
+   "turn": 182,
+   "seat": 2,
+   "action": "trade_with_bank",
+   "payload": {
+    "give": "wood",
+    "get": "wheat"
+   }
+  },
+  {
+   "turn": 182,
+   "seat": 2,
+   "action": "end_turn",
+   "payload": {}
+  },
+  {
+   "turn": 183,
+   "seat": 0,
+   "action": "roll_dice",
+   "payload": {},
+   "outcome": {
+    "dice": [
+     6,
+     1
+    ]
+   }
+  },
+  {
+   "turn": 183,
+   "seat": 0,
+   "action": "move_robber",
+   "payload": {
+    "hex": {
+     "q": -1,
+     "r": -1,
+     "s": 2
+    }
+   }
+  },
+  {
+   "turn": 183,
+   "seat": 0,
+   "action": "end_turn",
+   "payload": {}
+  },
+  {
+   "turn": 184,
+   "seat": 1,
+   "action": "roll_dice",
+   "payload": {},
+   "outcome": {
+    "dice": [
+     3,
+     3
+    ]
+   }
+  },
+  {
+   "turn": 184,
+   "seat": 1,
+   "action": "end_turn",
+   "payload": {}
+  },
+  {
+   "turn": 185,
+   "seat": 2,
+   "action": "roll_dice",
+   "payload": {},
+   "outcome": {
+    "dice": [
+     4,
+     4
+    ]
+   }
+  },
+  {
+   "turn": 185,
+   "seat": 2,
+   "action": "buy_dev_card",
+   "payload": {},
+   "outcome": {
+    "card": "knight"
+   },
+   "visible_to": [
+    2
+   ]
+  },
+  {
+   "turn": 185,
+   "seat": 2,
+   "action": "end_turn",
+   "payload": {}
+  },
+  {
+   "turn": 186,
+   "seat": 0,
+   "action": "roll_dice",
+   "payload": {},
+   "outcome": {
+    "dice": [
+     2,
+     3
+    ]
+   }
+  },
+  {
+   "turn": 186,
+   "seat": 0,
+   "action": "build_settlement",
+   "payload": {
+    "hex": {
+     "q": -1,
+     "r": -1,
+     "s": 2
+    },
+    "direction": 0
+   }
+  },
+  {
+   "turn": 186,
+   "seat": 0,
+   "action": "end_turn",
+   "payload": {}
+  },
+  {
+   "turn": 187,
+   "seat": 1,
+   "action": "roll_dice",
+   "payload": {},
+   "outcome": {
+    "dice": [
+     3,
+     4
+    ]
+   }
+  },
+  {
+   "turn": 187,
+   "seat": 1,
+   "action": "move_robber",
+   "payload": {
+    "hex": {
+     "q": -2,
+     "r": 0,
+     "s": 2
+    }
+   }
+  },
+  {
+   "turn": 187,
+   "seat": 1,
+   "action": "steal",
+   "payload": {
+    "victim_seat": 0
+   },
+   "outcome": {
+    "resource": "wheat"
+   },
+   "visible_to": [
+    0,
+    1
+   ]
+  },
+  {
+   "turn": 187,
+   "seat": 1,
+   "action": "end_turn",
+   "payload": {}
+  },
+  {
+   "turn": 188,
+   "seat": 2,
+   "action": "roll_dice",
+   "payload": {},
+   "outcome": {
+    "dice": [
+     1,
+     2
+    ]
+   }
+  },
+  {
+   "turn": 188,
+   "seat": 2,
+   "action": "play_knight",
+   "payload": {}
+  },
+  {
+   "turn": 188,
+   "seat": 2,
+   "action": "move_robber",
+   "payload": {
+    "hex": {
+     "q": 1,
+     "r": 0,
+     "s": -1
+    }
+   }
+  },
+  {
+   "turn": 188,
+   "seat": 2,
+   "action": "build_road",
+   "payload": {
+    "hex": {
+     "q": 1,
+     "r": -1,
+     "s": 0
+    },
+    "direction": 0
+   }
+  },
+  {
+   "turn": 188,
+   "seat": 2,
+   "action": "end_turn",
+   "payload": {}
+  },
+  {
+   "turn": 189,
+   "seat": 0,
+   "action": "roll_dice",
+   "payload": {},
+   "outcome": {
+    "dice": [
+     3,
+     4
+    ]
+   }
+  },
+  {
+   "turn": 189,
+   "seat": 0,
+   "action": "move_robber",
+   "payload": {
+    "hex": {
+     "q": 0,
+     "r": 2,
+     "s": -2
+    }
+   }
+  },
+  {
+   "turn": 189,
+   "seat": 0,
+   "action": "steal",
+   "payload": {
+    "victim_seat": 2
+   },
+   "outcome": {
+    "resource": "wood"
+   },
+   "visible_to": [
+    0,
+    2
+   ]
+  },
+  {
+   "turn": 189,
+   "seat": 0,
+   "action": "build_road",
+   "payload": {
+    "hex": {
+     "q": -1,
+     "r": 0,
+     "s": 1
+    },
+    "direction": 5
+   }
+  },
+  {
+   "turn": 189,
+   "seat": 0,
+   "action": "end_turn",
+   "payload": {}
+  },
+  {
+   "turn": 190,
+   "seat": 1,
+   "action": "roll_dice",
+   "payload": {},
+   "outcome": {
+    "dice": [
+     1,
+     1
+    ]
+   }
+  },
+  {
+   "turn": 190,
+   "seat": 1,
+   "action": "end_turn",
+   "payload": {}
+  },
+  {
+   "turn": 191,
+   "seat": 2,
+   "action": "roll_dice",
+   "payload": {},
+   "outcome": {
+    "dice": [
+     3,
+     2
+    ]
+   }
+  },
+  {
+   "turn": 191,
+   "seat": 2,
+   "action": "end_turn",
+   "payload": {}
+  },
+  {
+   "turn": 192,
+   "seat": 0,
+   "action": "roll_dice",
+   "payload": {},
+   "outcome": {
+    "dice": [
+     3,
+     1
+    ]
+   }
+  },
+  {
+   "turn": 192,
+   "seat": 0,
+   "action": "trade_with_bank",
+   "payload": {
+    "give": "wheat",
+    "get": "sheep"
+   }
+  },
+  {
+   "turn": 192,
+   "seat": 0,
+   "action": "end_turn",
+   "payload": {}
+  },
+  {
+   "turn": 193,
+   "seat": 1,
+   "action": "roll_dice",
+   "payload": {},
+   "outcome": {
+    "dice": [
+     6,
+     6
+    ]
+   }
+  },
+  {
+   "turn": 193,
+   "seat": 1,
+   "action": "end_turn",
+   "payload": {}
+  },
+  {
+   "turn": 194,
+   "seat": 2,
+   "action": "roll_dice",
+   "payload": {},
+   "outcome": {
+    "dice": [
+     4,
+     1
+    ]
+   }
+  },
+  {
+   "turn": 194,
+   "seat": 2,
+   "action": "trade_with_bank",
+   "payload": {
+    "give": "wood",
+    "get": "sheep"
+   }
+  },
+  {
+   "turn": 194,
+   "seat": 2,
+   "action": "trade_with_bank",
+   "payload": {
+    "give": "wheat",
+    "get": "brick"
+   }
+  },
+  {
+   "turn": 194,
+   "seat": 2,
+   "action": "end_turn",
+   "payload": {}
+  },
+  {
+   "turn": 195,
+   "seat": 0,
+   "action": "roll_dice",
+   "payload": {},
+   "outcome": {
+    "dice": [
+     5,
+     3
+    ]
+   }
+  },
+  {
+   "turn": 195,
+   "seat": 0,
+   "action": "buy_dev_card",
+   "payload": {},
+   "outcome": {
+    "card": "victory_point"
+   },
+   "visible_to": [
+    0
+   ]
+  },
+  {
+   "turn": 195,
+   "seat": 0,
+   "action": "trade_with_bank",
+   "payload": {
+    "give": "brick",
+    "get": "wheat"
+   }
+  },
+  {
+   "turn": 195,
+   "seat": 0,
+   "action": "offer_trade",
+   "payload": {
+    "give": {
+     "brick": 1
+    },
+    "get": {
+     "wood": 1
+    }
+   }
+  },
+  {
+   "turn": 195,
+   "seat": 1,
+   "action": "respond_trade",
+   "payload": {
+    "accept": true
+   }
+  },
+  {
+   "turn": 195,
+   "seat": 0,
+   "action": "confirm_trade",
+   "payload": {
+    "partner_seat": 1
+   }
+  },
+  {
+   "turn": 195,
+   "seat": 0,
+   "action": "offer_trade",
+   "payload": {
+    "give": {
+     "wheat": 1
+    },
+    "get": {
+     "sheep": 1
+    }
+   }
+  },
+  {
+   "turn": 195,
+   "seat": 2,
+   "action": "respond_trade",
+   "payload": {
+    "accept": true
+   }
+  },
+  {
+   "turn": 195,
+   "seat": 0,
+   "action": "confirm_trade",
+   "payload": {
+    "partner_seat": 2
+   }
+  },
+  {
+   "turn": 195,
+   "seat": 0,
+   "action": "offer_trade",
+   "payload": {
+    "give": {
+     "wheat": 1
+    },
+    "get": {
+     "brick": 1
+    }
+   }
+  },
+  {
+   "turn": 195,
+   "seat": 2,
+   "action": "respond_trade",
+   "payload": {
+    "accept": true
+   }
+  },
+  {
+   "turn": 195,
+   "seat": 0,
+   "action": "confirm_trade",
+   "payload": {
+    "partner_seat": 2
+   }
+  },
+  {
+   "turn": 195,
+   "seat": 0,
+   "action": "build_road",
+   "payload": {
+    "hex": {
+     "q": -1,
+     "r": -2,
+     "s": 3
+    },
+    "direction": 0
+   }
+  },
+  {
+   "turn": 195,
+   "seat": 0,
+   "action": "end_turn",
+   "payload": {}
+  },
+  {
+   "turn": 196,
+   "seat": 1,
+   "action": "roll_dice",
+   "payload": {},
+   "outcome": {
+    "dice": [
+     2,
+     5
+    ]
+   }
+  },
+  {
+   "turn": 196,
+   "seat": 1,
+   "action": "move_robber",
+   "payload": {
+    "hex": {
+     "q": 1,
+     "r": -1,
+     "s": 0
+    }
+   }
+  },
+  {
+   "turn": 196,
+   "seat": 1,
+   "action": "steal",
+   "payload": {
+    "victim_seat": 2
+   },
+   "outcome": {
+    "resource": "wheat"
+   },
+   "visible_to": [
+    1,
+    2
+   ]
+  },
+  {
+   "turn": 196,
+   "seat": 1,
+   "action": "build_road",
+   "payload": {
+    "hex": {
+     "q": -1,
+     "r": 3,
+     "s": -2
+    },
+    "direction": 5
+   }
+  },
+  {
+   "turn": 196,
+   "seat": 1,
+   "action": "trade_with_bank",
+   "payload": {
+    "give": "wheat",
+    "get": "ore"
+   }
+  },
+  {
+   "turn": 196,
+   "seat": 1,
+   "action": "end_turn",
+   "payload": {}
+  },
+  {
+   "turn": 197,
+   "seat": 2,
+   "action": "roll_dice",
+   "payload": {},
+   "outcome": {
+    "dice": [
+     5,
+     3
+    ]
+   }
+  },
+  {
+   "turn": 197,
+   "seat": 2,
+   "action": "buy_dev_card",
+   "payload": {},
+   "outcome": {
+    "card": "knight"
+   },
+   "visible_to": [
+    2
+   ]
+  },
+  {
+   "turn": 197,
+   "seat": 2,
+   "action": "end_turn",
+   "payload": {}
+  },
+  {
+   "turn": 198,
+   "seat": 0,
+   "action": "roll_dice",
+   "payload": {},
+   "outcome": {
+    "dice": [
+     4,
+     6
+    ]
+   }
+  },
+  {
+   "turn": 198,
+   "seat": 0,
+   "action": "end_turn",
+   "payload": {}
+  },
+  {
+   "turn": 199,
+   "seat": 1,
+   "action": "roll_dice",
+   "payload": {},
+   "outcome": {
+    "dice": [
+     2,
+     3
+    ]
+   }
+  },
+  {
+   "turn": 199,
+   "seat": 1,
+   "action": "end_turn",
+   "payload": {}
+  },
+  {
+   "turn": 200,
+   "seat": 2,
+   "action": "roll_dice",
+   "payload": {},
+   "outcome": {
+    "dice": [
+     3,
+     2
+    ]
+   }
+  },
+  {
+   "turn": 200,
+   "seat": 2,
+   "action": "play_knight",
+   "payload": {}
+  },
+  {
+   "turn": 200,
+   "seat": 2,
+   "action": "move_robber",
+   "payload": {
+    "hex": {
+     "q": 1,
+     "r": -2,
+     "s": 1
+    }
+   }
+  },
+  {
+   "turn": 200,
+   "seat": 2,
+   "action": "trade_with_bank",
+   "payload": {
+    "give": "wheat",
+    "get": "brick"
+   }
+  },
+  {
+   "turn": 200,
+   "seat": 2,
+   "action": "end_turn",
+   "payload": {}
+  },
+  {
+   "turn": 201,
+   "seat": 0,
+   "action": "roll_dice",
+   "payload": {},
+   "outcome": {
+    "dice": [
+     4,
+     1
+    ]
+   }
+  },
+  {
+   "turn": 201,
+   "seat": 0,
+   "action": "trade_with_bank",
+   "payload": {
+    "give": "brick",
+    "get": "wheat"
+   }
+  },
+  {
+   "turn": 201,
+   "seat": 0,
+   "action": "trade_with_bank",
+   "payload": {
+    "give": "brick",
+    "get": "sheep"
+   }
+  },
+  {
+   "turn": 201,
+   "seat": 0,
+   "action": "trade_with_bank",
+   "payload": {
+    "give": "wheat",
+    "get": "ore"
+   }
+  },
+  {
+   "turn": 201,
+   "seat": 0,
+   "action": "trade_with_bank",
+   "payload": {
+    "give": "wheat",
+    "get": "wood"
+   }
+  },
+  {
+   "turn": 201,
+   "seat": 0,
+   "action": "trade_with_bank",
+   "payload": {
+    "give": "ore",
+    "get": "wheat"
+   }
+  },
+  {
+   "turn": 201,
+   "seat": 0,
+   "action": "end_turn",
+   "payload": {}
+  },
+  {
+   "turn": 202,
+   "seat": 1,
+   "action": "roll_dice",
+   "payload": {},
+   "outcome": {
+    "dice": [
+     2,
+     2
+    ]
+   }
+  },
+  {
+   "turn": 202,
+   "seat": 1,
+   "action": "end_turn",
+   "payload": {}
+  },
+  {
+   "turn": 203,
+   "seat": 2,
+   "action": "roll_dice",
+   "payload": {},
+   "outcome": {
+    "dice": [
+     3,
+     3
+    ]
+   }
+  },
+  {
+   "turn": 203,
+   "seat": 2,
+   "action": "trade_with_bank",
+   "payload": {
+    "give": "wood",
+    "get": "sheep"
+   }
+  },
+  {
+   "turn": 203,
+   "seat": 2,
+   "action": "end_turn",
+   "payload": {}
+  },
+  {
+   "turn": 204,
+   "seat": 0,
+   "action": "roll_dice",
+   "payload": {},
+   "outcome": {
+    "dice": [
+     2,
+     4
+    ]
+   }
+  },
+  {
+   "turn": 204,
+   "seat": 0,
+   "action": "trade_with_bank",
+   "payload": {
+    "give": "wheat",
+    "get": "wood"
+   }
+  },
+  {
+   "turn": 204,
+   "seat": 0,
+   "action": "end_turn",
+   "payload": {}
+  },
+  {
+   "turn": 205,
+   "seat": 1,
+   "action": "roll_dice",
+   "payload": {},
+   "outcome": {
+    "dice": [
+     3,
+     3
+    ]
+   }
+  },
+  {
+   "turn": 205,
+   "seat": 1,
+   "action": "end_turn",
+   "payload": {}
+  },
+  {
+   "turn": 206,
+   "seat": 2,
+   "action": "roll_dice",
+   "payload": {},
+   "outcome": {
+    "dice": [
+     1,
+     3
+    ]
+   }
+  },
+  {
+   "turn": 206,
+   "seat": 2,
+   "action": "trade_with_bank",
+   "payload": {
+    "give": "wood",
+    "get": "ore"
+   }
+  },
+  {
+   "turn": 206,
+   "seat": 2,
+   "action": "end_turn",
+   "payload": {}
+  },
+  {
+   "turn": 207,
+   "seat": 0,
+   "action": "roll_dice",
+   "payload": {},
+   "outcome": {
+    "dice": [
+     2,
+     2
+    ]
+   }
+  },
+  {
+   "turn": 207,
+   "seat": 0,
+   "action": "end_turn",
+   "payload": {}
+  },
+  {
+   "turn": 208,
+   "seat": 1,
+   "action": "roll_dice",
+   "payload": {},
+   "outcome": {
+    "dice": [
+     6,
+     2
+    ]
+   }
+  },
+  {
+   "turn": 208,
+   "seat": 1,
+   "action": "end_turn",
+   "payload": {}
+  },
+  {
+   "turn": 209,
+   "seat": 2,
+   "action": "roll_dice",
+   "payload": {},
+   "outcome": {
+    "dice": [
+     6,
+     5
+    ]
+   }
+  },
+  {
+   "turn": 209,
+   "seat": 2,
+   "action": "trade_with_bank",
+   "payload": {
+    "give": "sheep",
+    "get": "ore"
+   }
+  },
+  {
+   "turn": 209,
+   "seat": 2,
+   "action": "end_turn",
+   "payload": {}
+  },
+  {
+   "turn": 210,
+   "seat": 0,
+   "action": "roll_dice",
+   "payload": {},
+   "outcome": {
+    "dice": [
+     1,
+     3
+    ]
+   }
+  },
+  {
+   "turn": 210,
+   "seat": 0,
+   "action": "trade_with_bank",
+   "payload": {
+    "give": "wheat",
+    "get": "brick"
+   }
+  },
+  {
+   "turn": 210,
+   "seat": 0,
+   "action": "build_settlement",
+   "payload": {
+    "hex": {
+     "q": -1,
+     "r": -2,
+     "s": 3
+    },
+    "direction": 0
+   }
+  }
+ ],
+ "result": {
+  "winner_seat": 0,
+  "victory_points": [
+   10,
+   4,
+   9
+  ],
+  "turns": 210
+ }
+}

@@ -23,6 +23,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 option(CATAN_BUILD_TESTS "Build the unit tests" ON)
 option(CATAN_BUILD_BENCHMARKS "Build the benchmarks" ON)
 option(CATAN_SANITIZE "Build everything with AddressSanitizer and UBSan" OFF)
+option(CATAN_BUILD_PYTHON "Build the Python module used by tools/difftest.py" OFF)
 
 # Sanitizers must cover every object file, third-party ones included, so they
 # are global options set before the dependencies are fetched.
@@ -38,14 +39,30 @@ add_library(catan_warnings INTERFACE)
 target_compile_options(catan_warnings INTERFACE
   -Wall -Wextra -Wpedantic -Werror -Wconversion -Wshadow)
 
+include(cmake/Dependencies.cmake)
+
+# The rules engine: no dependencies, so it can go to WebAssembly as it is.
+# Position independent so the Python module (a shared library) can link it.
 add_library(catan STATIC
-  src/bits.cpp)
+  src/bits.cpp
+  src/game.cpp)
 target_include_directories(catan PUBLIC
   ${PROJECT_SOURCE_DIR}/include)
 target_compile_features(catan PUBLIC cxx_std_20)
 target_link_libraries(catan PRIVATE catan_warnings)
+set_target_properties(catan PROPERTIES POSITION_INDEPENDENT_CODE ON)
 
-include(cmake/Dependencies.cmake)
+# Game records (JSON) on top of the rules.
+add_library(catan_record STATIC
+  src/record.cpp)
+target_link_libraries(catan_record PUBLIC catan nlohmann_json::nlohmann_json PRIVATE catan_warnings)
+set_target_properties(catan_record PROPERTIES POSITION_INDEPENDENT_CODE ON)
+
+add_subdirectory(tools)
+
+if(CATAN_BUILD_PYTHON)
+  add_subdirectory(python)
+endif()
 
 if(CATAN_BUILD_TESTS)
   enable_testing()

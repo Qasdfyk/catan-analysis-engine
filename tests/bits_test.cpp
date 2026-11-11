@@ -115,3 +115,31 @@ TEST(Bits, ToString) {
 
 }  // namespace
 }  // namespace cae
+
+namespace cae {
+namespace {
+
+TEST(EdgeMask, SidesOnBothSidesOfTheWordBoundary) {
+  EdgeMask m;
+  for (int e : {0, 63, 64, 71}) m.set(e);
+  EXPECT_EQ(m.count(), 4);
+  EXPECT_TRUE(m.test(63));
+  EXPECT_TRUE(m.test(64));
+  EXPECT_FALSE(m.test(65));
+  std::vector<int> seen;
+  for_each_edge(m, [&](int e) { seen.push_back(e); });
+  EXPECT_EQ(seen, (std::vector<int>{0, 63, 64, 71}));
+  m.reset(64);
+  EXPECT_FALSE(m.test(64));
+  EXPECT_EQ(m.count(), 3);
+}
+
+TEST(EdgeMask, ComplementStaysInside72Sides) {
+  const EdgeMask all = ~EdgeMask{};
+  EXPECT_EQ(all.count(), kEdgeCount);
+  EXPECT_EQ((~all).count(), 0);
+  EXPECT_EQ(all & EdgeMask::of(70), EdgeMask::of(70));
+}
+
+}  // namespace
+}  // namespace cae
