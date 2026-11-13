@@ -197,31 +197,51 @@ NodeMask Game::occupied() const noexcept {
   return all;
 }
 
-// The longest trail of the seat's roads leaving `node`, each road used once.
-// An opponent's building stops a trail that reaches it, but a trail may start
-// there (game.py: `if used and building and building.owner != color`).
-int Game::longest_trail_from(int node, int seat, EdgeMask used, bool started) const {
-  if (started && contains(occupied() & ~players[at(seat)].buildings(), node)) return 0;
+namespace {
+
+// The longest trail of `roads` leaving `node`, each road used once. An
+// opponent's building (a corner in `blocked`) stops a trail that reaches it,
+// but a trail may start there (game.py: `if used and building and
+// building.owner != color`).
+//
+// A plain depth-first search over every trail. That is exponential in theory
+// but cheap here: a player has at most 15 roads and a corner at most 3 sides.
+// What made it expensive was calling it too often (see road_length and
+// update_longest_road), not the search itself.
+int longest_trail_from(int node, const EdgeMask& roads, NodeMask blocked, EdgeMask used, bool started) {
+  if (started && contains(blocked, node)) return 0;
   int best = 0;
-  const EdgeMask& roads = players[at(seat)].roads;
   for (const std::int8_t e : kTopology.node_edges[at(node)]) {
     if (e < 0 || !roads.test(e) || used.test(e)) continue;
     const auto& ends = kTopology.edge_nodes[at(e)];
     const int other = ends[0] == node ? ends[1] : ends[0];
     EdgeMask next = used;
     next.set(e);
-    best = std::max(best, 1 + longest_trail_from(other, seat, next, true));
+    best = std::max(best, 1 + longest_trail_from(other, roads, blocked, next, true));
   }
   return best;
 }
 
+}  // namespace
+
 int Game::road_length(int seat) const {
-  int best = 0;
-  for_each_edge(players[at(seat)].roads, [&](int e) {
-    for (const std::int8_t node : kTopology.edge_nodes[at(e)]) {
-      best = std::max(best, longest_trail_from(node, seat, EdgeMask{}, false));
-    }
+  const EdgeMask& roads = players[at(seat)].roads;
+  const int total = roads.count();
+  if (total == 0) return 0;
+  // Computed once here instead of at every step of the search.
+  const NodeMask blocked = occupied() & ~players[at(seat)].buildings();
+  // Every corner a road touches, each once: two roads meeting at a corner
+  // used to start the same search from it twice.
+  NodeMask starts = 0;
+  for_each_edge(roads, [&](int e) {
+    starts |= bit(kTopology.edge_nodes[at(e)][0]) | bit(kTopology.edge_nodes[at(e)][1]);
   });
+  int best = 0;
+  while (starts != 0 && best < total) {  // no trail is longer than all the roads
+    const int node = std::countr_zero(starts);
+    starts &= starts - 1;
+    best = std::max(best, longest_trail_from(node, roads, blocked, EdgeMask{}, false));
+  }
   return best;
 }
 
@@ -270,12 +290,29 @@ Error Game::check_road_spot(int seat, int edge) const noexcept {
   return Error::kNotConnected;
 }
 
+// The same rule as check_road_spot, for all 72 sides at once. Calling
+// check_road_spot 72 times recomputed occupied() and looped over every
+// player's roads for each side; here each of those happens once.
 EdgeMask Game::free_road_edges(int seat) const {
+  const Player& p = players[at(seat)];
+  if (p.roads.count() >= kMaxRoads) return {};
+  const NodeMask taken = occupied();
+  // Corners a new road can grow from: an own building, or the end of an own
+  // road where no opponent has built.
+  NodeMask road_ends = 0;
+  for_each_edge(p.roads, [&](int e) {
+    road_ends |= bit(kTopology.edge_nodes[at(e)][0]) | bit(kTopology.edge_nodes[at(e)][1]);
+  });
+  const NodeMask from = p.buildings() | (road_ends & ~taken);
   EdgeMask out;
-  for (int e = 0; e < kEdgeCount; ++e) {
-    if (check_road_spot(seat, e) == Error::kNone) out.set(e);
+  for_each_node(from, [&](int n) { out |= kTopology.node_edge_mask[at(n)]; });
+  if (phase == Phase::kSetup && setup_waiting_for_road) {
+    if (setup_last_node < 0) return {};
+    out &= kTopology.node_edge_mask[at(setup_last_node)];
   }
-  return out;
+  EdgeMask built;
+  for (int s = 0; s < player_count; ++s) built |= players[at(s)].roads;
+  return out & ~built;
 }
 
 bool Game::is_protected(int thief, int seat) const noexcept {
@@ -512,8 +549,13 @@ Error Game::build_settlement(int seat, int node) {
     setup_waiting_for_road = true;
     setup_last_node = node;
   }
-  // A new settlement may cut an opponent's road in two.
-  update_longest_road();
+  // A new settlement may cut an opponent's road in two, but only the road of
+  // someone with a road at this corner; everyone else's length is unchanged.
+  std::uint8_t cut = 0;
+  for (int s = 0; s < player_count; ++s) {
+    if (s != seat && (players[at(s)].roads & kTopology.node_edge_mask[at(node)]).any()) cut |= seat_bit(s);
+  }
+  if (cut != 0) update_longest_road(cut);
   check_victory();
   return Error::kNone;
 }
@@ -544,7 +586,7 @@ Error Game::build_road(int seat, int edge) {
   if (!free && !p.has(kRoadCost)) return Error::kNotEnoughResources;
   if (!free) subtract(p.resources, kRoadCost);
   p.roads.set(edge);
-  update_longest_road();
+  update_longest_road(seat_bit(seat));  // a new road changes only its owner's length
   if (phase == Phase::kSetup) {
     next_turn();
     return Error::kNone;
@@ -575,10 +617,14 @@ Error Game::upgrade_city(int seat, int node) {
 
 // --- Awards ---
 
-void Game::update_longest_road() {
+// game.py recomputes every player's road after every road and settlement.
+// The result is the same if only `changed` seats are recomputed, as long as
+// the callers pass every seat whose length can have moved; that was about
+// half of all the engine's time in random games (docs/performance.md).
+void Game::update_longest_road(std::uint8_t changed) {
   int best = 0;
   for (int s = 0; s < player_count; ++s) {
-    road_lengths[at(s)] = road_length(s);
+    if ((changed & seat_bit(s)) != 0) road_lengths[at(s)] = road_length(s);
     best = std::max(best, road_lengths[at(s)]);
   }
   // The holder keeps it on a tie; if a broken road leaves several others

@@ -45,7 +45,8 @@ include(cmake/Dependencies.cmake)
 # Position independent so the Python module (a shared library) can link it.
 add_library(catan STATIC
   src/bits.cpp
-  src/game.cpp)
+  src/game.cpp
+  src/random_player.cpp)
 target_include_directories(catan PUBLIC
   ${PROJECT_SOURCE_DIR}/include)
 target_compile_features(catan PUBLIC cxx_std_20)
@@ -58,6 +59,7 @@ add_library(catan_record STATIC
 target_link_libraries(catan_record PUBLIC catan nlohmann_json::nlohmann_json PRIVATE catan_warnings)
 set_target_properties(catan_record PROPERTIES POSITION_INDEPENDENT_CODE ON)
 
+find_package(Threads REQUIRED)
 add_subdirectory(tools)
 
 if(CATAN_BUILD_PYTHON)

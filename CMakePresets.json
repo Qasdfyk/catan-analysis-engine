@@ -39,6 +39,16 @@
       }
     },
     {
+      "name": "profile",
+      "displayName": "Release with debug info and frame pointers, for perf",
+      "inherits": "base",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "CMAKE_CXX_FLAGS": "-g -fno-omit-frame-pointer",
+        "CATAN_BUILD_TESTS": "OFF"
+      }
+    },
+    {
       "name": "python",
       "displayName": "Release Python module for tools/difftest.py",
       "inherits": "base",
@@ -63,6 +73,10 @@
     {
       "name": "clang-release",
       "configurePreset": "clang-release"
+    },
+    {
+      "name": "profile",
+      "configurePreset": "profile"
     },
     {
       "name": "python",

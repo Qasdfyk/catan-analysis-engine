@@ -47,7 +47,7 @@ Each client action of catan-project is one member function returning an `Error`.
 
 Points are not stored. `visible_points(seat)` counts settlements, cities and the two awards from the masks each time, so they cannot drift from the board. `hidden_points` counts victory point cards in hand.
 
-The longest road is a depth-first search over the player's roads with a mask of sides already used, as in `game.py`: a trail may start at an opponent's building but not pass through one. It is exponential in the worst case and fast enough for replays; making it fast is a job for step B8.
+The longest road is a depth-first search over the player's roads with a mask of sides already used, as in `game.py`: a trail may start at an opponent's building but not pass through one. It is exponential in the worst case, but a player has at most 15 roads; what made it slow was calling it for every player after every build. Since step B8 only the seats whose road can have changed are recomputed (see [performance.md](performance.md)).
 
 ## Records
 

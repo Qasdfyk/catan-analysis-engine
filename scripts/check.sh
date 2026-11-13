@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # Local CI. GitHub Actions is off for this repo, so this script is the gate
 # before merging: Debug with sanitizers, Release with the default compiler,
-# Release with clang, a short benchmark run to prove they still run, and the
-# difference test against catan-project's Python rules.
+# Release with clang, a short benchmark run to prove they still run, 2000
+# random games, and the difference test against catan-project's Python rules.
 #
 # Usage: scripts/check.sh                  all checks
 #        scripts/check.sh --bench          same, then run the benchmarks for real
@@ -43,6 +43,11 @@ step "benchmarks: smoke run (release)"
 # min_time takes a unit suffix since Google Benchmark 1.8: "0.05s" = 50 ms per
 # benchmark, "100x" = exactly 100 iterations.
 build/release/benchmarks/catan_benchmarks --benchmark_min_time=0.05s
+
+step "random games (release): no refused action"
+# Exits 1 if the engine refuses any move of the random player, which only
+# picks legal moves.
+build/release/tools/catan_selfplay --games 2000
 
 if "$bench"; then
   step "benchmarks: full run (release)"
