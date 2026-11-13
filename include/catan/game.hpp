@@ -229,14 +229,13 @@ struct Game {
   [[nodiscard]] bool is_protected(int thief, int seat) const noexcept;
   [[nodiscard]] std::uint8_t owners_around(int hex) const noexcept;
   [[nodiscard]] Error spend_dev_card(int seat, DevCard card);
-  [[nodiscard]] int longest_trail_from(int node, int seat, EdgeMask used, bool started) const;
 
   void produce(int roll);
   void give_initial_resources(int seat, int node);
   void start_robber();
   void next_turn();
   void check_victory();
-  void update_longest_road();
+  void update_longest_road(std::uint8_t changed);  // seats as bits
   void update_largest_army(int seat);
   void finish_road_building_if_done(int seat);
 };
