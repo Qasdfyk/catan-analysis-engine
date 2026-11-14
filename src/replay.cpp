@@ -82,7 +82,11 @@ json topology_json() {
     nodes.push_back({{"q", s.hex.q}, {"r", s.hex.r}, {"direction", s.direction}});
   }
   json edges = json::array();
-  for (const auto& e : t.edge_nodes) edges.push_back({e[0], e[1]});
+  for (int e = 0; e < kEdgeCount; ++e) {
+    const Spelling& s = t.edge_spelling[at(e)];
+    const auto& ends = t.edge_nodes[at(e)];
+    edges.push_back({{"q", s.hex.q}, {"r", s.hex.r}, {"direction", s.direction}, {"nodes", {ends[0], ends[1]}}});
+  }
   return {{"hexes", hexes}, {"nodes", nodes}, {"edges", edges}};
 }
 

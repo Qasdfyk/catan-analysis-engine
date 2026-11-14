@@ -46,10 +46,10 @@ class ReplayLog {
   std::string error_;
 };
 
-// The geometry a drawing needs: the cube coordinates of every hex, every
-// corner as (hex, direction) in its canonical spelling, and the two corners
-// of every side. The page turns these into pixels; the indices are the ones
-// in state_json() and board_json().
+// The positions behind the indices of state_json() and board_json(): the
+// cube coordinates of every hex, and every corner and side as (hex,
+// direction) in its canonical spelling, the form game records and
+// catan-project's board use. Sides also list their two corners.
 [[nodiscard]] nlohmann::json topology_json();
 
 }  // namespace cae

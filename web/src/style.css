@@ -9,9 +9,7 @@
   --accent: #b5502b;
   --accent-dark: #8f3c1e;
   --danger: #b3261e;
-  --sea: #2f7fa3;
   --highlight: #e6b93a;
-  --glow: #fff2a8;
   --wood: #3f7a3a;
   --brick: #bf5f36;
   --sheep: #9cc95a;
@@ -62,23 +60,10 @@ button:focus-visible, .button:focus-visible, input:focus-visible { outline: 3px 
 .viewer[hidden] { display: none; }
 @media (max-width: 900px) { .viewer { grid-template-columns: minmax(0, 1fr); } }
 
-.board svg { width: 100%; height: auto; display: block; max-height: 78vh; }
-.sea { fill: var(--sea); }
-.hex { stroke: #f3e8cf; stroke-width: 3; }
-.token { fill: #fdf8ec; stroke: #b9a77f; stroke-width: 1; }
-.number { font: 700 20px Georgia, serif; text-anchor: middle; dominant-baseline: middle; fill: var(--text); }
-.number.hot, .pip.hot { fill: #b3261e; }
-.pip { fill: var(--text); }
-.port line { stroke: #fdf8ec; stroke-width: 3; stroke-dasharray: 4 3; }
-.port circle { stroke: var(--text); stroke-width: 1.5; }
-.port text { font: 700 12px system-ui, sans-serif; text-anchor: middle; dominant-baseline: middle; fill: var(--text); }
-.robber { fill: #262626; stroke: #fdf8ec; stroke-width: 1.5; }
-.road-edge { stroke: #1d150c; stroke-width: 11; stroke-linecap: round; }
-.road-fill { stroke-width: 7; stroke-linecap: round; }
-.building path { stroke: #1d150c; stroke-width: 2; stroke-linejoin: round; }
-/* What the shown move changed glows. */
-.changed { filter: drop-shadow(0 0 5px var(--glow)) drop-shadow(0 0 3px var(--glow)); }
-.road.changed .road-edge { stroke: var(--glow); }
+/* The board and its styles are catan-project's (Board.tsx, board.css, art.css);
+   only its frame belongs to the viewer. */
+.board-area { border-radius: 10px; padding: 4px; box-shadow: 0 1px 2px rgba(0, 0, 0, .3); }
+.board-area .board { height: auto; aspect-ratio: 1; max-height: 80vh; margin: 0 auto; }
 
 .controls { display: flex; gap: 6px; align-items: center; margin-top: 8px; }
 .controls input[type='range'] { flex: 1; min-width: 60px; accent-color: var(--accent); }

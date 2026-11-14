@@ -1,19 +1,20 @@
 // The viewer page: open a record, step through it.
 //
-// All game logic is in the engine (WebAssembly). This file only keeps the
-// position (which state is shown) and draws that state: board, players,
-// move list.
+// All game logic is in the engine (WebAssembly) and the board is
+// catan-project's own (BoardView.tsx). This file keeps the position (which
+// state is shown) and draws the rest of that state: players, move list.
 
-import { boardSvg, changesBetween, PLAYER_COLORS } from './board';
+import { PLAYER_COLORS } from '@platform/utils/labels';
+import { renderBoard } from './BoardView';
 import { OpenGame, loadEngine, readRecordBytes, topology } from './engine';
 import { eventText, isTradeTalk } from './events';
-import { type Layout, layout } from './geometry';
-import { DEV_CARDS, RESOURCES, type GameState, type RecordPlayer } from './types';
+import { DEV_CARDS, RESOURCES, type GameState, type RecordPlayer, type Topology } from './types';
+import { toGameView, toPlayers } from './view';
 import './style.css';
 
 const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
 
-let geo: Layout | null = null;
+let topo: Topology | null = null;
 let game: OpenGame | null = null;
 /** The state shown: 0 before the first event, i after event i - 1. */
 let pos = 0;
@@ -28,7 +29,7 @@ function showMessage(text: string, isError = false): void {
 async function open(text: string, label: string): Promise<void> {
   try {
     const engine = await loadEngine();
-    geo ??= layout(await topology());
+    topo ??= await topology();
     const next = new OpenGame(engine, text);
     if (next.stateCount === 0) {
       next.close();
@@ -87,13 +88,18 @@ function escapeHtml(s: string): string {
 }
 
 function render(): void {
-  if (!game || !geo) return;
+  if (!game || !topo) return;
   const state = game.state(pos);
   const before = pos > 0 ? game.state(pos - 1) : null;
   const players = game.record.players;
   const event = pos > 0 ? game.record.events[pos - 1] : null;
 
-  $('board').innerHTML = boardSvg(geo, game.board, state, players, changesBetween(before, state));
+  renderBoard($('board'), {
+    view: toGameView(state, game.record, topo),
+    before: before ? toGameView(before, game.record, topo) : null,
+    players: toPlayers(game.record, state),
+    rolled: event?.action === 'roll_dice',
+  });
   $<HTMLInputElement>('slider').value = String(pos);
   $('position').textContent = `Move ${pos} of ${game.stateCount - 1} · turn ${state.turn}`;
   renderStatus(state, players, event ? `${playerName(players, event.seat)} ${eventText(event, players)}` : 'Start of the game');

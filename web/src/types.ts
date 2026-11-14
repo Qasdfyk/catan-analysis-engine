@@ -29,21 +29,28 @@ export interface RecordEvent {
   visible_to?: number[];
 }
 
+export interface RecordTile {
+  hex: { q: number; r: number; s: number };
+  resource: Resource | 'desert';
+  number: number | null;
+}
+
 export interface GameRecord {
   format: string;
   version: number;
   source: string;
   game_id: string | null;
   players: RecordPlayer[];
+  board: { tiles: RecordTile[]; ports: { type: string; vertices: { hex: { q: number; r: number; s: number }; direction: number }[] }[] };
   events: RecordEvent[];
   result: { winner_seat: number | null; victory_points: number[]; turns: number } | null;
 }
 
-/** topologyJson(): geometry by index. */
+/** topologyJson(): the position behind each index, in the spelling of game records. */
 export interface Topology {
   hexes: { q: number; r: number }[];
   nodes: { q: number; r: number; direction: number }[];
-  edges: [number, number][];
+  edges: { q: number; r: number; direction: number; nodes: [number, number] }[];
 }
 
 /** boardJson(): the part of the board that never changes. */

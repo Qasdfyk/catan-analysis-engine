@@ -103,6 +103,11 @@ TEST(Topology, JsonMatchesTheTables) {
     const auto& s = t["nodes"][static_cast<std::size_t>(n)];
     EXPECT_EQ(node_at(s["q"].get<int>(), s["r"].get<int>(), s["direction"].get<int>()), n);
   }
+  for (int e = 0; e < kEdgeCount; ++e) {
+    const auto& s = t["edges"][static_cast<std::size_t>(e)];
+    EXPECT_EQ(edge_at(s["q"].get<int>(), s["r"].get<int>(), s["direction"].get<int>()), e);
+    EXPECT_EQ(s["nodes"].size(), 2U);
+  }
 }
 
 }  // namespace

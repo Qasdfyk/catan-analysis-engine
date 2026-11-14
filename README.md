@@ -72,7 +72,7 @@ See [docs/benchmarks.md](docs/benchmarks.md) for getting numbers you can trust, 
 - `tools/`: `catan_replay` (replay a record), `catan_selfplay` (random games, games per second), `difftest.py` (the difference test) and `bench_python.py` (games per second of the Python engines).
 - `python/`: the pybind11 module the difference test loads.
 - `wasm/`: the Embind bindings of the WebAssembly module.
-- `web/`: the game viewer (TypeScript, Vite), a static page around the WebAssembly module.
+- `web/`: the game viewer (TypeScript, Vite), a static page around the WebAssembly module, drawing catan-project's own board component.
 - `cmake/`: dependency pins.
 - `scripts/check.sh`: the local CI. `scripts/deploy-pages.sh`: publishes the viewer to GitHub Pages.
 - `docs/`: notes.

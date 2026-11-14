@@ -98,6 +98,10 @@ else
   echo "native: $native"
   echo "wasm:   $wasm"
   [ "$native" = "$wasm" ] || { echo "checksums differ" >&2; exit 1; }
+  if [ ! -d ../catan-project/frontend/src ]; then
+    echo "web viewer: ../catan-project/frontend/src not found; the viewer draws catan-project's board" >&2
+    exit 1
+  fi
   step "web viewer: install, typecheck, test, build"
   (cd web && npm ci --no-audit --no-fund && npm test && npm run build)
 fi
