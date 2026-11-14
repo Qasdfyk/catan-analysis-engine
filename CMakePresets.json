@@ -59,6 +59,19 @@
         "CATAN_BUILD_BENCHMARKS": "OFF",
         "Python_EXECUTABLE": "${sourceDir}/../catan-project/backend/.venv/bin/python"
       }
+    },
+    {
+      "name": "wasm",
+      "displayName": "WebAssembly module for the web viewer (needs emsdk_env.sh)",
+      "inherits": "base",
+      "toolchainFile": "$env{EMSDK}/upstream/emscripten/cmake/Modules/Platform/Emscripten.cmake",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "CMAKE_CXX_FLAGS": "-fwasm-exceptions",
+        "CMAKE_EXE_LINKER_FLAGS": "-fwasm-exceptions",
+        "CATAN_BUILD_TESTS": "OFF",
+        "CATAN_BUILD_BENCHMARKS": "OFF"
+      }
     }
   ],
   "buildPresets": [
@@ -81,6 +94,10 @@
     {
       "name": "python",
       "configurePreset": "python"
+    },
+    {
+      "name": "wasm",
+      "configurePreset": "wasm"
     }
   ],
   "testPresets": [
