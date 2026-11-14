@@ -2,7 +2,8 @@
 # Local CI. GitHub Actions is off for this repo, so this script is the gate
 # before merging: Debug with sanitizers, Release with the default compiler,
 # Release with clang, a short benchmark run to prove they still run, 2000
-# random games, and the difference test against catan-project's Python rules.
+# random games, the difference test against catan-project's Python rules,
+# and the WebAssembly build with the web viewer's tests.
 #
 # Usage: scripts/check.sh                  all checks
 #        scripts/check.sh --bench          same, then run the benchmarks for real
@@ -11,6 +12,9 @@
 # The difference test needs catan-project checked out next to this repo with
 # its backend venv (../catan-project/backend/.venv). Without it the script
 # fails rather than passing silently; CATAN_SKIP_DIFFTEST=1 skips it on purpose.
+#
+# The WebAssembly step needs Emscripten (emsdk, by default in ~/emsdk; see
+# docs/web.md) and Node. Without them it fails too; CATAN_SKIP_WASM=1 skips it.
 set -euo pipefail
 
 cd "$(dirname "$0")/.."
@@ -68,6 +72,34 @@ else
   cmake --preset python
   cmake --build --preset python -j"$jobs"
   "$python" tools/difftest.py --games "$games"
+fi
+
+if [ "${CATAN_SKIP_WASM:-0}" = 1 ]; then
+  step "WebAssembly: SKIPPED (CATAN_SKIP_WASM=1)"
+else
+  if ! command -v emcc >/dev/null; then
+    emsdk_env="${EMSDK:-$HOME/emsdk}/emsdk_env.sh"
+    if [ ! -f "$emsdk_env" ]; then
+      echo "WebAssembly: emcc not found and no $emsdk_env; install emsdk (docs/web.md)" >&2
+      echo "or set CATAN_SKIP_WASM=1" >&2
+      exit 1
+    fi
+    # shellcheck disable=SC1090
+    source "$emsdk_env" >/dev/null 2>&1
+  fi
+  step "WebAssembly: build (wasm preset)"
+  cmake --preset wasm
+  cmake --build --preset wasm -j"$jobs"
+  step "WebAssembly: same games as the native build"
+  # Equal checksums mean the module plays exactly the moves of the native
+  # engine, not merely that it runs.
+  native="$(build/release/tools/catan_selfplay --games 2000 | grep checksum)"
+  wasm="$(node web/scripts/selfplay-node.mjs --games 2000 | grep checksum)"
+  echo "native: $native"
+  echo "wasm:   $wasm"
+  [ "$native" = "$wasm" ] || { echo "checksums differ" >&2; exit 1; }
+  step "web viewer: install, typecheck, test, build"
+  (cd web && npm ci --no-audit --no-fund && npm test && npm run build)
 fi
 
 echo
