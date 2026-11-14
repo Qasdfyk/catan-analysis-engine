@@ -13,3 +13,5 @@ node_modules/
 dist/
 # Written by the `wasm` CMake preset.
 web/src/wasm/
+# Vitest and Vite caches.
+.vite/
