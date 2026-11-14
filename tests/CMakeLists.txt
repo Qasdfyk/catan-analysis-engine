@@ -3,6 +3,7 @@ add_executable(catan_tests
   topology_test.cpp
   game_test.cpp
   record_test.cpp
+  replay_test.cpp
   random_player_test.cpp)
 target_link_libraries(catan_tests PRIVATE catan_record catan_warnings GTest::gtest_main)
 # Recorded games made by catan-project's `game_record simulate`.

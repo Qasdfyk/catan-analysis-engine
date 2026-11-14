@@ -55,12 +55,19 @@ set_target_properties(catan PROPERTIES POSITION_INDEPENDENT_CODE ON)
 
 # Game records (JSON) on top of the rules.
 add_library(catan_record STATIC
-  src/record.cpp)
+  src/record.cpp
+  src/replay.cpp)
 target_link_libraries(catan_record PUBLIC catan nlohmann_json::nlohmann_json PRIVATE catan_warnings)
 set_target_properties(catan_record PROPERTIES POSITION_INDEPENDENT_CODE ON)
 
-find_package(Threads REQUIRED)
-add_subdirectory(tools)
+# The WebAssembly build (preset `wasm`, Emscripten's toolchain) makes only
+# the module for the web viewer; the command-line tools need a real OS.
+if(EMSCRIPTEN)
+  add_subdirectory(wasm)
+else()
+  find_package(Threads REQUIRED)
+  add_subdirectory(tools)
+endif()
 
 if(CATAN_BUILD_PYTHON)
   add_subdirectory(python)
