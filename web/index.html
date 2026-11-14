@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Step through a finished Catan game, move by move, with the rules engine running in your browser." />
+    <title>Catan Game Viewer</title>
+  </head>
+  <body>
+    <header class="top">
+      <h1>Catan game viewer</h1>
+      <div class="open">
+        <label class="button primary" for="file">Open a game record…</label>
+        <input id="file" type="file" accept=".json,.gz,application/json,application/gzip" hidden />
+        <button id="example" type="button">Example game</button>
+      </div>
+      <p class="hint">Drop a <code>.json</code> or <code>.json.gz</code> record from catan-project anywhere on the page. It stays on your computer: the engine runs here, in WebAssembly.</p>
+    </header>
+
+    <p id="message" class="message" role="status" hidden></p>
+
+    <main id="viewer" class="viewer" hidden>
+      <section class="board-pane">
+        <div id="board" class="board-area"></div>
+        <div class="controls">
+          <button id="first" type="button" title="Start (Home)">⏮</button>
+          <button id="prev-turn" type="button" title="Previous turn (Page Up)">⏪</button>
+          <button id="prev" type="button" title="Previous move (←)">◀</button>
+          <input id="slider" type="range" min="0" value="0" aria-label="Move" />
+          <button id="next" type="button" title="Next move (→)">▶</button>
+          <button id="next-turn" type="button" title="Next turn (Page Down)">⏩</button>
+          <button id="last" type="button" title="End (End)">⏭</button>
+        </div>
+        <p id="position" class="position"></p>
+      </section>
+      <aside class="side">
+        <div id="status" class="panel status"></div>
+        <div id="players" class="players"></div>
+        <div class="panel log-panel">
+          <div class="log-head">
+            <h2>Moves</h2>
+            <label><input id="trade-talk" type="checkbox" checked /> trade offers</label>
+          </div>
+          <ol id="log" class="log"></ol>
+        </div>
+      </aside>
+    </main>
+
+    <details id="speed" class="panel speed">
+      <summary>Engine speed in this browser</summary>
+      <p>Plays whole games between random players, the same games as <code>catan_selfplay --games N --seed 1</code> in the native build, so the checksum must match it.</p>
+      <div class="speed-row">
+        <label>Games <input id="speed-games" type="number" min="100" max="1000000" step="1000" value="20000" /></label>
+        <button id="speed-run" type="button">Run</button>
+      </div>
+      <pre id="speed-out"></pre>
+    </details>
+
+    <footer>
+      <a href="https://github.com/Qasdfyk/catan-analysis-engine">catan-analysis-engine</a> · records come from
+      <a href="https://github.com/Qasdfyk/catan-project">catan-project</a>
+    </footer>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

@@ -6,3 +6,4 @@ Design notes and benchmark write-ups land here, one per step, with the numbers a
 - [difftest.md](difftest.md): the difference test against catan-project, and how good it is.
 - [benchmarks.md](benchmarks.md): getting benchmark numbers you can trust.
 - [performance.md](performance.md): games per second against the Python engines, the `perf` profile, two fixes and the data layout.
+- [web.md](web.md): the WebAssembly build, the boundary between JavaScript and C++, and the web viewer.
