@@ -4,7 +4,7 @@
 import { isTradeTalk } from './events';
 import type { RecordEvent } from './types';
 
-export const TABS = ['start', 'replay', 'performance'] as const;
+export const TABS = ['start', 'replay', 'performance', 'how-it-works'] as const;
 export type Tab = (typeof TABS)[number];
 
 /** "#/performance" -> "performance"; anything unknown is the start page. */

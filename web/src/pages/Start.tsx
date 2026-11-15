@@ -144,6 +144,9 @@ export function Start() {
             </div>
           ))}
         </div>
+        <p className="panel-foot">
+          <a href="#/how-it-works">Explore the bitboard and the tests in How it works →</a>
+        </p>
       </section>
 
       <section className="section">

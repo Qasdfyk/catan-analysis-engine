@@ -1,7 +1,7 @@
 // How fast the engine is: run it here, compare with the published numbers.
 
 import { useState } from 'react';
-import { runBenchmark, useLastBenchmark } from '../bench';
+import { runBenchmark, runScaling, useLastBenchmark, useScaling, workerCounts } from '../bench';
 import { fmt, LogBars, type Bar } from '../components/Charts';
 import { NATIVE_CHECKSUMS, PROFILE, REPO_URL, SPEED, THREADS } from '../facts';
 
@@ -103,19 +103,25 @@ function Verdict({ games, checksum, refused }: { games: number; checksum: string
   );
 }
 
-function ThreadChart() {
+interface Series {
+  name: string;
+  tone: 'gold' | 'green';
+  points: { threads: number; gamesPerSecond: number }[];
+}
+
+/** Speed-up against one thread, log-log: the ideal line is a diagonal. */
+function ThreadChart({ series }: { series: Series[] }) {
   const w = 520;
-  const h = 220;
+  const h = 230;
   const pad = { l: 44, r: 24, t: 24, b: 40 };
-  const maxT = 16;
-  const maxS = 16;
+  const maxT = Math.max(16, ...series.flatMap((s) => s.points.map((p) => p.threads)));
+  const ticks = Array.from({ length: Math.log2(maxT) + 1 }, (_, i) => 2 ** i).filter((t) => t <= maxT);
+  const maxS = maxT;
   const x = (t: number) => pad.l + (Math.log2(t) / Math.log2(maxT)) * (w - pad.l - pad.r);
-  const y = (s: number) => h - pad.b - (Math.log2(s) / Math.log2(maxS)) * (h - pad.t - pad.b);
-  const base = THREADS[0].gamesPerSecond;
-  const points = THREADS.map((p) => [x(p.threads), y(p.gamesPerSecond / base)] as const);
+  const y = (s: number) => h - pad.b - (Math.log2(Math.max(1, s)) / Math.log2(maxS)) * (h - pad.t - pad.b);
   return (
     <svg className="chart" viewBox={`0 0 ${w} ${h}`} role="img" aria-label="Speed-up by number of threads">
-      {[1, 2, 4, 8, 16].map((t) => (
+      {ticks.map((t) => (
         <g key={t}>
           <line className="grid" x1={x(t)} x2={x(t)} y1={pad.t} y2={h - pad.b} />
           <text className="axis" x={x(t)} y={h - pad.b + 18} textAnchor="middle">
@@ -127,25 +133,94 @@ function ThreadChart() {
           </text>
         </g>
       ))}
-      <line className="ideal" x1={x(1)} y1={y(1)} x2={x(16)} y2={y(16)} />
-      <text className="label muted-fill" x={x(8) - 6} y={y(8) - 8} textAnchor="end">
+      <line className="ideal" x1={x(1)} y1={y(1)} x2={x(maxT)} y2={y(maxS)} />
+      <text className="label muted-fill" x={x(maxT / 2) - 6} y={y(maxS / 2) - 8} textAnchor="end">
         ideal
       </text>
-      <polyline className="series gold" points={points.map((p) => p.join(',')).join(' ')} />
-      {THREADS.map((p, i) => (
-        <g key={p.threads}>
-          <circle className="dot gold" cx={points[i][0]} cy={points[i][1]} r={4} />
-          {i > 0 && (
-            <text className="label" x={points[i][0]} y={points[i][1] - 10} textAnchor="middle">
-              {(p.gamesPerSecond / base).toFixed(1)}×
-            </text>
-          )}
-        </g>
-      ))}
+      {series.map((s, k) => {
+        if (s.points.length === 0) return null;
+        // Where earlier series already put a label: skip ours if it would land on one.
+        const taken = series.slice(0, k).flatMap((o) => {
+          const b = o.points[0]?.gamesPerSecond ?? 1;
+          return o.points.map((p) => [x(p.threads), y(p.gamesPerSecond / b)] as const);
+        });
+        const base = s.points[0].gamesPerSecond;
+        const pts = s.points.map((p) => [x(p.threads), y(p.gamesPerSecond / base)] as const);
+        const below = s.tone === 'green';
+        return (
+          <g key={s.name}>
+            <polyline className={`series ${s.tone}`} points={pts.map((p) => p.join(',')).join(' ')} />
+            {s.points.map((p, i) => (
+              <g key={p.threads}>
+                <circle className={`dot ${s.tone}`} cx={pts[i][0]} cy={pts[i][1]} r={4} />
+                {i > 0 && !taken.some(([tx, ty]) => Math.abs(tx - pts[i][0]) < 1 && Math.abs(ty - pts[i][1]) < 24) && (
+                  <text className={`label ${s.tone}-fill`} x={pts[i][0]} y={pts[i][1] + (below ? 18 : -10)} textAnchor="middle">
+                    {(p.gamesPerSecond / base).toFixed(1)}×
+                  </text>
+                )}
+              </g>
+            ))}
+          </g>
+        );
+      })}
       <text className="axis" x={(w + pad.l) / 2} y={h - 4} textAnchor="middle">
-        threads
+        threads / workers
       </text>
     </svg>
+  );
+}
+
+const GAMES_PER_WORKER = 3_000;
+
+/** The thread chart with this browser's own scaling run added. */
+function Threads() {
+  const scaling = useScaling();
+  const [running, setRunning] = useState(false);
+  const [error, setError] = useState('');
+  const cores = navigator.hardwareConcurrency || 0;
+  const counts = workerCounts();
+
+  const run = async () => {
+    setRunning(true);
+    setError('');
+    try {
+      await runScaling(GAMES_PER_WORKER);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : String(e));
+    } finally {
+      setRunning(false);
+    }
+  };
+
+  const series: Series[] = [
+    { name: 'native', tone: 'gold', points: THREADS.map((t) => ({ threads: t.threads, gamesPerSecond: t.gamesPerSecond })) },
+    { name: 'browser', tone: 'green', points: scaling.map((p) => ({ threads: p.workers, gamesPerSecond: p.gamesPerSecond })) },
+  ];
+  const best = scaling.reduce((a, p) => Math.max(a, p.gamesPerSecond), 0);
+
+  return (
+    <div className="panel">
+      <div className="legend small">
+        <span>
+          <span className="swatch" style={{ background: 'var(--gold)' }} /> native, i7-11800H (8 cores, 16 threads)
+        </span>
+        <span>
+          <span className="swatch" style={{ background: 'var(--green)' }} /> your browser, Web Workers
+        </span>
+      </div>
+      <ThreadChart series={series} />
+      <div className="threads-run">
+        <button type="button" onClick={run} disabled={running}>
+          {running ? `Playing on ${counts[scaling.length] ?? counts.at(-1)} workers…` : scaling.length ? 'Run again' : 'Measure your cores'}
+        </button>
+        <span className="muted small">
+          {scaling.length > 0 && !running
+            ? `${fmt(best)} games/s at best on ${cores} logical cores.`
+            : `${fmt(GAMES_PER_WORKER)} games per worker on ${counts.join(', ')} workers; your browser reports ${cores || 'an unknown number of'} logical cores.`}
+        </span>
+      </div>
+      {error && <p className="message error">The workers failed: {error}</p>}
+    </div>
   );
 }
 
@@ -192,13 +267,11 @@ export function Performance() {
             <h2>Threads</h2>
             <p>
               Games share nothing, so threads split them with no locks. Scaling still flattens: one busy core turbo-boosts
-              higher than eight, and threads 9–16 are hyper-threads sharing a core.
+              higher than eight, and threads 9–16 are hyper-threads sharing a core. A Web Worker is a thread the page may
+              start, so you can measure the same curve on your machine.
             </p>
           </div>
-          <div className="panel">
-            <ThreadChart />
-            <p className="muted small">Native build, i7-11800H (8 cores, 16 threads), {fmt(THREADS[4].gamesPerSecond)} games/s at 16 threads.</p>
-          </div>
+          <Threads />
         </div>
         <div>
           <div className="section-head">
