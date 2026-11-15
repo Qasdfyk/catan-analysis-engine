@@ -61,7 +61,7 @@ const ROADMAP = [
   { done: true, title: 'Rules engine in C++20', text: 'Full rules, difference-tested against the Python game' },
   { done: true, title: 'Performance', text: 'Profiled with perf; 2.6× faster after two targeted fixes' },
   { done: true, title: 'WebAssembly replay viewer', text: 'This page' },
-  { done: false, title: 'Bot zoo', text: 'Bots with distinct styles, to generate varied games' },
+  { done: true, title: 'Bot zoo', text: 'Sixteen styles of bot, to play varied games (in Replay and How it works)' },
   { done: false, title: 'Search', text: 'Monte Carlo tree search over the fast engine' },
   { done: false, title: 'Value network', text: 'A learned evaluation of positions, trained on self-play' },
   { done: false, title: 'Post-game review', text: 'Which moves won or lost the game, shown here move by move' },

@@ -62,6 +62,12 @@ export function Status({ game, pos }: { game: OpenGame; pos: number }) {
   );
 }
 
+/** "bot hard", or for a zoo bot its trading personality (its archetype is in the name). */
+export function botTag(player: RecordPlayer): string {
+  if (player.bot_style) return `zoo · ${player.bot_style.personality}`;
+  return `bot ${player.bot_level ?? ''}`.trim();
+}
+
 export function Players({ state, players }: { state: GameState; players: RecordPlayer[] }) {
   return (
     <div className="players">
@@ -80,8 +86,10 @@ export function Players({ state, players }: { state: GameState; players: RecordP
           >
             <div className="player-head">
               <Chip seat={seat} players={players} />
-              <strong className="name">{info?.name ?? `seat ${seat}`}</strong>
-              {info?.kind === 'bot' && <span className="tag">bot {info.bot_level ?? ''}</span>}
+              <span className="who">
+                <strong className="name">{info?.name ?? `seat ${seat}`}</strong>
+                {info?.kind === 'bot' && <span className="tag">{botTag(info)}</span>}
+              </span>
               <span className="points">
                 {p.points}
                 {p.hidden_points > 0 && (

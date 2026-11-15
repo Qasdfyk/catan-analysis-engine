@@ -247,14 +247,15 @@ footer {
 .last { margin: 10px 0; font-size: 15px; }
 .bank { display: flex; gap: 8px; align-items: center; font-size: 13px; }
 
-.players { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.players { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
 @media (max-width: 420px) { .players { grid-template-columns: 1fr; } }
 .player { display: flex; flex-direction: column; gap: 8px; padding: 12px; font-size: 14px; border-top: 3px solid var(--seat); }
 .player.to-move { border-color: var(--gold); border-top-color: var(--seat); box-shadow: 0 0 0 1px var(--gold); }
 .player.winner { background: linear-gradient(180deg, rgba(230, 185, 58, .12), transparent 60%), var(--panel); }
 .player-head { display: flex; align-items: center; gap: 6px; min-width: 0; }
 .player-head .name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.tag { font-size: 11px; color: var(--muted); white-space: nowrap; }
+.player-head .who { display: flex; flex-direction: column; min-width: 0; line-height: 1.25; }
+.tag { font-size: 11px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .points { margin-left: auto; font: 500 22px var(--mono); }
 .hidden-points { font-size: 13px; color: var(--gold); margin-left: 2px; }
 .chip { display: inline-block; width: 10px; height: 10px; border-radius: 50%; flex: none; box-shadow: 0 0 0 1px rgba(0, 0, 0, .5); margin-right: 4px; }
@@ -380,3 +381,18 @@ footer {
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; }
 }
+
+/* The bot zoo on How it works */
+.section.zoo { display: grid; grid-template-columns: minmax(0, 1fr); gap: 32px; }
+.section.zoo .h2h-panel { max-width: 680px; }
+.zoo-scroll { overflow-x: auto; }
+.zoo-table, .h2h { width: 100%; border-collapse: collapse; font-size: 14px; }
+.zoo-table th, .zoo-table td, .h2h th, .h2h td { padding: 8px 10px; text-align: left; border-bottom: 1px solid var(--line); white-space: nowrap; }
+.zoo-table thead th, .h2h thead th { color: var(--muted); font-weight: 500; font-size: 12px; }
+.zoo-table tbody th { font-weight: 600; }
+.zoo-table tbody th .small { display: block; font-weight: 400; white-space: normal; max-width: 240px; }
+.zoo-share { display: inline-flex; align-items: center; gap: 8px; min-width: 110px; }
+.zoo-bar { display: inline-block; height: 8px; border-radius: 4px; max-width: 60px; }
+.h2h td { text-align: center; border-radius: 6px; border: 2px solid var(--panel); }
+.h2h thead th { text-align: center; }
+.zoo-scroll p { margin-top: 12px; }

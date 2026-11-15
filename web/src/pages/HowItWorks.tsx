@@ -1,10 +1,12 @@
 // How the engine is built and checked: the pieces and how they connect, the
 // bitmask a player's buildings live in (explorable on the example game), the
-// tests that keep the rules equal to the game's, and the data layout.
+// tests that keep the rules equal to the game's, the data layout and the
+// bot zoo that will play the opponents in simulations.
 
 import { useEffect, useMemo, useState } from 'react';
 import { getVertexCoords, hexCorners, hexToPixel, HEX_SIZE, RESOURCE_COLORS } from '@platform/utils/hexLayout';
 import { PLAYER_COLORS } from '@platform/utils/labels';
+import { Zoo } from '../components/Zoo';
 import { exampleRecord, type OpenGame } from '../engine';
 import { CORRECTNESS, GAME_LAYOUT, REPO_URL } from '../facts';
 import { useOpenGame } from '../hooks';
@@ -242,7 +244,7 @@ function Layout() {
   );
 }
 
-const TOOLS = ['C++20', 'CMake presets', 'GoogleTest', 'Google Benchmark', 'ASan + UBSan', 'perf', 'pybind11', 'Emscripten + embind', 'TypeScript', 'React', 'Vite', 'Vitest'];
+const TOOLS = ['C++20', 'Go', 'CMake presets', 'GoogleTest', 'Google Benchmark', 'ASan + UBSan', 'perf', 'pybind11', 'Emscripten + embind', 'TypeScript', 'React', 'Vite', 'Vitest'];
 
 export function HowItWorks() {
   const [text, setText] = useState<string | null>(null);
@@ -284,6 +286,8 @@ export function HowItWorks() {
         </div>
         <Layout />
       </section>
+
+      <Zoo />
 
       <section className="section">
         <div className="section-head">

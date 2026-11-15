@@ -5,7 +5,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { GameBoard } from '../components/GameBoard';
 import { MoveLog, Players, Status } from '../components/GamePanels';
 import { DiceChart, IncomeChart, PointsChart } from '../components/ReplayCharts';
-import { exampleRecord, readRecordBytes } from '../engine';
+import { EXAMPLES, exampleRecord, readRecordBytes } from '../engine';
 import { useOpenGame, usePlayback } from '../hooks';
 import { turnStart } from '../nav';
 import { gameStats } from '../stats';
@@ -29,7 +29,7 @@ export function Replay() {
   // The example opens by itself, so the tab is never empty.
   useEffect(() => {
     exampleRecord().then(
-      (text) => setSource((s) => s ?? { text, label: 'example game' }),
+      (text) => setSource((s) => s ?? { text, label: EXAMPLES[0].label }),
       (e) => setMessage(`Cannot load the example game: ${e.message}`),
     );
   }, []);
@@ -124,9 +124,30 @@ export function Replay() {
               e.target.value = '';
             }}
           />
-          <button type="button" onClick={() => exampleRecord().then((text) => setSource({ text, label: 'example game' }))}>
-            Example game
-          </button>
+          <select
+            aria-label="Example games"
+            value=""
+            onChange={(e) => {
+              const example = EXAMPLES.find((x) => x.file === e.target.value);
+              if (!example) return;
+              exampleRecord(example.file).then(
+                (text) => {
+                  setSource({ text, label: example.label });
+                  setMessage('');
+                },
+                (err) => setMessage(`Cannot load ${example.label}: ${err.message}`),
+              );
+            }}
+          >
+            <option value="" disabled>
+              Example games…
+            </option>
+            {EXAMPLES.map((x) => (
+              <option key={x.file} value={x.file}>
+                {x.label} ({x.note})
+              </option>
+            ))}
+          </select>
         </div>
       </div>
       <p className="hint">
