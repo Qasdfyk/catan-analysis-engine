@@ -56,18 +56,31 @@ export function topology(): Promise<Topology> {
   return topo;
 }
 
-let example: Promise<string> | null = null;
+/** Games shipped with the page, in public/. The first opens by default. */
+export const EXAMPLES = [
+  { file: 'example.json.gz', label: 'Example game', note: 'a human against three hard bots' },
+  { file: 'zoo/ore-wheat.json.gz', label: 'Zoo: ore-wheat wins', note: 'cities and development cards' },
+  { file: 'zoo/wood-brick.json.gz', label: 'Zoo: wood-brick wins', note: 'settlements and the Longest Road' },
+  { file: 'zoo/port.json.gz', label: 'Zoo: port wins', note: 'one resource and the port that sells it' },
+  { file: 'zoo/balanced.json.gz', label: 'Zoo: balanced wins', note: 'the hard bot, shaken a little' },
+] as const;
 
-/** The text of the example record shipped with the page (public/example.json.gz). */
-export function exampleRecord(): Promise<string> {
-  example ??= fetch(new URL('example.json.gz', document.baseURI))
-    .then((response) => {
-      if (!response.ok) throw new Error(`example game: HTTP ${response.status}`);
-      return response.arrayBuffer();
-    })
-    .then(readRecordBytes);
-  example.catch(() => (example = null));
-  return example;
+const examples = new Map<string, Promise<string>>();
+
+/** The text of a record shipped with the page; by default the example game. */
+export function exampleRecord(file: string = EXAMPLES[0].file): Promise<string> {
+  let text = examples.get(file);
+  if (!text) {
+    text = fetch(new URL(file, document.baseURI))
+      .then((response) => {
+        if (!response.ok) throw new Error(`${file}: HTTP ${response.status}`);
+        return response.arrayBuffer();
+      })
+      .then(readRecordBytes);
+    text.catch(() => examples.delete(file));
+    examples.set(file, text);
+  }
+  return text;
 }
 
 /** Plain JSON or gzip (what the platform downloads), told apart by the first two bytes. */

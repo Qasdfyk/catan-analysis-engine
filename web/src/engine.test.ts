@@ -1,19 +1,18 @@
-// The real WebAssembly module, run in Node: every test record and the
-// example game must replay to their recorded result.
+// The real WebAssembly module, run in Node: every test record and every
+// example game shipped with the page must replay to its recorded result.
 
 import { readFileSync, readdirSync } from 'node:fs';
 import { gunzipSync } from 'node:zlib';
 import { describe, expect, it } from 'vitest';
-import { OpenGame, loadEngine, readRecordBytes, topology } from './engine';
+import { EXAMPLES, OpenGame, loadEngine, readRecordBytes, topology } from './engine';
 
 const dataDir = new URL('../../tests/data/', import.meta.url);
 const records = readdirSync(dataDir)
   .filter((f) => f.endsWith('.json'))
   .map((f) => ({ name: f, text: readFileSync(new URL(f, dataDir), 'utf8') }));
-records.push({
-  name: 'example.json.gz',
-  text: gunzipSync(readFileSync(new URL('../public/example.json.gz', import.meta.url))).toString('utf8'),
-});
+for (const { file } of EXAMPLES) {
+  records.push({ name: file, text: gunzipSync(readFileSync(new URL(`../public/${file}`, import.meta.url))).toString('utf8') });
+}
 
 describe('engine in WebAssembly', () => {
   it.each(records)('replays $name to the recorded result', async ({ text }) => {
@@ -54,6 +53,14 @@ describe('engine in WebAssembly', () => {
     const b = JSON.parse(engine.selfplay(50, 4, 7));
     expect(a.refused).toBe(0);
     expect(a.checksum).toBe(b.checksum);
+  });
+
+  it('ships zoo examples won by the archetype they are named after', () => {
+    for (const { file } of EXAMPLES.filter((x) => x.file.startsWith('zoo/'))) {
+      const record = JSON.parse(records.find((r) => r.name === file)!.text);
+      const winner = record.players[record.result.winner_seat];
+      expect(winner.bot_style.archetype).toBe(file.slice(4, -'.json.gz'.length));
+    }
   });
 
   it('reads gzip and plain JSON alike', async () => {

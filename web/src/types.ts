@@ -18,6 +18,8 @@ export interface RecordPlayer {
   color: 'red' | 'blue' | 'white' | 'orange';
   kind: 'human' | 'bot';
   bot_level: string | null;
+  /** A zoo bot from catan-project's tournament: its style, weights and trading. */
+  bot_style?: { archetype: string; personality: string; seed: number };
 }
 
 export interface RecordEvent {
