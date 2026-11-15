@@ -48,8 +48,26 @@ export class OpenGame {
   }
 }
 
-export async function topology(): Promise<Topology> {
-  return JSON.parse((await loadEngine()).topologyJson()) as Topology;
+let topo: Promise<Topology> | null = null;
+
+/** Board positions behind the engine's indices; the same for every game. */
+export function topology(): Promise<Topology> {
+  topo ??= loadEngine().then((engine) => JSON.parse(engine.topologyJson()) as Topology);
+  return topo;
+}
+
+let example: Promise<string> | null = null;
+
+/** The text of the example record shipped with the page (public/example.json.gz). */
+export function exampleRecord(): Promise<string> {
+  example ??= fetch(new URL('example.json.gz', document.baseURI))
+    .then((response) => {
+      if (!response.ok) throw new Error(`example game: HTTP ${response.status}`);
+      return response.arrayBuffer();
+    })
+    .then(readRecordBytes);
+  example.catch(() => (example = null));
+  return example;
 }
 
 /** Plain JSON or gzip (what the platform downloads), told apart by the first two bytes. */
