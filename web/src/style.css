@@ -102,6 +102,10 @@ footer {
 .section-head { margin-bottom: 16px; max-width: 720px; }
 .section-head p { margin-top: 6px; color: var(--muted); font-size: 15px; }
 .section.two { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 440px), 1fr)); gap: 24px; }
+/* Side by side, the heads share one row and the panels the next, so both panels start and end level */
+.section.two { grid-template-rows: auto 1fr; }
+.section.two > * { display: grid; grid-row: span 2; grid-template-rows: subgrid; row-gap: 16px; min-width: 0; }
+.section.two > * > .section-head { margin-bottom: 0; }
 
 .page-head { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 16px; margin-bottom: 8px; }
 .page-head h1 { font-size: 32px; }
