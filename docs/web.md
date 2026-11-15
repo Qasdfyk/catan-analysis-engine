@@ -46,12 +46,12 @@ The viewer does not draw its own board. It imports catan-project's `Board` compo
 
 What this costs:
 - Building the viewer needs catan-project checked out next to this repo, as the difference test already does. The published page has no such link: Vite copies everything it needs into `web/dist`.
-- React is a dependency of the viewer, only for the board; the rest of the page is plain TypeScript. Vite's `dedupe` makes catan-project's files use the viewer's React, since two copies on one page break React.
+- The page is React (`web/src/App.tsx`), one component per tab in `web/src/pages/`: Start, Replay and Performance. Tabs are hash routes (`#/replay`), because GitHub Pages serves a single file and cannot route `/replay` back to it. Charts are hand-written SVG and divs (`web/src/components/Charts.tsx`), with no chart library. The numbers the page quotes from `docs/` live in one file, `web/src/facts.ts`. Vite's `dedupe` makes catan-project's files use the viewer's React, since two copies on one page break React.
 - `web/src/view.ts` fills the parts of `GameView` the board reads; the rest (log, timers) gets neutral values. A new field the board starts to read shows up as a type error in `npm run build`, because `tsc` checks catan-project's files too.
 
 ## Speed
 
-The page's "Engine speed in this browser" panel and `node web/scripts/selfplay-node.mjs` play the same random games as `catan_selfplay` (same seed, same checksum) on one thread. Threads are left out on purpose: WebAssembly threads need `SharedArrayBuffer`, which a browser only allows on pages served with cross-origin isolation headers, and GitHub Pages cannot set headers. The review will run one game at a time per worker instead.
+The Performance tab and `node web/scripts/selfplay-node.mjs` play the same random games as `catan_selfplay` (same seed, same checksum) on one thread. For 5 000, 20 000 and 100 000 games the tab knows the native checksums (`NATIVE_CHECKSUMS` in `facts.ts`) and says whether the browser matched. Threads are left out on purpose: WebAssembly threads need `SharedArrayBuffer`, which a browser only allows on pages served with cross-origin isolation headers, and GitHub Pages cannot set headers. The review will run one game at a time per worker instead.
 
 ```sh
 build/release/tools/catan_selfplay --games 20000
