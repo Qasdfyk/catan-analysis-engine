@@ -8,6 +8,7 @@ describe('tabFromHash', () => {
   it('reads the tab after #/', () => {
     expect(tabFromHash('#/performance')).toBe('performance');
     expect(tabFromHash('#replay')).toBe('replay');
+    expect(tabFromHash('#/how-it-works')).toBe('how-it-works');
     expect(tabFromHash('#/replay?x=1')).toBe('replay');
   });
   it('falls back to the start page', () => {

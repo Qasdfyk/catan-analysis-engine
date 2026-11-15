@@ -28,7 +28,16 @@ export const CORRECTNESS = {
   coverage: 0.93,
   mutantsCaught: 12,
   mutants: 12,
+  /** Planted bugs caught as the test grew. */
+  mutationRuns: [
+    { label: 'First version of the difference test', caught: 9 },
+    { label: '+ bank squeeze, aimed probes, steal probes', caught: 11 },
+    { label: '+ the C++ unit tests', caught: 12 },
+  ],
 } as const;
+
+/** docs/performance.md, "Data layout": one Game, and what copying it costs. */
+export const GAME_LAYOUT = { bytes: 768, cacheLine: 64, copyNs: 21 } as const;
 
 /**
  * Checksums the native build prints for `catan_selfplay --games N --seed 1`
