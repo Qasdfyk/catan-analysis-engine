@@ -277,6 +277,41 @@ footer {
 .log .turn { margin-top: 8px; font: 500 11px var(--mono); color: var(--muted); text-transform: uppercase; letter-spacing: .06em; }
 .log.hide-talk .talk { display: none; }
 
+/* --- Replay charts --- */
+.chart-panel { margin-top: 16px; padding: 14px 16px; }
+.chart-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 4px 12px; margin-bottom: 10px; }
+.chart-note { margin-top: 10px; }
+.charts { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 420px), 1fr)); gap: 0 20px; }
+.chart.seekable { cursor: ew-resize; touch-action: none; user-select: none; }
+.chart .played { fill: rgba(255, 255, 255, .025); }
+.chart .points-line { fill: none; stroke-width: 2; stroke-linejoin: round; }
+.chart .cursor { stroke: var(--gold); stroke-width: 1.5; }
+.chart .cursor-dot { stroke: var(--panel); stroke-width: 2; }
+
+.dice-chart { display: grid; grid-template-columns: repeat(11, minmax(0, 1fr)); gap: 6px; height: 160px; }
+.dice-col { display: flex; flex-direction: column; min-width: 0; }
+.dice-bar-area { position: relative; flex: 1; border-bottom: 1px solid var(--line-2); }
+.dice-bar { position: absolute; bottom: 0; left: 10%; right: 10%; background: #5a606b; border-radius: 4px 4px 0 0; transition: height .2s; }
+.dice-bar.seven { background: #8a4b47; }
+.dice-bar.now { background: var(--gold); }
+.dice-expected { position: absolute; left: 0; right: 0; height: 0; border-top: 2px solid var(--text); opacity: .55; }
+.dice-sum { text-align: center; font: 12px var(--mono); color: var(--muted); margin-top: 4px; }
+
+.income { display: flex; flex-direction: column; gap: 12px; }
+.income-row { display: grid; grid-template-columns: 110px minmax(0, 1fr) 36px; gap: 4px 12px; align-items: center; font-size: 14px; }
+.income-name { display: flex; align-items: center; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.income-bar { display: flex; height: 16px; background: var(--panel-2); border-radius: 4px; overflow: hidden; }
+.res-seg { height: 100%; transition: width .2s; }
+.res-seg.wood { background: var(--wood); }
+.res-seg.brick { background: var(--brick); }
+.res-seg.sheep { background: var(--sheep); }
+.res-seg.wheat { background: var(--wheat); }
+.res-seg.ore { background: var(--ore); }
+.income-total { text-align: right; }
+.income-extra { grid-column: 2 / -1; margin-top: -2px; }
+.legend { display: flex; flex-wrap: wrap; gap: 4px 14px; margin-top: 14px; }
+.swatch { display: inline-block; width: 10px; height: 10px; border-radius: 2px; vertical-align: -1px; }
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; }
 }
