@@ -1,12 +1,14 @@
 // The replay viewer: open a record (or the example), step through it by
 // hand or let it play.
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { GameBoard } from '../components/GameBoard';
 import { MoveLog, Players, Status } from '../components/GamePanels';
+import { DiceChart, IncomeChart, PointsChart } from '../components/ReplayCharts';
 import { exampleRecord, readRecordBytes } from '../engine';
 import { useOpenGame, usePlayback } from '../hooks';
 import { turnStart } from '../nav';
+import { gameStats } from '../stats';
 
 const SPEEDS = [0.5, 1, 2, 4];
 
@@ -21,6 +23,8 @@ export function Replay() {
   const { game, topo, error } = useOpenGame(source?.text ?? null);
   const playback = usePlayback(game);
   const { pos, go, playing, setPlaying, speed, setSpeed } = playback;
+  // Every state of the game is read once here; the charts then cut at pos.
+  const stats = useMemo(() => (game ? gameStats(game) : null), [game]);
 
   // The example opens by itself, so the tab is never empty.
   useEffect(() => {
@@ -182,12 +186,19 @@ export function Replay() {
             <p className="position">
               Move {pos} of {game.stateCount - 1} · turn {game.state(pos).turn} · {source?.label}
             </p>
+            {stats && <PointsChart stats={stats} players={game.record.players} pos={pos} onSeek={step} />}
           </section>
           <aside className="side">
             <Status game={game} pos={pos} />
             <Players state={game.state(pos)} players={game.record.players} />
             <MoveLog game={game} pos={pos} onPick={step} />
           </aside>
+          {stats && (
+            <section className="charts">
+              <DiceChart stats={stats} players={game.record.players} pos={pos} />
+              <IncomeChart stats={stats} players={game.record.players} pos={pos} />
+            </section>
+          )}
         </div>
       ) : (
         !shownError && <div className="board-area placeholder viewer-placeholder" aria-busy="true" />
