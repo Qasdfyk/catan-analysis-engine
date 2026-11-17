@@ -50,6 +50,16 @@ export const NATIVE_CHECKSUMS: Record<number, string> = {
   100_000: '1972913071',
 };
 
+/**
+ * The same for `catan_selfplay --games N --seed 1 --bots zoo`: zoo bots, the
+ * C++ port of catan-project's Go bots (docs/zoo.md).
+ */
+export const NATIVE_ZOO_CHECKSUMS: Record<number, string> = {
+  500: '8137758',
+  2_000: '32562187',
+  10_000: '162606903',
+};
+
 /** Per action, how much faster than game.py (docs/performance.md). */
 export const SPEEDUP_VS_PYTHON = 4_000;
 

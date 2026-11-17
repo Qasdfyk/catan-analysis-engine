@@ -34,6 +34,10 @@ namespace cae {
 // A new game on a random board with a random first seat.
 [[nodiscard]] Game random_game(Rng& rng, int players = 4);
 
+// One card drawn from a hand, each card equally likely (not each resource):
+// how the platform picks the card a thief takes. Wood for an empty hand.
+[[nodiscard]] Resource random_card(const Cards& hand, Rng& rng);
+
 // One random legal action of whoever must act now: the seat that owes a
 // discard, otherwise the current seat. Chance (dice, the stolen card) is
 // drawn from `rng` too. Returns the engine's answer: always kNone, since the

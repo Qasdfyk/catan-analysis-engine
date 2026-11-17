@@ -12,10 +12,12 @@
 //   replay.delete();           // C++ memory is not garbage collected
 //
 // selfplay() runs the random player of catan_selfplay, single-threaded, to
-// compare the engine in the browser with the native build.
+// compare the engine in the browser with the native build; zooSelfplay()
+// runs zoo bots, like `catan_selfplay --bots zoo`.
 
 #include "catan/random_player.hpp"
 #include "catan/replay.hpp"
+#include "catan/zoo.hpp"
 
 #include <emscripten/bind.h>
 
@@ -48,16 +50,26 @@ std::string topologyJson() { return cae::topology_json().dump(); }
 // The same games as `catan_selfplay --games N --players P --seed S`, so the
 // checksum must match the native one: that proves the WebAssembly build plays
 // the same moves, not just that it runs.
-std::string selfplay(int games, int players, double seed_number) {
+std::string play_games(int games, int players, double seed_number, bool zoo) {
   const auto seed = static_cast<std::uint64_t>(seed_number);
   long long actions = 0;
   long long refused = 0;
   std::uint64_t checksum = 0;
   const auto t0 = std::chrono::steady_clock::now();
   for (int i = 0; i < games; ++i) {
+    // The same streams and the same order of draws as tools/selfplay.cpp
     cae::Rng rng((seed << 32) ^ static_cast<std::uint64_t>(i));
-    cae::Game game = cae::random_game(rng, players);
-    const cae::PlayoutResult r = cae::play_out(game, rng);
+    cae::PlayoutResult r;
+    if (zoo) {
+      cae::ZooTable table;
+      table.game = cae::random_game(rng, players);
+      for (int s = 0; s < players; ++s) table.bots[static_cast<std::size_t>(s)] = cae::random_zoo_bot(rng);
+      const cae::ZooPlayout z = cae::play_out_zoo(table, rng);
+      r = {z.winner, z.actions, z.fallbacks};
+    } else {
+      cae::Game game = cae::random_game(rng, players);
+      r = cae::play_out(game, rng);
+    }
     actions += r.actions;
     refused += r.refused;
     checksum += static_cast<std::uint64_t>(r.actions) * 31 + static_cast<std::uint64_t>(r.winner + 1);
@@ -72,6 +84,9 @@ std::string selfplay(int games, int players, double seed_number) {
   return out.dump();
 }
 
+std::string selfplay(int games, int players, double seed) { return play_games(games, players, seed, false); }
+std::string zooSelfplay(int games, int players, double seed) { return play_games(games, players, seed, true); }
+
 }  // namespace
 
 EMSCRIPTEN_BINDINGS(catan_engine) {
@@ -84,4 +99,5 @@ EMSCRIPTEN_BINDINGS(catan_engine) {
       .function("boardJson", &Replay::boardJson);
   emscripten::function("topologyJson", &topologyJson);
   emscripten::function("selfplay", &selfplay);
+  emscripten::function("zooSelfplay", &zooSelfplay);
 }
