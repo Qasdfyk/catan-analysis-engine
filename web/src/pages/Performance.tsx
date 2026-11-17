@@ -1,14 +1,17 @@
 // How fast the engine is: run it here, compare with the published numbers.
 
 import { useState } from 'react';
-import { runBenchmark, runScaling, useLastBenchmark, useScaling, workerCounts } from '../bench';
+import { runBenchmark, runScaling, useLastBenchmark, useScaling, workerCounts, type Bots } from '../bench';
 import { fmt, LogBars, type Bar } from '../components/Charts';
-import { NATIVE_CHECKSUMS, PROFILE, REPO_URL, SPEED, THREADS } from '../facts';
+import { NATIVE_CHECKSUMS, NATIVE_ZOO_CHECKSUMS, PROFILE, REPO_URL, SPEED, THREADS } from '../facts';
 
-const GAME_COUNTS = [5_000, 20_000, 100_000];
+// A zoo bot thinks about every move, so its games take longer: fewer of them.
+const GAME_COUNTS: Record<Bots, number[]> = { random: [5_000, 20_000, 100_000], zoo: [500, 2_000, 10_000] };
+const CHECKSUMS: Record<Bots, Record<number, string>> = { random: NATIVE_CHECKSUMS, zoo: NATIVE_ZOO_CHECKSUMS };
 
 function Runner() {
   const last = useLastBenchmark();
+  const [bots, setBots] = useState<Bots>('random');
   const [games, setGames] = useState(20_000);
   const [running, setRunning] = useState(false);
   const [error, setError] = useState('');
@@ -17,7 +20,7 @@ function Runner() {
     setRunning(true);
     setError('');
     try {
-      await runBenchmark(games);
+      await runBenchmark(games, bots);
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e));
     } finally {
@@ -31,12 +34,39 @@ function Runner() {
         <div>
           <h3>Run it on your machine</h3>
           <p className="muted small">
-            One Web Worker plays whole random games, the same games as <code>catan_selfplay --games N --seed 1</code> in the
-            native build.
+            {bots === 'random' ? (
+              <>
+                One Web Worker plays whole games between random players, the same games as{' '}
+                <code>catan_selfplay --games N --seed 1</code> in the native build.
+              </>
+            ) : (
+              <>
+                Zoo bots: the platform's hard bot with its archetypes and trading personalities, ported from Go to C++. They
+                will be the opponents in the review's simulations. Same games as{' '}
+                <code>catan_selfplay --games N --seed 1 --bots zoo</code>.
+              </>
+            )}
           </p>
         </div>
+        <div className="segmented" role="radiogroup" aria-label="Players">
+          {(['random', 'zoo'] as const).map((b) => (
+            <button
+              key={b}
+              type="button"
+              role="radio"
+              aria-checked={bots === b}
+              className={bots === b ? 'on' : ''}
+              onClick={() => {
+                setBots(b);
+                setGames(GAME_COUNTS[b][1]);
+              }}
+            >
+              {b === 'random' ? 'Random players' : 'Zoo bots'}
+            </button>
+          ))}
+        </div>
         <div className="segmented" role="radiogroup" aria-label="Games">
-          {GAME_COUNTS.map((n) => (
+          {GAME_COUNTS[bots].map((n) => (
             <button key={n} type="button" role="radio" aria-checked={games === n} className={games === n ? 'on' : ''} onClick={() => setGames(n)}>
               {fmt(n)} games
             </button>
@@ -52,7 +82,7 @@ function Runner() {
         <div className="result">
           <div className="result-main">
             <span className="result-number">{fmt(last.games / last.seconds)}</span>
-            <span className="muted">games / s in this browser</span>
+            <span className="muted">games / s in this browser{last.bots === 'zoo' ? ', zoo bots' : ''}</span>
           </div>
           <dl className="result-grid">
             <div>
@@ -80,7 +110,7 @@ function Runner() {
               <dd className="mono">{last.checksum}</dd>
             </div>
           </dl>
-          <Verdict games={last.games} checksum={last.checksum} refused={last.refused} />
+          <Verdict games={last.games} checksum={last.checksum} refused={last.refused} native={CHECKSUMS[last.bots][last.games]} />
         </div>
       )}
     </div>
@@ -88,8 +118,7 @@ function Runner() {
 }
 
 /** Whether the browser played exactly the games the native build plays. */
-function Verdict({ games, checksum, refused }: { games: number; checksum: string; refused: number }) {
-  const native = NATIVE_CHECKSUMS[games];
+function Verdict({ games, checksum, refused, native }: { games: number; checksum: string; refused: number; native?: string }) {
   const same = native === checksum;
   return (
     <p className={`verdict${refused === 0 && same ? ' ok' : native ? ' bad' : ''}`}>
@@ -232,7 +261,7 @@ export function Performance() {
     note: s.note,
     tone: s.short === 'Native C++' ? 'gold' : 'muted',
   }));
-  if (yours) bars.push({ label: 'This engine, your browser', value: yours.games / yours.seconds, note: 'WebAssembly, one worker', tone: 'green' });
+  if (yours?.bots === 'random') bars.push({ label: 'This engine, your browser', value: yours.games / yours.seconds, note: 'WebAssembly, one worker', tone: 'green' });
 
   return (
     <>

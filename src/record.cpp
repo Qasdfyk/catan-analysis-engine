@@ -420,6 +420,108 @@ json legal_moves(const Game& g, int seat) {
   };
 }
 
+std::optional<Action> action_from_event(const json& event) {
+  if (!event.is_object() || !event.contains("action") || !event["action"].is_string()) return std::nullopt;
+  const std::string& name = event["action"].get_ref<const std::string&>();
+  static const json kEmpty = json::object();
+  const json& payload = event.contains("payload") && event["payload"].is_object() ? event["payload"] : kEmpty;
+  const auto get = [&payload](const char* key) -> const json& {
+    static const json kNull;
+    return payload.contains(key) ? payload[key] : kNull;
+  };
+  Action a;
+  bool found = false;
+  for (int k = 0; k <= static_cast<int>(ActionKind::kEndTurn); ++k) {
+    if (name == action_name(static_cast<ActionKind>(k))) {
+      a.kind = static_cast<ActionKind>(k);
+      found = true;
+    }
+  }
+  if (!found) return std::nullopt;
+
+  const auto position = [&](auto lookup) -> bool {
+    const auto p = parse_position(payload, lookup);
+    if (!p || *p < 0) return false;
+    a.target = *p;
+    return true;
+  };
+  const auto resource = [&](const char* key, Resource& out) -> bool {
+    const auto r = parse_resource(get(key));
+    if (r) out = *r;
+    return r.has_value();
+  };
+  const auto cards = [&](const char* key, Cards& out) -> bool {
+    const auto c = parse_cards(get(key));
+    if (c) out = *c;
+    return c.has_value();
+  };
+  const auto seat = [&](const char* key) -> bool {
+    const auto s = parse_seat(get(key));
+    if (s) a.target = *s;
+    return s.has_value();
+  };
+
+  bool ok = true;
+  switch (a.kind) {
+    case ActionKind::kBuildSettlement:
+    case ActionKind::kUpgradeCity: ok = position(node_at); break;
+    case ActionKind::kBuildRoad: ok = position(edge_at); break;
+    case ActionKind::kMoveRobber: {
+      const auto hex = parse_hex(get("hex"));
+      ok = hex && hex_at(hex->q, hex->r) >= 0;
+      if (ok) a.target = hex_at(hex->q, hex->r);
+      break;
+    }
+    case ActionKind::kSteal: ok = seat("victim_seat"); break;
+    case ActionKind::kConfirmTrade: ok = seat("partner_seat"); break;
+    case ActionKind::kDiscard: ok = cards("cards", a.give); break;
+    case ActionKind::kOfferTrade: ok = cards("give", a.give) && cards("get", a.get); break;
+    case ActionKind::kRespondTrade: a.accept = get("accept").is_boolean() && get("accept").get<bool>(); break;
+    case ActionKind::kTradeWithBank: ok = resource("give", a.first) && resource("get", a.second); break;
+    case ActionKind::kPlayYearOfPlenty: ok = resource("first", a.first) && resource("second", a.second); break;
+    case ActionKind::kPlayMonopoly: ok = resource("resource", a.first); break;
+    default: break;
+  }
+  if (!ok) return std::nullopt;
+  return a;
+}
+
+std::optional<ZooBot> zoo_bot_from_record(const json& player) {
+  if (!player.is_object() || !player.contains("bot_level") || !player["bot_level"].is_string()) {
+    return std::nullopt;
+  }
+  const std::string& level = player["bot_level"].get_ref<const std::string&>();
+  if (level == "hard") return hard_bot();
+  if (level != "zoo" || !player.contains("bot_style")) return std::nullopt;
+  const json& style = player["bot_style"];
+  ZooBot bot;
+  for (int a = 0; a < kArchetypeCount; ++a) {
+    if (style.value("archetype", "") == archetype_name(static_cast<Archetype>(a))) bot.archetype = static_cast<Archetype>(a);
+  }
+  for (int p = 0; p < kPersonalityCount; ++p) {
+    if (style.value("personality", "") == personality_name(static_cast<Personality>(p))) {
+      bot.personality = static_cast<Personality>(p);
+    }
+  }
+  bot.seed = style.value("seed", std::uint64_t{0});
+  const json& w = field(style, "weights");
+  for (int r = 0; r < kResourceCount; ++r) {
+    bot.weights.resource[at(r)] = field(field(w, "resource"), std::string(resource_name(static_cast<Resource>(r))).c_str()).get<double>();
+  }
+  bot.weights.variety = field(w, "variety").get<double>();
+  bot.weights.port = field(w, "port").get<double>();
+  bot.weights.city = field(w, "city").get<double>();
+  bot.weights.settlement = field(w, "settlement").get<double>();
+  bot.weights.dev_card = field(w, "dev_card").get<double>();
+  bot.weights.road_reach = field(w, "road_reach").get<int>();
+  const json& t = field(style, "trading");
+  bot.trading.offers_per_turn = field(t, "offers_per_turn").get<int>();
+  bot.trading.accepts = field(t, "accepts").get<bool>();
+  bot.trading.neutral = field(t, "neutral").get<bool>();
+  bot.trading.embargo = field(t, "embargo").get<int>();
+  return bot;
+}
+
 json read_record_file(const std::string& path) {
   std::ifstream in(path);
   if (!in) throw RecordError("cannot open " + path);

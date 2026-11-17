@@ -46,7 +46,8 @@ include(cmake/Dependencies.cmake)
 add_library(catan STATIC
   src/bits.cpp
   src/game.cpp
-  src/random_player.cpp)
+  src/random_player.cpp
+  src/zoo.cpp)
 target_include_directories(catan PUBLIC
   ${PROJECT_SOURCE_DIR}/include)
 target_compile_features(catan PUBLIC cxx_std_20)

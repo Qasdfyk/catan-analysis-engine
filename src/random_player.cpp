@@ -36,17 +36,6 @@ int pick(const EdgeMask& edges, Rng& rng) {
   return k < low ? nth_bit(edges.lo, k) : 64 + nth_bit(edges.hi, k - low);
 }
 
-// One card drawn from a hand, each card equally likely (not each resource):
-// how the platform picks the card a thief takes.
-Resource random_card(const Cards& hand, Rng& rng) {
-  int k = rng.below(std::max(1, hand[0] + hand[1] + hand[2] + hand[3] + hand[4]));
-  for (std::size_t r = 0; r < kResourceCount; ++r) {
-    if (k < hand[r]) return static_cast<Resource>(r);
-    k -= hand[r];
-  }
-  return Resource::kWood;  // unreachable for a non-empty hand
-}
-
 bool red_numbers_touch(const Board& board) {
   for (int h = 0; h < kHexCount; ++h) {
     const int n = board.number[at(h)];
@@ -203,6 +192,17 @@ void main_phase(Game& g, int seat, Rng& rng, Error& err) {
 }
 
 }  // namespace
+
+// One card drawn from a hand, each card equally likely (not each resource):
+// how the platform picks the card a thief takes.
+Resource random_card(const Cards& hand, Rng& rng) {
+  int k = rng.below(std::max(1, hand[0] + hand[1] + hand[2] + hand[3] + hand[4]));
+  for (std::size_t r = 0; r < kResourceCount; ++r) {
+    if (k < hand[r]) return static_cast<Resource>(r);
+    k -= hand[r];
+  }
+  return Resource::kWood;  // unreachable for a non-empty hand
+}
 
 Board random_board(Rng& rng) {
   Board board;

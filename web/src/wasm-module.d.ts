@@ -14,6 +14,7 @@ declare module '@engine' {
     Replay: new (recordText: string) => Replay;
     topologyJson(): string;
     selfplay(games: number, players: number, seed: number): string;
+    zooSelfplay(games: number, players: number, seed: number): string;
   }
   const createEngine: (overrides?: object) => Promise<EngineModule>;
   export default createEngine;

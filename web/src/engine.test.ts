@@ -5,6 +5,7 @@ import { readFileSync, readdirSync } from 'node:fs';
 import { gunzipSync } from 'node:zlib';
 import { describe, expect, it } from 'vitest';
 import { EXAMPLES, OpenGame, loadEngine, readRecordBytes, topology } from './engine';
+import { NATIVE_ZOO_CHECKSUMS } from './facts';
 
 const dataDir = new URL('../../tests/data/', import.meta.url);
 const records = readdirSync(dataDir)
@@ -53,6 +54,13 @@ describe('engine in WebAssembly', () => {
     const b = JSON.parse(engine.selfplay(50, 4, 7));
     expect(a.refused).toBe(0);
     expect(a.checksum).toBe(b.checksum);
+  });
+
+  it('plays the zoo games of the native build', async () => {
+    const engine = await loadEngine();
+    const r = JSON.parse(engine.zooSelfplay(500, 4, 1));
+    expect(r.refused).toBe(0);
+    expect(r.checksum).toBe(NATIVE_ZOO_CHECKSUMS[500]);
   });
 
   it('ships zoo examples won by the archetype they are named after', () => {

@@ -7,9 +7,11 @@
 // the simulations need only the rules.
 
 #include "catan/game.hpp"
+#include "catan/zoo.hpp"
 
 #include <nlohmann/json.hpp>
 
+#include <optional>
 #include <stdexcept>
 #include <string>
 
@@ -37,6 +39,15 @@ class RecordError : public std::runtime_error {
 
 // The legal moves of one seat, in the same index form.
 [[nodiscard]] nlohmann::json legal_moves(const Game& game, int seat);
+
+// The move of an event, without its outcome (the dice, the stolen card):
+// what a bot chose. Nothing for an event that does not parse.
+[[nodiscard]] std::optional<Action> action_from_event(const nlohmann::json& event);
+
+// The bot that played a seat of a record: "hard", or "zoo" rebuilt from the
+// shaken weights and trading in its bot_style (so no Go random generator is
+// needed). Nothing for people and the other levels.
+[[nodiscard]] std::optional<ZooBot> zoo_bot_from_record(const nlohmann::json& player);
 
 // Reads a record file: plain JSON (downloaded from the game) only.
 [[nodiscard]] nlohmann::json read_record_file(const std::string& path);

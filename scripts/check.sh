@@ -53,6 +53,29 @@ step "random games (release): no refused action"
 # picks legal moves.
 build/release/tools/catan_selfplay --games 2000
 
+step "zoo games (release): no refused move"
+build/release/tools/catan_selfplay --games 2000 --bots zoo --threads "$jobs"
+
+if [ "${CATAN_SKIP_ZOO_RECORDS:-0}" = 1 ]; then
+  step "zoo against Go on recorded games: SKIPPED (CATAN_SKIP_ZOO_RECORDS=1)"
+else
+  # The tests check the C++ zoo against the Go bots on a few records in
+  # tests/data; this checks it on every tournament record catan-project has
+  # locally (its .logs/zoo-data, from the tournaments of docs/bot-zoo.md).
+  zoo_records=../catan-project/.logs/zoo-data
+  if compgen -G "$zoo_records/*/*.json.gz" >/dev/null; then
+    step "zoo against Go on every record in $zoo_records"
+    tmp="$(mktemp -d)"
+    trap 'rm -rf "$tmp"' EXIT
+    for f in "$zoo_records"/*/*.json.gz; do
+      gzip -dc "$f" > "$tmp/$(basename "$(dirname "$f")")-$(basename "$f" .gz)"
+    done
+    build/release/tools/catan_zoo_check --show 5 "$tmp"/*.json
+  else
+    step "zoo against Go: no records in $zoo_records (only tests/data was checked)"
+  fi
+fi
+
 if "$bench"; then
   step "benchmarks: full run (release)"
   build/release/benchmarks/catan_benchmarks \
@@ -93,11 +116,13 @@ else
   step "WebAssembly: same games as the native build"
   # Equal checksums mean the module plays exactly the moves of the native
   # engine, not merely that it runs.
-  native="$(build/release/tools/catan_selfplay --games 2000 | grep checksum)"
-  wasm="$(node web/scripts/selfplay-node.mjs --games 2000 | grep checksum)"
-  echo "native: $native"
-  echo "wasm:   $wasm"
-  [ "$native" = "$wasm" ] || { echo "checksums differ" >&2; exit 1; }
+  for bots in random zoo; do
+    native="$(build/release/tools/catan_selfplay --games 2000 --bots "$bots" | grep checksum)"
+    wasm="$(node web/scripts/selfplay-node.mjs --games 2000 --bots "$bots" | grep checksum)"
+    echo "$bots, native: $native"
+    echo "$bots, wasm:   $wasm"
+    [ "$native" = "$wasm" ] || { echo "checksums differ" >&2; exit 1; }
+  done
   if [ ! -d ../catan-project/frontend/src ]; then
     echo "web viewer: ../catan-project/frontend/src not found; the viewer draws catan-project's board" >&2
     exit 1

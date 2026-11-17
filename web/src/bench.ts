@@ -1,11 +1,15 @@
-// The in-browser benchmark: whole random games in Web Workers, the same
-// games as `catan_selfplay --games N --seed 1` in the native build. The last
-// results are kept here so every page can show "your browser" next to the
-// published numbers.
+// The in-browser benchmark: whole games in Web Workers, the same games as
+// `catan_selfplay --games N --seed 1 [--bots zoo]` in the native build. The
+// last results are kept here so every page can show "your browser" next to
+// the published numbers.
 
 import { useSyncExternalStore } from 'react';
 
+/** Random players, or zoo bots (the opponents of the review's simulations). */
+export type Bots = 'random' | 'zoo';
+
 export interface BenchResult {
+  bots: Bots;
   games: number;
   actions: number;
   refused: number;
@@ -38,10 +42,10 @@ function ask<T>(worker: Worker, message: object): Promise<T> {
   });
 }
 
-export async function runBenchmark(games: number): Promise<BenchResult> {
+export async function runBenchmark(games: number, bots: Bots = 'random'): Promise<BenchResult> {
   const worker = spawn();
   try {
-    last = await ask<BenchResult>(worker, { games, seed: 1 });
+    last = await ask<BenchResult>(worker, { games, seed: 1, bots });
     changed();
     return last;
   } finally {

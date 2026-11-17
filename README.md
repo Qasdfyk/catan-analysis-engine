@@ -2,7 +2,7 @@
 
 Post-game review for Catan-style board games, in the spirit of a chess game review: step through a finished game, see a grade for every decision, the better move when there was one, and how each player's chances of winning changed, with the swings from dice kept apart from the swings from decisions.
 
-Work in progress. So far there is the rules engine: the full rules of catan-project in C++ (board as bitmasks, production, robber, development cards, trading between players), reading and replaying its game records, a difference test that holds it to the Python rules after every move, and a random player that plays about 10 000 whole games a second on one core, some 4 000 times faster per move than the Python rules, and a web viewer that steps through a recorded game with the engine compiled to WebAssembly. See [docs/rules-engine.md](docs/rules-engine.md), [docs/difftest.md](docs/difftest.md), [docs/performance.md](docs/performance.md) and [docs/web.md](docs/web.md).
+Work in progress. So far there is the rules engine: the full rules of catan-project in C++ (board as bitmasks, production, robber, development cards, trading between players), reading and replaying its game records, a difference test that holds it to the Python rules after every move, and a random player that plays about 10 000 whole games a second on one core, some 4 000 times faster per move than the Python rules, a web viewer that steps through a recorded game with the engine compiled to WebAssembly, and catan-project's bot zoo ported from Go (the same moves on 310 000 recorded decisions) with a first Monte Carlo of each player's chance to win. See [docs/rules-engine.md](docs/rules-engine.md), [docs/difftest.md](docs/difftest.md), [docs/performance.md](docs/performance.md), [docs/web.md](docs/web.md) and [docs/zoo.md](docs/zoo.md).
 
 ## Plan
 
@@ -69,7 +69,7 @@ See [docs/benchmarks.md](docs/benchmarks.md) for getting numbers you can trust, 
 - `src/`: library sources.
 - `tests/`: unit tests (GoogleTest).
 - `benchmarks/`: microbenchmarks (Google Benchmark).
-- `tools/`: `catan_replay` (replay a record), `catan_selfplay` (random games, games per second), `difftest.py` (the difference test) and `bench_python.py` (games per second of the Python engines).
+- `tools/`: `catan_replay` (replay a record), `catan_selfplay` (whole games between random or zoo bots, games per second), `catan_zoo_check` (the C++ zoo against the Go bots on records), `catan_winrate` (chances to win by Monte Carlo), `difftest.py` (the difference test) and `bench_python.py` (games per second of the Python engines).
 - `python/`: the pybind11 module the difference test loads.
 - `wasm/`: the Embind bindings of the WebAssembly module.
 - `web/`: the game viewer (TypeScript, Vite), a static page around the WebAssembly module, drawing catan-project's own board component.
