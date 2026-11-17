@@ -38,12 +38,42 @@ touch web/dist/.nojekyll
 site="$(mktemp -d)"
 trap 'rm -rf "$site"' EXIT
 cp -r web/dist/. "$site"
+
+# Keep the files of the build before this one. Pages lets browsers and its CDN
+# cache every file for 10 minutes, so for a while after a deploy a page loaded
+# earlier still asks for the old, hash-named files (the benchmark worker, the
+# engine module); deleting them at once makes such a page fail. Each build
+# lists its own files in assets/.build, so only one build back is kept.
+remote="$(git remote get-url origin)"
+if git ls-remote --exit-code --heads "$remote" gh-pages >/dev/null; then
+  old="$(mktemp -d)"
+  git clone -q --depth 1 --branch gh-pages "$remote" "$old"
+  kept=0
+  if [ -f "$old/assets/.build" ]; then
+    while read -r name; do
+      if [ -n "$name" ] && [ -f "$old/assets/$name" ] && [ ! -e "$site/assets/$name" ]; then
+        cp "$old/assets/$name" "$site/assets/$name"
+        kept=$((kept + 1))
+      fi
+    done < "$old/assets/.build"
+  else
+    # The first deploy with this rule: the old branch has no list yet, so
+    # keep all of its assets once.
+    for f in "$old"/assets/*; do
+      name="$(basename "$f")"
+      [ -e "$site/assets/$name" ] || { cp "$f" "$site/assets/$name"; kept=$((kept + 1)); }
+    done
+  fi
+  rm -rf "$old"
+  echo "Kept $kept files of the previous build for pages still in caches."
+fi
+(cd web/dist/assets && ls -1) > "$site/assets/.build"
 git -C "$site" init -q -b gh-pages
 git -C "$site" add -A
 git -C "$site" -c user.name="$(git config user.name)" -c user.email="$(git config user.email)" \
   commit -q -m "Build of $source_commit"
 if "$push"; then
-  git -C "$site" push -q -f "$(git remote get-url origin)" gh-pages
+  git -C "$site" push -q -f "$remote" gh-pages
   echo "Pushed the viewer built from $source_commit to gh-pages."
 else
   echo "Dry run: built and committed in $site, not pushed."

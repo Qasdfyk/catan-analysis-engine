@@ -77,7 +77,7 @@ function Runner() {
         </button>
       </div>
       {running && <div className="progress" aria-label="running" />}
-      {error && <p className="message error">The worker failed: {error}</p>}
+      {error && <p className="message error">The benchmark failed: {error}. Reload the page and try again.</p>}
       {last && !running && (
         <div className="result">
           <div className="result-main">
@@ -248,7 +248,7 @@ function Threads() {
             : `${fmt(GAMES_PER_WORKER)} games per worker on ${counts.join(', ')} workers; your browser reports ${cores || 'an unknown number of'} logical cores.`}
         </span>
       </div>
-      {error && <p className="message error">The workers failed: {error}</p>}
+      {error && <p className="message error">The benchmark failed: {error}. Reload the page and try again.</p>}
     </div>
   );
 }

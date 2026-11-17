@@ -33,17 +33,49 @@ function spawn(): Worker {
   return new Worker(new URL('./bench-worker.ts', import.meta.url), { type: 'module' });
 }
 
-/** Sends one message and waits for the answer. */
+/** The worker's script or the engine module could not be fetched. */
+class StartError extends Error {}
+
+/**
+ * Sends one message and waits for the answer. The worker answers a failure
+ * of its own as {error}; an error event without a message means its script
+ * never ran, usually a failed download.
+ */
 function ask<T>(worker: Worker, message: object): Promise<T> {
   return new Promise((resolve, reject) => {
-    worker.onmessage = (msg: MessageEvent<T>) => resolve(msg.data);
-    worker.onerror = (err) => reject(new Error(err.message || 'the worker failed'));
+    worker.onmessage = (msg: MessageEvent<T | { error: string }>) => {
+      const data = msg.data as { error?: string };
+      if (typeof data?.error === 'string') reject(new Error(data.error));
+      else resolve(msg.data as T);
+    };
+    worker.onerror = (err) => {
+      err.preventDefault();
+      reject(err.message ? new Error(err.message) : new StartError('the benchmark worker could not be loaded'));
+    };
     worker.postMessage(message);
   });
 }
 
+/**
+ * A worker with the engine compiled and ready. Starting is tried twice: just
+ * after a deploy the CDN in front of GitHub Pages can fail one request for a
+ * new file, and a second request a moment later succeeds.
+ */
+export async function startWorker(make: () => Worker = spawn, attempts = 2): Promise<Worker> {
+  for (let attempt = 1; ; attempt++) {
+    const worker = make();
+    try {
+      await ask(worker, { load: true });
+      return worker;
+    } catch (e) {
+      worker.terminate();
+      if (!(e instanceof StartError) || attempt >= attempts) throw e;
+    }
+  }
+}
+
 export async function runBenchmark(games: number, bots: Bots = 'random'): Promise<BenchResult> {
-  const worker = spawn();
+  const worker = await startWorker();
   try {
     last = await ask<BenchResult>(worker, { games, seed: 1, bots });
     changed();
@@ -72,9 +104,11 @@ export async function runScaling(gamesPerWorker: number, onPoint?: (p: ScalingPo
   scaling = [];
   changed();
   for (const n of workerCounts()) {
-    const workers = Array.from({ length: n }, spawn);
+    const started = await Promise.allSettled(Array.from({ length: n }, () => startWorker()));
+    const workers = started.flatMap((s) => (s.status === 'fulfilled' ? [s.value] : []));
     try {
-      await Promise.all(workers.map((w) => ask(w, { load: true })));
+      const failed = started.find((s) => s.status === 'rejected');
+      if (failed) throw failed.reason;
       const start = performance.now();
       await Promise.all(workers.map((w, i) => ask(w, { games: gamesPerWorker, seed: i + 1 })));
       const seconds = (performance.now() - start) / 1000;
