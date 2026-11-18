@@ -99,6 +99,10 @@ struct ZooWeights {
   double settlement = 1;
   double dev_card = 1;
   int road_reach = 2;     // roads behind the Longest Road it still builds for it
+  // Extra weight of the leader when choosing the robber's hex: the leader's
+  // buildings count (1 + leader_focus) times. 0 is the hard level (and the
+  // Go bots, which have no such weight); MAP-Elites (map_elites.hpp) tunes it.
+  double leader_focus = 0;
 };
 
 // How a bot trades with players.

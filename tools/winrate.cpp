@@ -19,9 +19,11 @@
 // playout: what the web page does, since it cannot know who played. --bots
 // record seats the bot that played the game (zoo and hard games of the
 // platform's tournaments record it), so playouts are played by the same
-// players as the real game.
+// players as the real game. --bots elites draws every seat from the
+// MAP-Elites archive instead (--elites PATH, default data/elites.json).
 
 #include "catan/calibration.hpp"
+#include "catan/elites.hpp"
 #include "catan/record.hpp"
 #include "catan/replay.hpp"
 #include "catan/winrate.hpp"
@@ -50,6 +52,8 @@ struct Options {
   int threads = 1;
   std::uint64_t seed = 1;
   bool record_bots = false;
+  std::string elites_path;  // --bots elites
+  std::vector<cae::ZooBot> elites;
   int calibrate = 0;  // positions per game; 0 = show each game
   int bootstrap = 1000;
 };
@@ -76,7 +80,8 @@ std::vector<cae::WinCounts> estimate(const std::vector<Position>& positions, con
       for (int j = next++; j < jobs; j = next++) {
         const Position& p = positions[at(j / chunks_per_position)];
         const int first = (j % chunks_per_position) * kChunk;
-        part[at(j)] = cae::play_out_chances(*p.game, first, std::min(kChunk, o.playouts - first), o.seed, *p.bots);
+        part[at(j)] = cae::play_out_chances(*p.game, first, std::min(kChunk, o.playouts - first), o.seed, *p.bots,
+                                            o.elites);
       }
     });
   }
@@ -246,7 +251,7 @@ void calibrate(const std::vector<Game>& games, const Options& o) {
 
 [[noreturn]] void usage(const char* argv0) {
   std::fprintf(stderr,
-               "usage: %s [--playouts N] [--threads T] [--seed S] [--bots zoo|record]\n"
+               "usage: %s [--playouts N] [--threads T] [--seed S] [--bots zoo|record|elites] [--elites PATH]\n"
                "          [--calibrate POSITIONS_PER_GAME] [--bootstrap B] RECORD.json...\n",
                argv0);
   std::exit(2);
@@ -271,8 +276,11 @@ int main(int argc, char** argv) {
       o.seed = std::strtoull(value(), nullptr, 10);
     } else if (flag == "--bots") {
       const std::string_view b = value();
-      if (b != "zoo" && b != "record") usage(argv[0]);
+      if (b != "zoo" && b != "record" && b != "elites") usage(argv[0]);
       o.record_bots = b == "record";
+      if (b == "elites" && o.elites_path.empty()) o.elites_path = "data/elites.json";
+    } else if (flag == "--elites") {
+      o.elites_path = value();
     } else if (flag == "--calibrate") {
       o.calibrate = std::atoi(value());
     } else if (flag == "--bootstrap") {
@@ -285,6 +293,14 @@ int main(int argc, char** argv) {
   }
   if (files.empty() || o.playouts < 1 || o.threads < 1 || o.calibrate < 0) usage(argv[0]);
 
+  if (!o.elites_path.empty()) {
+    try {
+      o.elites = cae::load_elites(o.elites_path);
+    } catch (const std::exception& e) {
+      std::fprintf(stderr, "%s\n", e.what());
+      return 1;
+    }
+  }
   std::vector<Game> games(files.size());
   for (std::size_t i = 0; i < files.size(); ++i) {
     if (!load(files[i], o, games[i])) return 1;

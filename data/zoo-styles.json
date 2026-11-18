@@ -1,0 +1,230 @@
+{
+ "games": 4000,
+ "seed": 1001,
+ "zoo": [
+  {
+   "cell": 33,
+   "eval": {
+    "city_share": 0.7291345238095173,
+    "dev_cards": 2.48175,
+    "games": 4000,
+    "margin": 0.014875354113432056,
+    "trades": 5.3595,
+    "unfinished": 0,
+    "win_rate": 0.36,
+    "wins": 1440
+   },
+   "name": "balanced/fair"
+  },
+  {
+   "cell": 37,
+   "eval": {
+    "city_share": 0.6976099206349163,
+    "dev_cards": 2.13,
+    "games": 4000,
+    "margin": 0.013933533628444723,
+    "trades": 11.18575,
+    "unfinished": 0,
+    "win_rate": 0.28125,
+    "wins": 1125
+   },
+   "name": "balanced/friendly"
+  },
+  {
+   "cell": 32,
+   "eval": {
+    "city_share": 0.7028331349206313,
+    "dev_cards": 2.53775,
+    "games": 4000,
+    "margin": 0.014410863762280176,
+    "trades": 3.31325,
+    "unfinished": 0,
+    "win_rate": 0.31625,
+    "wins": 1265
+   },
+   "name": "balanced/wary"
+  },
+  {
+   "cell": 22,
+   "eval": {
+    "city_share": 0.6749081349206345,
+    "dev_cards": 2.4465,
+    "games": 4000,
+    "margin": 0.013154357786490377,
+    "trades": 0.0,
+    "unfinished": 0,
+    "win_rate": 0.23575,
+    "wins": 943
+   },
+   "name": "balanced/loner"
+  },
+  {
+   "cell": 74,
+   "eval": {
+    "city_share": 0.8960561507936451,
+    "dev_cards": 6.1275,
+    "games": 4000,
+    "margin": 0.01502095579432281,
+    "trades": 5.26575,
+    "unfinished": 0,
+    "win_rate": 0.37725,
+    "wins": 1509
+   },
+   "name": "ore-wheat/fair"
+  },
+  {
+   "cell": 79,
+   "eval": {
+    "city_share": 0.8766708333333266,
+    "dev_cards": 5.06475,
+    "games": 4000,
+    "margin": 0.01421167054835567,
+    "trades": 11.4465,
+    "unfinished": 0,
+    "win_rate": 0.30075,
+    "wins": 1203
+   },
+   "name": "ore-wheat/friendly"
+  },
+  {
+   "cell": 74,
+   "eval": {
+    "city_share": 0.8748740079365034,
+    "dev_cards": 5.77125,
+    "games": 4000,
+    "margin": 0.014523750024528789,
+    "trades": 3.054,
+    "unfinished": 0,
+    "win_rate": 0.32575,
+    "wins": 1303
+   },
+   "name": "ore-wheat/wary"
+  },
+  {
+   "cell": 64,
+   "eval": {
+    "city_share": 0.8534188492063457,
+    "dev_cards": 5.25325,
+    "games": 4000,
+    "margin": 0.013310117414959194,
+    "trades": 0.0,
+    "unfinished": 0,
+    "win_rate": 0.244,
+    "wins": 976
+   },
+   "name": "ore-wheat/loner"
+  },
+  {
+   "cell": 10,
+   "eval": {
+    "city_share": 0.44360992063491944,
+    "dev_cards": 1.0475,
+    "games": 4000,
+    "margin": 0.014139866756797957,
+    "trades": 5.4835,
+    "unfinished": 0,
+    "win_rate": 0.2955,
+    "wins": 1182
+   },
+   "name": "wood-brick/fair"
+  },
+  {
+   "cell": 15,
+   "eval": {
+    "city_share": 0.4126944444444437,
+    "dev_cards": 0.92475,
+    "games": 4000,
+    "margin": 0.013268307457057212,
+    "trades": 11.10125,
+    "unfinished": 0,
+    "win_rate": 0.24175,
+    "wins": 967
+   },
+   "name": "wood-brick/friendly"
+  },
+  {
+   "cell": 10,
+   "eval": {
+    "city_share": 0.4243273809523808,
+    "dev_cards": 1.109,
+    "games": 4000,
+    "margin": 0.01368940870801219,
+    "trades": 3.587,
+    "unfinished": 0,
+    "win_rate": 0.26575,
+    "wins": 1063
+   },
+   "name": "wood-brick/wary"
+  },
+  {
+   "cell": 0,
+   "eval": {
+    "city_share": 0.391146031746032,
+    "dev_cards": 1.2095,
+    "games": 4000,
+    "margin": 0.01196382689506163,
+    "trades": 0.0,
+    "unfinished": 0,
+    "win_rate": 0.18225,
+    "wins": 729
+   },
+   "name": "wood-brick/loner"
+  },
+  {
+   "cell": 32,
+   "eval": {
+    "city_share": 0.7156817460317431,
+    "dev_cards": 2.97025,
+    "games": 4000,
+    "margin": 0.013555031020805523,
+    "trades": 5.3685,
+    "unfinished": 0,
+    "win_rate": 0.25775,
+    "wins": 1031
+   },
+   "name": "port/fair"
+  },
+  {
+   "cell": 37,
+   "eval": {
+    "city_share": 0.6825057539682525,
+    "dev_cards": 2.42875,
+    "games": 4000,
+    "margin": 0.012319946256985053,
+    "trades": 10.61875,
+    "unfinished": 0,
+    "win_rate": 0.19675,
+    "wins": 787
+   },
+   "name": "port/friendly"
+  },
+  {
+   "cell": 32,
+   "eval": {
+    "city_share": 0.6959813492063455,
+    "dev_cards": 2.814,
+    "games": 4000,
+    "margin": 0.01292054834749671,
+    "trades": 3.0645,
+    "unfinished": 0,
+    "win_rate": 0.224,
+    "wins": 896
+   },
+   "name": "port/wary"
+  },
+  {
+   "cell": 22,
+   "eval": {
+    "city_share": 0.6832204365079351,
+    "dev_cards": 2.768,
+    "games": 4000,
+    "margin": 0.011317949951294183,
+    "trades": 0.0,
+    "unfinished": 0,
+    "win_rate": 0.1585,
+    "wins": 634
+   },
+   "name": "port/loner"
+  }
+ ]
+}

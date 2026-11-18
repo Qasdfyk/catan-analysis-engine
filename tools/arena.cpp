@@ -11,6 +11,11 @@
 //   hard                         the hard bot
 //   zoo                          a new random zoo bot every deal (the same in its four games)
 //   zoo:ARCHETYPE/PERSONALITY    that zoo bot, unshaken; add :SEED to shake its weights
+//   elite:N                      elite N of the MAP-Elites archive (0 = best final score;
+//                                --elites PATH, default data/elites.json)
+//   elites                       a random elite every deal
+// Zoo bots, hard and elites may end in +leader=X: the Robber's leader focus
+// (zoo.hpp), for instance hard+leader=2.
 //   catanatron                   Catanatron's AlphaBetaPlayer (depth 2) in its own process,
 //                                through tools/catanatron_bridge.py; needs --python with
 //                                Catanatron installed (docs/arena.md)
@@ -34,6 +39,7 @@
 // and the SPRT looks at whole batches in deal order.
 
 #include "catan/arena.hpp"
+#include "catan/elites.hpp"
 #include "catan/record.hpp"
 #include "catan/replay.hpp"
 
@@ -186,21 +192,29 @@ cae::ArenaPlayer catanatron_player(Bridge& bridge, BridgeStats& stats) {
 // --- Players by name -----------------------------------------------------------
 
 struct PlayerSpec {
-  enum class Kind { kHard, kZooRandom, kZoo, kCatanatron } kind = Kind::kHard;
+  enum class Kind { kHard, kZooRandom, kZoo, kEliteRandom, kCatanatron } kind = Kind::kHard;
   cae::ZooBot bot;
   std::string bridge_player;  // "alphabeta" or "weighted"
   std::string name;
 };
 
+// The MAP-Elites archive, read once on first use.
+std::string g_elites_path = "data/elites.json";
+const std::vector<cae::ZooBot>& elites() {
+  static const std::vector<cae::ZooBot> pool = cae::load_elites(g_elites_path);
+  return pool;
+}
+
 PlayerSpec parse_player(const std::string& text) {
   PlayerSpec p;
   p.name = text;
-  if (text == "hard") {
-    p.bot = cae::hard_bot();
-    return p;
-  }
   if (text == "zoo") {
     p.kind = PlayerSpec::Kind::kZooRandom;
+    return p;
+  }
+  if (text == "elites") {
+    (void)elites();
+    p.kind = PlayerSpec::Kind::kEliteRandom;
     return p;
   }
   if (text == "catanatron" || text == "catanatron:weighted") {
@@ -208,30 +222,10 @@ PlayerSpec parse_player(const std::string& text) {
     p.bridge_player = text == "catanatron" ? "alphabeta" : "weighted";
     return p;
   }
-  if (text.rfind("zoo:", 0) == 0) {
-    p.kind = PlayerSpec::Kind::kZoo;
-    std::string rest = text.substr(4);
-    std::uint64_t seed = 0;
-    if (const auto colon = rest.find(':'); colon != std::string::npos) {
-      seed = std::stoull(rest.substr(colon + 1));
-      rest = rest.substr(0, colon);
-    }
-    const auto slash = rest.find('/');
-    const std::string archetype = rest.substr(0, slash);
-    const std::string personality = slash == std::string::npos ? "fair" : rest.substr(slash + 1);
-    int a = -1;
-    int q = -1;
-    for (int i = 0; i < cae::kArchetypeCount; ++i) {
-      if (archetype == cae::archetype_name(static_cast<cae::Archetype>(i))) a = i;
-    }
-    for (int i = 0; i < cae::kPersonalityCount; ++i) {
-      if (personality == cae::personality_name(static_cast<cae::Personality>(i))) q = i;
-    }
-    if (a < 0 || q < 0) throw std::runtime_error("unknown zoo bot: " + text);
-    p.bot = cae::make_zoo_bot(static_cast<cae::Archetype>(a), static_cast<cae::Personality>(q), seed);
-    return p;
-  }
-  throw std::runtime_error("unknown player: " + text);
+  // hard, zoo:ARCHETYPE/PERSONALITY[:SEED], elite:N, each with +leader=X
+  p.kind = text.rfind("hard", 0) == 0 ? PlayerSpec::Kind::kHard : PlayerSpec::Kind::kZoo;
+  p.bot = cae::zoo_bot_named(text, g_elites_path);
+  return p;
 }
 
 std::vector<PlayerSpec> parse_players(const std::string& text) {
@@ -284,6 +278,10 @@ struct Seating {
       case PlayerSpec::Kind::kZooRandom: {
         cae::Rng rng(deal_seed ^ (0x5eed0000ULL + static_cast<std::uint64_t>(slot)));
         return cae::zoo_player(cae::random_zoo_bot(rng), o.trades);
+      }
+      case PlayerSpec::Kind::kEliteRandom: {
+        cae::Rng rng(deal_seed ^ (0x5eed0000ULL + static_cast<std::uint64_t>(slot)));
+        return cae::zoo_player(elites()[at(rng.below(static_cast<int>(elites().size())))], o.trades);
       }
       case PlayerSpec::Kind::kCatanatron: {
         auto& bridge = bridges[p.bridge_player];
@@ -430,7 +428,7 @@ void print_summary(const Options& o, const std::string& who, const Summary& s, d
   std::fprintf(stderr,
                "usage: %s [--candidate P] [--baseline P] [--opponents P[,P,P]] [--mode plain|rotate|duplicate] [--deals N]\n"
                "          [--threads T] [--seed S] [--no-trades] [--sprt P0 P1] [--alpha A] [--beta B] [--batch N]\n"
-               "          [--compare-modes] [--python PATH] [--bridge PATH]\n",
+               "          [--compare-modes] [--python PATH] [--bridge PATH] [--elites PATH]\n",
                argv0);
   std::exit(2);
 }
@@ -491,6 +489,8 @@ int main(int argc, char** argv) {
       o.python = value();
     } else if (flag == "--bridge") {
       o.bridge_script = value();
+    } else if (flag == "--elites") {
+      g_elites_path = value();
     } else {
       usage(argv[0]);
     }

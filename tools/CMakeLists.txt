@@ -18,3 +18,6 @@ endif()
 
 add_executable(catan_validate validate.cpp)
 target_link_libraries(catan_validate PRIVATE catan_record catan_warnings Threads::Threads)
+
+add_executable(catan_map_elites map_elites.cpp)
+target_link_libraries(catan_map_elites PRIVATE catan_record catan_warnings Threads::Threads)

@@ -91,6 +91,21 @@ TEST(Arena, NoTradesMeansNoOffers) {
   EXPECT_EQ(accepted, 0);
 }
 
+TEST(Arena, HowEachSeatPlayed) {
+  const auto table = hard_table();
+  for (int i = 0; i < 10; ++i) {
+    const ArenaGame g = play_arena_game(make_deal(2, i), table, 0, false);
+    int trades = 0;
+    for (const SeatPlay& p : g.play) {
+      EXPECT_GE(p.settlements + p.cities, 2);  // the two of the setup at least
+      EXPECT_LE(p.cities, kMaxCities);
+      EXPECT_GE(p.dev_cards, 0);
+      trades += p.trades;
+    }
+    EXPECT_EQ(trades % 2, 0);  // every trade counts for both sides
+  }
+}
+
 TEST(Arena, ScoreStats) {
   ScoreStats s;
   for (double x : {0.0, 0.25, 0.5, 0.25}) s.add(x);

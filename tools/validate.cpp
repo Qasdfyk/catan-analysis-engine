@@ -29,6 +29,7 @@
 // clearly on set A, or it learned nothing a few numbers do not already tell.
 
 #include "catan/calibration.hpp"
+#include "catan/elites.hpp"
 #include "catan/random_player.hpp"
 #include "catan/record.hpp"
 #include "catan/winrate.hpp"
@@ -443,23 +444,7 @@ std::optional<bool> run_scenario(int scenario, const cae::Game& base, int seat, 
 }
 
 int sanity(const Options& o, const std::string& bot_name) {
-  cae::ZooBot bot = cae::hard_bot();
-  if (bot_name != "hard") {
-    const auto slash = bot_name.find('/');
-    int a = -1;
-    int p = -1;
-    for (int i = 0; i < cae::kArchetypeCount; ++i) {
-      if (bot_name.substr(0, slash) == cae::archetype_name(static_cast<cae::Archetype>(i))) a = i;
-    }
-    for (int i = 0; i < cae::kPersonalityCount; ++i) {
-      if (slash != std::string::npos && bot_name.substr(slash + 1) == cae::personality_name(static_cast<cae::Personality>(i))) p = i;
-    }
-    if (a < 0 || p < 0) {
-      std::fprintf(stderr, "unknown bot %s (hard or ARCHETYPE/PERSONALITY)\n", bot_name.c_str());
-      return 2;
-    }
-    bot = cae::make_zoo_bot(static_cast<cae::Archetype>(a), static_cast<cae::Personality>(p), 0);
-  }
+  const cae::ZooBot bot = cae::zoo_bot_named(bot_name);
   // Real mid-game positions: one per game, the latest of its drawn points.
   const auto games = play_games(o.seed, o.games, o.positions, o.threads);
   std::array<SanityResult, kScenarios.size()> results{};
@@ -494,7 +479,7 @@ int sanity(const Options& o, const std::string& bot_name) {
                "       catan_validate train [--games N] [--seed S] [--positions K] [--threads T] > model.json\n"
                "       catan_validate eval  (--model model.json | --playouts N [--bots record|zoo]) [--threads T]\n"
                "                            < set.jsonl\n"
-               "       catan_validate sanity [--bot hard|ARCHETYPE/PERSONALITY] [--games N] [--seed S]\n");
+               "       catan_validate sanity [--bot hard|ARCHETYPE/PERSONALITY|elite:N[+leader=X]] [--games N] [--seed S]\n");
   std::exit(2);
 }
 

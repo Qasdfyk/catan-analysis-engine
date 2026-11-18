@@ -195,4 +195,4 @@ The leader is given Longest Road and Largest Army to reach 8 visible points and 
 | steal-leader | 147 / 147 | 147 / 147 | 147 / 147 |
 | first-spot | 181 / 200 | 153 / 200 | 169 / 200 |
 
-The friendly personality takes a leader's trade by design (no embargo). The robber misses are a real weakness of the hard bot: it weighs the harm to everyone on a hex, so two middling players can outweigh the leader. The expert bot (step 12) has to pass all of them.
+The friendly personality takes a leader's trade by design (no embargo). The robber misses come from the hard bot weighing the harm to everyone on a hex, so two middling players can outweigh the leader. Fixing it (`hard+leader=1` passes 147/148) does not make the bot win more, though: see [map-elites.md](map-elites.md#the-robber-and-the-leader). The expert bot (step 12) should still pass all of them.
