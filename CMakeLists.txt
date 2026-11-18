@@ -44,6 +44,7 @@ include(cmake/Dependencies.cmake)
 # The rules engine: no dependencies, so it can go to WebAssembly as it is.
 # Position independent so the Python module (a shared library) can link it.
 add_library(catan STATIC
+  src/arena.cpp
   src/bits.cpp
   src/game.cpp
   src/random_player.cpp

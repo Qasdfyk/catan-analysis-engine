@@ -3,6 +3,8 @@
 // result, without Python.
 
 #include "catan/record.hpp"
+#include "catan/random_player.hpp"
+#include "catan/zoo.hpp"
 
 #include <gtest/gtest.h>
 
@@ -58,6 +60,77 @@ TEST(Records, BrokenEventsAreRefusedNotCrashes) {
   EXPECT_EQ(apply_event(g, json::parse(R"({"seat": 0, "action": "roll_dice", "payload": {}})")), Error::kBadOutcome);
   EXPECT_THROW((void)game_from_record(json::parse(R"({"format": "something else"})")), RecordError);
   EXPECT_THROW((void)game_from_record(json::parse(R"({"format": "catan-game-record", "version": 2})")), RecordError);
+}
+
+// A position written as board + snapshot comes back as the same position,
+// and a game played on from it goes exactly as from the original.
+TEST(Records, SnapshotRoundTrip) {
+  int checked = 0;
+  for (const std::string& path : record_files()) {
+    SCOPED_TRACE(path);
+    const nlohmann::json record = read_record_file(path);
+    Game g = game_from_record(record);
+    const nlohmann::json board = board_json(g.board);
+    for (const auto& event : record.at("events")) {
+      const nlohmann::json snap = snapshot(g);
+      const Game back = game_from_snapshot(board, snap);
+      ASSERT_EQ(snapshot(back), snap);
+      ASSERT_EQ(apply_event(g, event), Error::kNone);
+      ++checked;
+    }
+  }
+  EXPECT_GT(checked, 1000);
+
+  // Zoo games from a few positions mid-game: same moves, same end.
+  for (std::uint64_t seed = 1; seed <= 20; ++seed) {
+    SCOPED_TRACE(seed);
+    Rng rng(seed);
+    ZooTable a;
+    a.game = random_game(rng);
+    for (auto& bot : a.bots) bot = random_zoo_bot(rng);
+    for (int i = 0; i < 150; ++i) (void)play_zoo_step(a, rng);
+    ZooTable b = a;
+    b.game = game_from_snapshot(board_json(a.game.board), snapshot(a.game));
+    Rng ra(seed + 100);
+    Rng rb(seed + 100);
+    const ZooPlayout pa = play_out_zoo(a, ra);
+    const ZooPlayout pb = play_out_zoo(b, rb);
+    EXPECT_EQ(pa.winner, pb.winner);
+    EXPECT_EQ(pa.actions, pb.actions);
+    EXPECT_EQ(snapshot(a.game), snapshot(b.game));
+  }
+}
+
+TEST(Records, ActionJsonRoundTrip) {
+  std::vector<Action> actions;
+  for (int k = 0; k <= static_cast<int>(ActionKind::kEndTurn); ++k) {
+    Action a;
+    a.kind = static_cast<ActionKind>(k);
+    switch (a.kind) {
+      case ActionKind::kBuildSettlement:
+      case ActionKind::kBuildRoad:
+      case ActionKind::kUpgradeCity:
+      case ActionKind::kMoveRobber:
+      case ActionKind::kSteal:
+      case ActionKind::kConfirmTrade: a.target = 7; break;
+      case ActionKind::kDiscard: a.give = {1, 0, 2, 0, 1}; break;
+      case ActionKind::kOfferTrade: a.give = {1, 0, 0, 0, 0}; a.get = {0, 0, 0, 0, 1}; break;
+      case ActionKind::kRespondTrade: a.accept = true; break;
+      case ActionKind::kTradeWithBank:
+      case ActionKind::kPlayYearOfPlenty: a.first = Resource::kSheep; a.second = Resource::kOre; break;
+      case ActionKind::kPlayMonopoly: a.first = Resource::kWheat; break;
+      default: break;
+    }
+    actions.push_back(a);
+  }
+  for (const Action& a : actions) {
+    SCOPED_TRACE(action_json(a).dump());
+    const auto back = action_from_json(action_json(a));
+    ASSERT_TRUE(back.has_value());
+    EXPECT_EQ(*back, a);
+  }
+  EXPECT_FALSE(action_from_json(nlohmann::json{{"kind", "fly"}}).has_value());
+  EXPECT_FALSE(action_from_json(nlohmann::json{{"kind", "play_monopoly"}, {"first", "gold"}}).has_value());
 }
 
 }  // namespace

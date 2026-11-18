@@ -2,7 +2,9 @@
 # Local CI. GitHub Actions is off for this repo, so this script is the gate
 # before merging: Debug with sanitizers, Release with the default compiler,
 # Release with clang, a short benchmark run to prove they still run, 2000
-# random games, the difference test against catan-project's Python rules,
+# random games, zoo games, a short arena match, the validation set and the
+# sanity positions, the Catanatron bridge where Catanatron is installed,
+# the difference test against catan-project's Python rules,
 # the WebAssembly build (same games and same win chances as native) with
 # the web viewer's tests.
 #
@@ -75,6 +77,31 @@ else
   else
     step "zoo against Go: no records in $zoo_records (only tests/data was checked)"
   fi
+fi
+
+step "arena (release): a short match, no refused move"
+out="$(build/release/tools/catan_arena --candidate hard --opponents zoo --deals 200 --threads "$jobs")"
+echo "$out"
+echo "$out" | grep -q " 0 unfinished, 0 refused moves" || { echo "arena games went wrong" >&2; exit 1; }
+
+step "validation set A: reads back, baseline model scores it"
+gzip -dc data/set-a.jsonl.gz | build/release/tools/catan_validate eval --model data/baseline.json | tail -1
+
+step "sanity positions C (hard bot)"
+build/release/tools/catan_validate sanity --bot hard --games 200 --seed 3001 --threads "$jobs"
+
+# Catanatron (GPL-3.0) is not part of this repository; the bridge is checked
+# only where it is installed (docs/arena.md says how).
+catanatron_python="${CATAN_CATANATRON_PYTHON:-/tmp/catanatron/bin/python}"
+if [ -x "$catanatron_python" ] && "$catanatron_python" -c "import catanatron.players.minimax" 2>/dev/null; then
+  step "Catanatron bridge: every move it makes is one our rules accept"
+  out="$(build/release/tools/catan_arena --candidate catanatron:weighted --opponents hard --no-trades --deals 32 \
+    --threads "$jobs" --python "$catanatron_python")"
+  echo "$out"
+  echo "$out" | grep -q " 0 unfinished, 0 refused moves" || { echo "Catanatron moves were refused" >&2; exit 1; }
+  echo "$out" | grep -q ", 0 it chose that our rules have no move for" || { echo "unmapped Catanatron moves" >&2; exit 1; }
+else
+  step "Catanatron bridge: not installed at $catanatron_python, skipped"
 fi
 
 if "$bench"; then

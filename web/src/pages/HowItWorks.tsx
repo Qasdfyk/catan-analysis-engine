@@ -6,6 +6,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { getVertexCoords, hexCorners, hexToPixel, HEX_SIZE, RESOURCE_COLORS } from '@platform/utils/hexLayout';
 import { PLAYER_COLORS } from '@platform/utils/labels';
+import { Arena } from '../components/Arena';
 import { Zoo } from '../components/Zoo';
 import { exampleRecord, type OpenGame } from '../engine';
 import { CORRECTNESS, GAME_LAYOUT, REPO_URL } from '../facts';
@@ -288,6 +289,8 @@ export function HowItWorks() {
       </section>
 
       <Zoo />
+
+      <Arena />
 
       <section className="section">
         <div className="section-head">

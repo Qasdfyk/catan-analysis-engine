@@ -49,6 +49,28 @@ class RecordError : public std::runtime_error {
 // needed). Nothing for people and the other levels.
 [[nodiscard]] std::optional<ZooBot> zoo_bot_from_record(const nlohmann::json& player);
 
+// --- Positions in index form ----------------------------------------------
+//
+// A position written down without its game: the board and a snapshot(). The
+// validation set A (docs/arena.md) stores positions like this, and the
+// arena hands them to bots that run in another process.
+
+// Terrain, numbers and ports by index: {"hexes": [{"terrain", "number"}],
+// "ports": [{"type", "nodes": [a, b]}]}.
+[[nodiscard]] nlohmann::json board_json(const Board& board);
+[[nodiscard]] Board board_from_json(const nlohmann::json& board);
+
+// The inverse of snapshot(): snapshot(game_from_snapshot(b, snapshot(g)))
+// == snapshot(g), and the game plays on exactly as g would (tests check
+// both). Settings are the defaults. Throws RecordError.
+[[nodiscard]] Game game_from_snapshot(const nlohmann::json& board, const nlohmann::json& state);
+
+// One move in index form: {"kind": "build_road", "target": 17, ...}, with only
+// the fields the kind uses. action_from_json() returns nothing for anything
+// it cannot read.
+[[nodiscard]] nlohmann::json action_json(const Action& action);
+[[nodiscard]] std::optional<Action> action_from_json(const nlohmann::json& action);
+
 // Reads a record file: plain JSON (downloaded from the game) only.
 [[nodiscard]] nlohmann::json read_record_file(const std::string& path);
 

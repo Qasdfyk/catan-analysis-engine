@@ -522,6 +522,203 @@ std::optional<ZooBot> zoo_bot_from_record(const json& player) {
   return bot;
 }
 
+json board_json(const Board& b) {
+  static constexpr std::array<const char*, 6> kTerrainNames = {"wood", "brick", "sheep", "wheat", "ore", "desert"};
+  static constexpr std::array<const char*, 6> kPortNames = {"3:1",       "wood_2:1",  "brick_2:1",
+                                                            "sheep_2:1", "wheat_2:1", "ore_2:1"};
+  json hexes = json::array();
+  for (int h = 0; h < kHexCount; ++h) {
+    hexes.push_back({{"terrain", kTerrainNames[static_cast<std::size_t>(b.terrain[at(h)])]},
+                     {"number", b.number[at(h)]}});
+  }
+  json ports = json::array();
+  for (int p = 0; p < b.port_count; ++p) {
+    ports.push_back({{"type", kPortNames[static_cast<std::size_t>(b.ports[at(p)].type)]},
+                     {"nodes", nodes_json(b.ports[at(p)].nodes)}});
+  }
+  return {{"hexes", hexes}, {"ports", ports}};
+}
+
+Board board_from_json(const json& j) {
+  try {
+    Board b;
+    const json& hexes = field(j, "hexes");
+    if (!hexes.is_array() || hexes.size() != kHexCount) throw RecordError("the board must have 19 hexes");
+    for (int h = 0; h < kHexCount; ++h) {
+      const auto terrain = parse_terrain(field(hexes[at(h)], "terrain").get<std::string>());
+      if (!terrain) throw RecordError("unknown terrain");
+      b.terrain[at(h)] = *terrain;
+      b.number[at(h)] = static_cast<std::int8_t>(field(hexes[at(h)], "number").get<int>());
+    }
+    const json& ports = field(j, "ports");
+    if (!ports.is_array() || ports.size() > kMaxPorts) throw RecordError("too many ports");
+    for (const json& port : ports) {
+      const auto type = parse_port(field(port, "type").get<std::string>());
+      if (!type) throw RecordError("unknown port type");
+      Port p{*type, 0};
+      for (const json& n : field(port, "nodes")) p.nodes |= bit(n.get<int>());
+      b.ports[at(b.port_count++)] = p;
+    }
+    b.index_numbers();
+    return b;
+  } catch (const json::exception& e) {
+    throw RecordError(std::string("broken board: ") + e.what());
+  }
+}
+
+namespace {
+
+std::optional<Phase> parse_phase(const std::string& name) {
+  for (int p = 0; p <= static_cast<int>(Phase::kMain); ++p) {
+    if (name == phase_name(static_cast<Phase>(p))) return static_cast<Phase>(p);
+  }
+  return std::nullopt;
+}
+
+Cards cards_from(const json& j) {
+  Cards c{};
+  if (!j.is_array() || j.size() != kResourceCount) throw RecordError("cards are five numbers");
+  for (int r = 0; r < kResourceCount; ++r) c[at(r)] = j[at(r)].get<int>();
+  return c;
+}
+
+std::uint8_t seats_from(const json& j) {
+  std::uint8_t mask = 0;
+  for (const json& s : j) mask = static_cast<std::uint8_t>(mask | (1U << s.get<int>()));
+  return mask;
+}
+
+int seat_or_none(const json& j) { return j.is_null() ? -1 : j.get<int>(); }
+
+Game from_snapshot(const json& board_j, const json& st) {
+  const Board board = board_from_json(board_j);
+  const json& players = field(st, "players");
+  const int n = static_cast<int>(players.size());
+  if (n < 2 || n > kMaxPlayers) throw RecordError("a game has 2 to 4 players");
+  std::vector<DevCard> deck;
+  for (const json& card : field(st, "dev_deck")) {
+    const auto c = parse_dev_card(card.get<std::string>());
+    if (!c) throw RecordError("unknown development card");
+    deck.push_back(*c);
+  }
+  Game g = Game::create(board, Settings{}, n, 0, deck);
+  for (int s = 0; s < n; ++s) {
+    const json& pj = players[at(s)];
+    Player& p = g.players[at(s)];
+    p.resources = cards_from(field(pj, "resources"));
+    for (int c = 0; c < kDevCardKinds; ++c) {
+      p.dev_cards[at(c)] = static_cast<std::uint8_t>(field(pj, "dev_cards")[at(c)].get<int>());
+      p.new_dev_cards[at(c)] = static_cast<std::uint8_t>(field(pj, "new_dev_cards")[at(c)].get<int>());
+    }
+    p.knights = field(pj, "knights").get<int>();
+    for (const json& v : field(pj, "settlements")) p.settlements |= bit(v.get<int>());
+    for (const json& v : field(pj, "cities")) p.cities |= bit(v.get<int>());
+    for (const json& e : field(pj, "roads")) p.roads.set(e.get<int>());
+  }
+  g.current = field(st, "current").get<int>();
+  g.turn_number = field(st, "turn").get<int>();
+  const auto phase = parse_phase(field(st, "phase").get<std::string>());
+  const auto back = parse_phase(field(st, "return_phase").get<std::string>());
+  if (!phase || !back) throw RecordError("unknown phase");
+  g.phase = *phase;
+  g.return_phase = *back;
+  g.dice_roll = field(st, "dice_roll").is_null() ? 0 : field(st, "dice_roll").get<int>();
+  const json& counts = field(st, "roll_counts");
+  for (std::size_t i = 0; i < g.roll_counts.size(); ++i) g.roll_counts[i] = counts.at(i).get<int>();
+  // The snapshot lists the seats still to place; the queue starts over from them.
+  const json& queue = field(st, "setup_queue");
+  g.setup_length = static_cast<int>(queue.size());
+  g.setup_position = 0;
+  for (int i = 0; i < g.setup_length; ++i) g.setup_queue[at(i)] = static_cast<std::int8_t>(queue[at(i)].get<int>());
+  g.setup_waiting_for_road = field(st, "setup_waiting_for_road").get<bool>();
+  g.setup_last_node = seat_or_none(field(st, "setup_last_node"));
+  g.robber_hex = field(st, "robber").get<int>();
+  const json& pending = field(st, "pending_discards");
+  for (int s = 0; s < n; ++s) g.pending_discards[at(s)] = static_cast<std::int8_t>(seat_or_none(pending[at(s)]));
+  g.free_roads_left = field(st, "free_roads_left").get<int>();
+  const json& offer = field(st, "offer");
+  if (!offer.is_null()) {
+    g.offer.open = true;
+    g.offer.proposer = static_cast<std::int8_t>(field(offer, "proposer").get<int>());
+    g.offer.give = cards_from(field(offer, "give"));
+    g.offer.get = cards_from(field(offer, "get"));
+    g.offer.accepted = seats_from(field(offer, "accepted"));
+    g.offer.declined = seats_from(field(offer, "declined"));
+  }
+  g.dev_card_played = field(st, "dev_card_played").get<bool>();
+  g.largest_army = seat_or_none(field(st, "largest_army"));
+  g.longest_road = seat_or_none(field(st, "longest_road"));
+  const json& lengths = field(st, "road_lengths");
+  for (int s = 0; s < n; ++s) g.road_lengths[at(s)] = lengths[at(s)].get<int>();
+  g.game_over = field(st, "game_over").get<bool>();
+  g.winner = seat_or_none(field(st, "winner"));
+  return g;
+}
+
+}  // namespace
+
+Game game_from_snapshot(const json& board, const json& state) {
+  try {
+    return from_snapshot(board, state);
+  } catch (const json::exception& e) {
+    throw RecordError(std::string("broken snapshot: ") + e.what());
+  }
+}
+
+json action_json(const Action& a) {
+  json out = {{"kind", action_name(a.kind)}};
+  switch (a.kind) {
+    case ActionKind::kBuildSettlement:
+    case ActionKind::kBuildRoad:
+    case ActionKind::kUpgradeCity:
+    case ActionKind::kMoveRobber:
+    case ActionKind::kSteal:
+    case ActionKind::kConfirmTrade: out["target"] = a.target; break;
+    case ActionKind::kDiscard: out["give"] = cards_json(a.give); break;
+    case ActionKind::kOfferTrade:
+      out["give"] = cards_json(a.give);
+      out["get"] = cards_json(a.get);
+      break;
+    case ActionKind::kRespondTrade: out["accept"] = a.accept; break;
+    case ActionKind::kTradeWithBank:
+    case ActionKind::kPlayYearOfPlenty:
+      out["first"] = resource_name(a.first);
+      out["second"] = resource_name(a.second);
+      break;
+    case ActionKind::kPlayMonopoly: out["first"] = resource_name(a.first); break;
+    default: break;
+  }
+  return out;
+}
+
+std::optional<Action> action_from_json(const json& j) {
+  try {
+    if (!j.is_object() || !j.contains("kind") || !j["kind"].is_string()) return std::nullopt;
+    Action a;
+    bool found = false;
+    for (int k = 0; k <= static_cast<int>(ActionKind::kEndTurn); ++k) {
+      if (j["kind"] == action_name(static_cast<ActionKind>(k))) {
+        a.kind = static_cast<ActionKind>(k);
+        found = true;
+      }
+    }
+    if (!found) return std::nullopt;
+    a.target = j.value("target", -1);
+    if (j.contains("give")) a.give = cards_from(j["give"]);
+    if (j.contains("get")) a.get = cards_from(j["get"]);
+    a.accept = j.value("accept", false);
+    for (const auto& [key, out] : {std::pair<const char*, Resource*>{"first", &a.first}, {"second", &a.second}}) {
+      if (!j.contains(key)) continue;
+      const auto r = parse_resource(j[key]);
+      if (!r) return std::nullopt;
+      *out = *r;
+    }
+    return a;
+  } catch (const std::exception&) {
+    return std::nullopt;
+  }
+}
+
 json read_record_file(const std::string& path) {
   std::ifstream in(path);
   if (!in) throw RecordError("cannot open " + path);
