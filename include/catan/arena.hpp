@@ -89,12 +89,21 @@ using ArenaPlayer = std::function<std::optional<Action>(const ArenaView&)>;
 // players, so matches against it are played without).
 [[nodiscard]] ArenaPlayer zoo_player(const ZooBot& bot, bool trades = true);
 
+// How a seat played a game: what MAP-Elites (map_elites.hpp) sorts bots by.
+struct SeatPlay {
+  int settlements = 0;  // standing at the end (a city is no longer a settlement)
+  int cities = 0;
+  int trades = 0;     // trades with players completed, as proposer or partner
+  int dev_cards = 0;  // development cards bought
+};
+
 struct ArenaGame {
   int winner = -1;  // -1 when the action limit ran out
   int actions = 0;
   int turns = 0;
   std::array<int, kMaxPlayers> fallbacks{};  // moves of each seat refused or missing
   std::array<int, kMaxPlayers> points{};     // victory points at the end, hidden ones included
+  std::array<SeatPlay, kMaxPlayers> play{};
 };
 
 // One game of a deal. `game_number` picks the game's own random stream; with

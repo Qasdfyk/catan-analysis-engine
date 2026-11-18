@@ -63,6 +63,7 @@ const ROADMAP = [
   { done: true, title: 'WebAssembly replay viewer', text: 'This page' },
   { done: true, title: 'Bot zoo', text: 'Sixteen styles of bot, to play varied games (in Replay and How it works)' },
   { done: true, title: 'Chance to win', text: 'Monte Carlo in Web Workers, split into luck and decisions (in Replay)' },
+  { done: true, title: 'Arena and tuned zoo', text: 'SPRT matches, Catanatron, and MAP-Elites: the best bot of each style (in How it works)' },
   { done: false, title: 'Search', text: 'Monte Carlo tree search over the fast engine' },
   { done: false, title: 'Value network', text: 'A learned evaluation of positions, trained on self-play' },
   { done: false, title: 'Post-game review', text: 'Which moves won or lost the game, shown here move by move' },

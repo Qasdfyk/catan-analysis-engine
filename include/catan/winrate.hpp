@@ -79,12 +79,13 @@ struct WinCounts {
 };
 
 // Who sits where in the playouts: nothing = a random zoo bot per seat and
-// playout, as for a game between people.
+// playout, as for a game between people (from `pool` when it is not empty,
+// for instance the MAP-Elites of map_elites.hpp).
 using SeatBots = std::array<std::optional<ZooBot>, kMaxPlayers>;
 
 // Playouts first .. first + count - 1 from `start`. A finished game counts
 // every playout for its winner without playing any.
 [[nodiscard]] WinCounts play_out_chances(const Game& start, int first, int count, std::uint64_t seed,
-                                         const SeatBots& bots = {});
+                                         const SeatBots& bots = {}, std::span<const ZooBot> pool = {});
 
 }  // namespace cae

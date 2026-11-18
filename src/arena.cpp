@@ -98,6 +98,11 @@ ArenaGame play_arena_game(const Deal& deal, std::span<const ArenaPlayer> seats, 
     }
     if (e == Error::kNone) {
       if (action->kind == ActionKind::kRollDice) ++rolls;
+      if (action->kind == ActionKind::kBuyDevCard) ++out.play[at(seat)].dev_cards;
+      if (action->kind == ActionKind::kConfirmTrade) {
+        ++out.play[at(seat)].trades;
+        ++out.play[at(action->target)].trades;
+      }
       if (action->kind != ActionKind::kBuildSettlement) memory.record(seat, *action);
     } else {
       // The safe move, as after a refused move on the platform.
@@ -121,7 +126,12 @@ ArenaGame play_arena_game(const Deal& deal, std::span<const ArenaPlayer> seats, 
   }
   out.winner = game.winner;
   out.turns = game.turn_number;
-  for (int s = 0; s < players; ++s) out.points[at(s)] = game.visible_points(s) + game.hidden_points(s);
+  for (int s = 0; s < players; ++s) {
+    const Player& p = game.players[at(s)];
+    out.points[at(s)] = game.visible_points(s) + game.hidden_points(s);
+    out.play[at(s)].settlements = count(p.settlements);
+    out.play[at(s)].cities = count(p.cities);
+  }
   return out;
 }
 

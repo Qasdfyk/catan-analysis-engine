@@ -2,8 +2,8 @@
 # Local CI. GitHub Actions is off for this repo, so this script is the gate
 # before merging: Debug with sanitizers, Release with the default compiler,
 # Release with clang, a short benchmark run to prove they still run, 2000
-# random games, zoo games, a short arena match, the validation set and the
-# sanity positions, the Catanatron bridge where Catanatron is installed,
+# random games, zoo games, a short arena match, a tiny MAP-Elites search,
+# the validation set and the sanity positions, the Catanatron bridge where Catanatron is installed,
 # the difference test against catan-project's Python rules,
 # the WebAssembly build (same games and same win chances as native) with
 # the web viewer's tests.
@@ -84,11 +84,25 @@ out="$(build/release/tools/catan_arena --candidate hard --opponents zoo --deals 
 echo "$out"
 echo "$out" | grep -q " 0 unfinished, 0 refused moves" || { echo "arena games went wrong" >&2; exit 1; }
 
+step "MAP-Elites (release): a tiny search, its elites play in the arena"
+tmp_elites="$(mktemp)"
+build/release/tools/catan_map_elites --generations 2 --batch 16 --games 40 --recheck 40 --reeval 20 --final 100 \
+  --seed-bots 8 --threads "$jobs" --out "$tmp_elites" | tail -4
+out="$(build/release/tools/catan_arena --candidate elite:0 --opponents elites --elites "$tmp_elites" --deals 64 \
+  --threads "$jobs")"
+rm -f "$tmp_elites"
+echo "$out"
+echo "$out" | grep -q " 0 unfinished, 0 refused moves" || { echo "elite games went wrong" >&2; exit 1; }
+step "MAP-Elites: data/elites.json loads, the page's map matches it"
+build/release/tools/catan_arena --candidate elite:0 --opponents hard --deals 16 --threads "$jobs" | tail -1
+python3 scripts/style-map-web.py --check
+
 step "validation set A: reads back, baseline model scores it"
 gzip -dc data/set-a.jsonl.gz | build/release/tools/catan_validate eval --model data/baseline.json | tail -1
 
-step "sanity positions C (hard bot)"
+step "sanity positions C (hard bot, then with the Robber on the leader)"
 build/release/tools/catan_validate sanity --bot hard --games 200 --seed 3001 --threads "$jobs"
+build/release/tools/catan_validate sanity --bot hard+leader=1 --games 200 --seed 3001 --threads "$jobs"
 
 # Catanatron (GPL-3.0) is not part of this repository; the bridge is checked
 # only where it is installed (docs/arena.md says how).

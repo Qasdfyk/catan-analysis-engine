@@ -46,7 +46,8 @@ WinCounts& WinCounts::operator+=(const WinCounts& o) noexcept {
   return *this;
 }
 
-WinCounts play_out_chances(const Game& start, int first, int count, std::uint64_t seed, const SeatBots& bots) {
+WinCounts play_out_chances(const Game& start, int first, int count, std::uint64_t seed, const SeatBots& bots,
+                           std::span<const ZooBot> pool) {
   WinCounts out;
   out.playouts = count;
   if (start.winner >= 0) {
@@ -60,7 +61,11 @@ WinCounts play_out_chances(const Game& start, int first, int count, std::uint64_
     table.game = start;
     shuffle_undrawn(table.game, rng);
     for (int s = 0; s < start.player_count; ++s) {
-      table.bots[at(s)] = bots[at(s)] ? *bots[at(s)] : random_zoo_bot(rng);
+      if (bots[at(s)]) {
+        table.bots[at(s)] = *bots[at(s)];
+      } else {
+        table.bots[at(s)] = pool.empty() ? random_zoo_bot(rng) : pool[at(rng.below(static_cast<int>(pool.size())))];
+      }
     }
     const ZooPlayout r = play_out_zoo(table, rng);
     if (r.winner < 0) {

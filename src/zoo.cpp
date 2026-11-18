@@ -911,10 +911,10 @@ int Plan::robber_hex_medium(std::uint32_t options) const {
 int Plan::hard_robber() const {
   const std::uint32_t options = g_.legal_robber_hexes(seat_);
   int best = -1;
-  int best_harm = 0;
+  double best_harm = 0;
   for (int h = 0; h < kHexCount; ++h) {
     if ((options >> h & 1U) == 0) continue;
-    int harm = 0;
+    double harm = 0;
     bool own = false;
     bool victims = false;
     for_each_node(kTopology.hex_node_mask[at(h)], [&](int n) {
@@ -924,8 +924,10 @@ int Plan::hard_robber() const {
         own = true;
         return;
       }
-      int weight = threat(o) * (pips(g_.board.number[at(h)]) + 1);
+      double weight = threat(o) * (pips(g_.board.number[at(h)]) + 1);
       if (contains(g_.players[at(o)].cities, n)) weight *= 2;
+      // Not in Go: at 0 the sums stay whole numbers, so the choice is the same.
+      if (w_.leader_focus > 0 && leads(o)) weight *= 1 + w_.leader_focus;
       harm += weight;
       victims = victims || g_.players[at(o)].card_count() > 0;
     });

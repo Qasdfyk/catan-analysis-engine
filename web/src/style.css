@@ -415,3 +415,28 @@ footer {
 .split-num { text-align: right; }
 .legend .chip { margin-right: 2px; }
 .split-err { position: absolute; top: 4px; height: 2px; background: rgba(255, 255, 255, .55); }
+
+/* The map of styles (StyleMap.tsx) */
+.style-map { display: grid; grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); gap: 16px; align-items: start; }
+.style-controls { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; margin-bottom: 14px; }
+.style-controls .segmented button { padding: 6px 10px; font-size: 13px; }
+.style-grid { display: grid; gap: 4px; align-items: center; }
+.style-axis { font-size: 11px; color: var(--muted); padding-right: 6px; white-space: nowrap; }
+.style-axis.center { text-align: center; padding: 4px 0 0; }
+.style-cell { position: relative; aspect-ratio: 1.4; min-width: 0; padding: 0; display: grid; place-items: center; border: 1px solid var(--line-2); border-radius: 6px; font-size: 13px; color: var(--text); }
+.style-cell.empty { background: transparent; color: var(--muted); border-style: dashed; }
+.style-cell.on { outline: 2px solid var(--gold); outline-offset: 1px; }
+.style-zoo { position: absolute; top: 4px; right: 4px; width: 6px; height: 6px; border-radius: 50%; background: var(--gold); }
+.style-zoo.inline { position: static; display: inline-block; margin: 0 2px 0 4px; }
+.style-legend { margin-top: 12px; }
+.style-detail-head { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+.style-win { font-size: 28px; color: var(--text); }
+.style-genes { display: grid; gap: 6px; margin: 12px 0 0; }
+.style-genes div { display: flex; justify-content: space-between; gap: 12px; border-bottom: 1px solid var(--line); padding-bottom: 4px; }
+.style-genes dt { color: var(--muted); font-size: 12px; }
+.style-genes dd { margin: 0; font-size: 12px; text-align: right; }
+@media (max-width: 760px) {
+  .style-map { grid-template-columns: minmax(0, 1fr); }
+  .style-cell { font-size: 11px; aspect-ratio: 1.1; }
+  .style-axis { font-size: 10px; }
+}
