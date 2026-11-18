@@ -142,9 +142,13 @@ constexpr bool is_permutation_of_indices(const std::array<std::int8_t, N>& order
 static_assert(is_permutation_of_indices(kServerNodeOrder), "every corner once");
 static_assert(is_permutation_of_indices(kServerEdgeOrder), "every side once");
 
+// Both walk the server's order and stop once every member is out: most
+// masks hold a few spots, found long before the end of the order.
 NodeList in_server_order(NodeMask mask) {
   NodeList out;
+  const int members = count(mask);
   for (auto n : kServerNodeOrder) {
+    if (out.size == members) break;
     if (contains(mask, n)) out.push(n);
   }
   return out;
@@ -152,7 +156,9 @@ NodeList in_server_order(NodeMask mask) {
 
 EdgeList in_server_order(const EdgeMask& mask) {
   EdgeList out;
+  const int members = mask.count();
   for (auto e : kServerEdgeOrder) {
+    if (out.size == members) break;
     if (mask.test(e)) out.push(e);
   }
   return out;
@@ -188,10 +194,21 @@ class Plan {
       for_each_node(p.buildings(), [&](int n) { owner_[at(n)] = static_cast<std::int8_t>(s); });
       any_road_ |= p.roads;
     }
+    // Game::trade_rate() for all five resources in one pass over the ports
+    const NodeMask mine = g.players[at(seat)].buildings();
+    bool any_port = false;
+    std::array<bool, kResourceCount> two_for_one{};
     for (int i = 0; i < g.board.port_count; ++i) {
-      for_each_node(g.board.ports[at(i)].nodes, [&](int n) { port_[at(n)] = static_cast<int>(g.board.ports[at(i)].type); });
+      const Port& port = g.board.ports[at(i)];
+      for_each_node(port.nodes, [&](int n) { port_[at(n)] = static_cast<int>(port.type); });
+      if ((port.nodes & mine) == 0) continue;
+      if (port.type == PortType::kAny) {
+        any_port = true;
+      } else {
+        two_for_one[at(static_cast<int>(port.type) - 1)] = true;  // PortType::kWood is 1
+      }
     }
-    for (int r = 0; r < kResourceCount; ++r) rate_[at(r)] = g.trade_rate(seat, res(r));
+    for (int r = 0; r < kResourceCount; ++r) rate_[at(r)] = two_for_one[at(r)] ? 2 : any_port ? 3 : 4;
   }
 
   // plan(): the part every hard decision works out first.
@@ -248,17 +265,17 @@ class Plan {
   [[nodiscard]] bool blocked(int n) const { return owner_[at(n)] >= 0 && owner_[at(n)] != seat_; }
 
   // network: every corner the bot can build a road from.
+  // Its buildings, and the ends of its roads where no opponent has built.
   [[nodiscard]] NodeMask network() const {
-    NodeMask start = 0;
-    for (int n = 0; n < kNodeCount; ++n) {
-      if (owner_[at(n)] == seat_) {
-        start |= bit(n);
-        continue;
-      }
-      if (blocked(n)) continue;
-      if ((me().roads & kTopology.node_edge_mask[at(n)]).any()) start |= bit(n);
+    NodeMask ends = 0;
+    for_each_edge(me().roads, [&](int e) {
+      ends |= bit(kTopology.edge_nodes[at(e)][0]) | bit(kTopology.edge_nodes[at(e)][1]);
+    });
+    NodeMask opponents = 0;
+    for (int s = 0; s < g_.player_count; ++s) {
+      if (s != seat_) opponents |= g_.players[at(s)].buildings();
     }
-    return start;
+    return me().buildings() | (ends & ~opponents);
   }
 
   // distances: new roads needed to reach each corner from the start, through
@@ -320,9 +337,10 @@ class Plan {
   // produces: the pips of each resource a player collects, cities twice,
   // without the robbed tile.
   [[nodiscard]] std::array<double, kResourceCount> produces(int seat) const {
+    // Go walks the sorted corners; the sums are whole numbers of pips, so the
+    // order of adding them does not change the result.
     std::array<double, kResourceCount> production{};
-    for (auto n : corner_order().nodes) {
-      if (owner_[at(n)] != seat) continue;
+    for_each_node(g_.players[at(seat)].buildings(), [&](int n) {
       const double weight = contains(g_.players[at(seat)].cities, n) ? 2.0 : 1.0;
       for (int i = 0; i < kCornerTiles.count[at(n)]; ++i) {
         const int h = kCornerTiles.hexes[at(n)][at(i)];
@@ -330,7 +348,7 @@ class Plan {
           production[at(static_cast<int>(g_.board.terrain[at(h)]))] += weight * pips(g_.board.number[at(h)]);
         }
       }
-    }
+    });
     return production;
   }
 
@@ -405,16 +423,31 @@ class Plan {
     for (int r = 0; r < kResourceCount; ++r) {
       if (rate_[at(r)] > 0 && hand_[at(r)] > cost[at(r)]) trades += (hand_[at(r)] - cost[at(r)]) / rate_[at(r)];
     }
-    std::array<double, 16> waits{};
-    int n = 0;
+    // Go lists one wait per missing card, sorts them and adds up all but the
+    // `trades` longest. The waits of one resource are equal, so sorting the
+    // five resources by wait and taking whole runs adds the same numbers in
+    // the same order.
+    std::array<double, kResourceCount> wait{};
+    std::array<int, kResourceCount> order{};
+    int needed = 0;
+    int kinds = 0;
     for (int r = 0; r < kResourceCount; ++r) {
+      const int short_by = cost[at(r)] - hand_[at(r)];
+      if (short_by <= 0) continue;
       const double per_round = static_cast<double>(g_.player_count) * production_[at(r)] / 36;
-      for (int k = 0; k < std::max(0, cost[at(r)] - hand_[at(r)]); ++k) waits[at(n++)] = 1 / (per_round + 0.15);
+      wait[at(r)] = 1 / (per_round + 0.15);
+      needed += short_by;
+      int i = kinds++;
+      for (; i > 0 && wait[at(order[at(i - 1)])] > wait[at(r)]; --i) order[at(i)] = order[at(i - 1)];
+      order[at(i)] = r;
     }
-    std::sort(waits.begin(), waits.begin() + n);
+    int left = needed - trades;
     double turns = 0;
-    for (int i = 0; i < n; ++i) {
-      if (i < n - trades) turns += waits[at(i)];
+    for (int i = 0; i < kinds && left > 0; ++i) {
+      const int r = order[at(i)];
+      const int take = std::min(left, cost[at(r)] - hand_[at(r)]);
+      for (int k = 0; k < take; ++k) turns += wait[at(r)];
+      left -= take;
     }
     return turns;
   }

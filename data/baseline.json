@@ -1,0 +1,18 @@
+{
+  "model": "conditional logit",
+  "trained_on": {
+    "games": 4000,
+    "positions_per_game": 4,
+    "seed": 2001
+  },
+  "weights": {
+    "cards": 0.0927228268862044,
+    "dev_cards": 0.2641836101101538,
+    "knights": -0.017800188229653596,
+    "points": 0.570539852106881,
+    "ports": 0.026384588289943067,
+    "production": 0.05893298746119101,
+    "road_length": 0.0834913690651812,
+    "to_move": 0.10401956471264416
+  }
+}

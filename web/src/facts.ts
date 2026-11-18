@@ -87,3 +87,41 @@ export const ZOO = {
     balanced: { 'ore-wheat': 0.42, 'wood-brick': 0.559, port: 0.643 },
   },
 } as const;
+
+/**
+ * The arena (docs/arena.md): one candidate against three copies of an
+ * opponent, plain deals, catan_arena --deals N --threads 12 (seed 1). `half`
+ * is the half-width of the 95% interval. An even share is 25%.
+ */
+export const ARENA = {
+  matches: [
+    { candidate: 'hard', opponents: 'hard', win: 0.245, half: 0.009, games: 8000, note: 'the control: an equal player wins 25%' },
+    { candidate: 'hard', opponents: 'random zoo bots', win: 0.37, half: 0.011, games: 8000, note: '' },
+    { candidate: 'zoo ore-wheat', opponents: 'hard', win: 0.274, half: 0.01, games: 8000, note: '' },
+    { candidate: 'zoo wood-brick', opponents: 'hard', win: 0.199, half: 0.009, games: 8000, note: '' },
+    { candidate: 'zoo port', opponents: 'hard', win: 0.152, half: 0.008, games: 8000, note: '' },
+    { candidate: 'zoo balanced, never trades', opponents: 'hard', win: 0.176, half: 0.008, games: 8000, note: 'trading is worth a lot' },
+    { candidate: 'Catanatron AlphaBeta', opponents: 'hard', win: 0.065, half: 0.024, games: 400, note: 'no trades between players; Catanatron sees every hand' },
+    { candidate: 'hard', opponents: 'Catanatron AlphaBeta', win: 0.52, half: 0.069, games: 200, note: 'no trades between players' },
+  ],
+  /**
+   * Set A: 4000 positions from 1000 native zoo games (seed 1001), scored by
+   * catan_validate eval. Brier score, lower is better.
+   */
+  brier: [
+    { name: 'Monte Carlo, the game’s own bots', value: 0.1263, lo: 0.1212, hi: 0.1312 },
+    { name: 'Monte Carlo, random zoo bots', value: 0.1301, lo: 0.1255, hi: 0.1348 },
+    { name: 'baseline model (8 numbers)', value: 0.1497, lo: 0.1456, hi: 0.1541 },
+    { name: 'always 1 in 4', value: 0.1875, lo: 0.1875, hi: 0.1875 },
+  ],
+  /** catan_validate sanity --bot hard --games 200 --seed 3001 */
+  sanity: [
+    { name: 'win now with a settlement', passed: 137, tried: 137 },
+    { name: 'win now with a city', passed: 199, tried: 199 },
+    { name: 'win now with Largest Army', passed: 192, tried: 192 },
+    { name: 'refuse the leader’s trade', passed: 148, tried: 148 },
+    { name: 'rob the leader', passed: 147, tried: 147 },
+    { name: 'robber next to the leader', passed: 132, tried: 148 },
+    { name: 'first settlement on a rich corner', passed: 181, tried: 200 },
+  ],
+} as const;

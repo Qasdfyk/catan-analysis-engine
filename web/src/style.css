@@ -400,6 +400,7 @@ footer {
 .h2h td { text-align: center; border-radius: 6px; border: 2px solid var(--panel); }
 .h2h thead th { text-align: center; }
 .zoo-scroll p { margin-top: 12px; }
+.zoo-table.wrap th { white-space: normal; }
 
 /* --- Win chances: luck or decisions --- */
 .split { display: grid; grid-template-columns: minmax(90px, auto) 1fr 1fr auto; gap: 8px 14px; align-items: center; }

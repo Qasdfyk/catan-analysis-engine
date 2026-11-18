@@ -9,3 +9,12 @@ target_link_libraries(catan_zoo_check PRIVATE catan_record catan_warnings)
 
 add_executable(catan_winrate winrate.cpp)
 target_link_libraries(catan_winrate PRIVATE catan_record catan_warnings Threads::Threads)
+
+# POSIX only (it starts Catanatron as a child process through pipes).
+if(NOT EMSCRIPTEN)
+  add_executable(catan_arena arena.cpp)
+  target_link_libraries(catan_arena PRIVATE catan_record catan_warnings Threads::Threads)
+endif()
+
+add_executable(catan_validate validate.cpp)
+target_link_libraries(catan_validate PRIVATE catan_record catan_warnings Threads::Threads)

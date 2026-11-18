@@ -97,7 +97,21 @@ One core, i7-11800H, 4 players, `catan_selfplay` (laptop numbers vary by ±15% b
 | hard | ~1 400 | 1.1 |
 | zoo | ~2 200 | 0.85 |
 
-Threads, zoo: 1: 2 100, 2: 4 400, 4: 6 100, 8: 8 000, 16: 9 600 games/s. A zoo game is about five times as expensive as a random one: every decision builds its plan again (production, scarcity, a breadth-first search for the target, the goal), and the hard bot's games are longer with more trading. Not profiled yet; the obvious candidate is computing the plan once per turn instead of once per decision.
+Threads, zoo: 1: 2 100, 2: 4 400, 4: 6 100, 8: 8 000, 16: 9 600 games/s. A zoo game is about five times as expensive as a random one: every decision builds its plan again (production, scarcity, a breadth-first search for the target, the goal), and the hard bot's games are longer with more trading.
+
+### Profiled (step 10b)
+
+`perf record` on 6,000 zoo games, one thread: `Plan::prepare()` (the plan) took 37% of the time, the rest of `zoo_decide` 26%, the Longest Road search 7%, `turns_for` 6%, `trade_rate` 3% and the software `popcount` 4%. Computing the plan once per turn, as guessed above, is not possible without changing moves: the hand changes after every build or trade, and the plan depends on it. Five smaller changes that keep every move the same:
+
+| Change | Why it is the same |
+|---|---|
+| `in_server_order` stops once it has listed every member of the mask | same order, it just skips the tail |
+| the trade rates of all five resources in one pass over the ports, not five | same rule as `Game::trade_rate` |
+| `network()` from the ends of the bot's roads with bit operations, not a loop over 54 corners | same set |
+| `produces()` walks the bot's buildings, not all 54 corners in sorted order | the sums are whole numbers of pips, so the order of adding does not change them |
+| `turns_for` sorts five resources by wait instead of up to 16 single waits | the waits of one resource are equal, so the same numbers are added in the same order |
+
+Result, 5,000 games on one pinned core, best of 5: 410 → 324 µs per game (2,440 → 3,090 games/s), and 17.36 → 13.53 billion instructions (−22%, `perf stat`, which does not depend on the load of the laptop). Same checksum (81328595), and `catan_zoo_check` still finds 310,411 identical decisions and no difference on the 600 tournament records.
 
 The WebAssembly build plays the same zoo games (`node web/scripts/selfplay-node.mjs --bots zoo` prints the native checksum; `check.sh` compares them) at about 1 100–1 300 games/s in Node.
 

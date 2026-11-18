@@ -12,9 +12,6 @@ namespace {
 
 constexpr std::size_t at(int i) noexcept { return static_cast<std::size_t>(i); }
 
-constexpr std::array<const char*, 6> kTerrainNames = {"wood", "brick", "sheep", "wheat", "ore", "desert"};
-constexpr std::array<const char*, 6> kPortNames = {"3:1",       "wood_2:1",  "brick_2:1",
-                                                   "sheep_2:1", "wheat_2:1", "ore_2:1"};
 
 }  // namespace
 
@@ -58,19 +55,7 @@ json ReplayLog::state_json(int i) const {
 
 json ReplayLog::board_json() const {
   if (states_.empty()) return nullptr;
-  const Board& b = states_.front().board;
-  json hexes = json::array();
-  for (int h = 0; h < kHexCount; ++h) {
-    hexes.push_back({{"terrain", kTerrainNames[static_cast<std::size_t>(b.terrain[at(h)])]},
-                     {"number", b.number[at(h)]}});
-  }
-  json ports = json::array();
-  for (int p = 0; p < b.port_count; ++p) {
-    json nodes = json::array();
-    for_each_node(b.ports[at(p)].nodes, [&](int n) { nodes.push_back(n); });
-    ports.push_back({{"type", kPortNames[static_cast<std::size_t>(b.ports[at(p)].type)]}, {"nodes", nodes}});
-  }
-  return {{"hexes", hexes}, {"ports", ports}};
+  return cae::board_json(states_.front().board);
 }
 
 json topology_json() {

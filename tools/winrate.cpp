@@ -21,6 +21,7 @@
 // platform's tournaments record it), so playouts are played by the same
 // players as the real game.
 
+#include "catan/calibration.hpp"
 #include "catan/record.hpp"
 #include "catan/replay.hpp"
 #include "catan/winrate.hpp"
@@ -191,41 +192,6 @@ void show_game(const Game& g, const Options& o) {
 
 // --- Calibration -------------------------------------------------------------
 
-constexpr int kBuckets = 10;
-
-struct Prediction {
-  double chance = 0;
-  int won = 0;
-};
-
-struct Calibration {
-  std::array<long, kBuckets> said{};
-  std::array<long, kBuckets> won{};
-  std::array<double, kBuckets> sum_chance{};
-  double brier = 0;
-  long count = 0;
-
-  void add(const Prediction& p) {
-    const int b = std::min(kBuckets - 1, static_cast<int>(p.chance * kBuckets));
-    ++said[at(b)];
-    won[at(b)] += p.won;
-    sum_chance[at(b)] += p.chance;
-    brier += (p.chance - p.won) * (p.chance - p.won);
-    ++count;
-  }
-  [[nodiscard]] double won_share(int b) const {
-    return said[at(b)] > 0 ? static_cast<double>(won[at(b)]) / static_cast<double>(said[at(b)]) : NAN;
-  }
-  [[nodiscard]] double brier_score() const { return count > 0 ? brier / static_cast<double>(count) : NAN; }
-};
-
-double percentile(std::vector<double> v, double q) {
-  std::erase_if(v, [](double x) { return std::isnan(x); });
-  if (v.empty()) return NAN;
-  std::sort(v.begin(), v.end());
-  return v[std::min(v.size() - 1, static_cast<std::size_t>(q * static_cast<double>(v.size())))];
-}
-
 void calibrate(const std::vector<Game>& games, const Options& o) {
   // Positions: `calibrate` turns per game, drawn at random among the points
   // just before a roll, so early, middle and late game all show up.
@@ -259,7 +225,7 @@ void calibrate(const std::vector<Game>& games, const Options& o) {
   const long long playouts = static_cast<long long>(positions) * o.playouts;
 
   // Predictions grouped by game, for the bootstrap.
-  std::vector<std::vector<Prediction>> by_game;
+  std::vector<std::vector<cae::Prediction>> by_game;
   int last_game = -1;
   for (std::size_t k = 0; k < picked.size(); ++k) {
     const Game& g = games[at(picked[k].game)];
@@ -271,44 +237,11 @@ void calibrate(const std::vector<Game>& games, const Options& o) {
   }
   const double seconds = std::chrono::duration<double>(std::chrono::steady_clock::now() - t0).count();
 
-  Calibration all;
-  for (const auto& preds : by_game) {
-    for (const auto& p : preds) all.add(p);
-  }
-
-  // Bootstrap: draw as many games as there are, with replacement, and
-  // compute everything again; the spread of those results is the
-  // uncertainty. 95% interval = the 2.5th to the 97.5th percentile.
-  std::array<std::vector<double>, kBuckets> boot_won;
-  std::vector<double> boot_brier;
-  cae::Rng rng(o.seed + 12345);
-  const int n = static_cast<int>(by_game.size());
-  for (int b = 0; b < o.bootstrap && n > 0; ++b) {
-    Calibration c;
-    for (int k = 0; k < n; ++k) {
-      for (const auto& p : by_game[at(rng.below(n))]) c.add(p);
-    }
-    for (int k = 0; k < kBuckets; ++k) boot_won[at(k)].push_back(c.won_share(k));
-    boot_brier.push_back(c.brier_score());
-  }
-
-  std::printf("%d games, %ld positions, %d playouts each (%lld playouts) in %.1f s: %.0f playouts/s\n\n", n,
-              positions, o.playouts, playouts, seconds, static_cast<double>(playouts) / seconds);
-  std::printf("calibration: when it said ..., the player won ... (95%% interval, bootstrap over games)\n");
-  std::printf("%10s %8s %8s %17s %7s\n", "said", "mean", "won", "interval", "count");
-  for (int k = 0; k < kBuckets; ++k) {
-    if (all.said[at(k)] == 0) continue;
-    const double mean = all.sum_chance[at(k)] / static_cast<double>(all.said[at(k)]);
-    const double lo = percentile(boot_won[at(k)], 0.025);
-    const double hi = percentile(boot_won[at(k)], 0.975);
-    const bool inside = mean >= lo && mean <= hi;
-    std::printf("%3d-%3d%%  %7.1f%% %7.1f%%   %5.1f%% .. %5.1f%% %7ld%s\n", k * 10, k * 10 + 10, 100 * mean,
-                100 * all.won_share(k), 100 * lo, 100 * hi, all.said[at(k)], inside ? "" : "  <- outside");
-  }
-  const int players = games.front().log.states().front().player_count;
-  const double base = (1.0 / players) * (1 - 1.0 / players);
-  std::printf("\nBrier score %.4f (95%% interval %.4f .. %.4f); always saying 1/%d scores %.4f\n", all.brier_score(),
-              percentile(boot_brier, 0.025), percentile(boot_brier, 0.975), players, base);
+  std::printf("%d games, %ld positions, %d playouts each (%lld playouts) in %.1f s: %.0f playouts/s\n\n",
+              static_cast<int>(by_game.size()), positions, o.playouts, playouts, seconds,
+              static_cast<double>(playouts) / seconds);
+  cae::print_calibration(cae::calibrate(by_game, o.bootstrap, o.seed + 12345),
+                         games.front().log.states().front().player_count);
 }
 
 [[noreturn]] void usage(const char* argv0) {
