@@ -5,6 +5,8 @@ import { useEffect, useMemo, useState } from 'react';
 import { GameBoard } from '../components/GameBoard';
 import { MoveLog, Players, Status } from '../components/GamePanels';
 import { DiceChart, IncomeChart, PointsChart } from '../components/ReplayCharts';
+import { LuckPanel, WinChart } from '../components/WinChances';
+import { useWinChances } from '../chances';
 import { EXAMPLES, exampleRecord, readRecordBytes } from '../engine';
 import { useOpenGame, usePlayback } from '../hooks';
 import { turnStart } from '../nav';
@@ -25,6 +27,8 @@ export function Replay() {
   const { pos, go, playing, setPlaying, speed, setSpeed } = playback;
   // Every state of the game is read once here; the charts then cut at pos.
   const stats = useMemo(() => (game ? gameStats(game) : null), [game]);
+  // Monte Carlo in Web Workers, started as soon as a record opens.
+  const chances = useWinChances(game ? (source?.text ?? null) : null);
 
   // The example opens by itself, so the tab is never empty.
   useEffect(() => {
@@ -207,7 +211,7 @@ export function Replay() {
             <p className="position">
               Move {pos} of {game.stateCount - 1} · turn {game.state(pos).turn} · {source?.label}
             </p>
-            {stats && <PointsChart stats={stats} players={game.record.players} pos={pos} onSeek={step} />}
+            <WinChart run={chances} players={game.record.players} stateCount={game.stateCount} pos={pos} onSeek={step} />
           </section>
           <aside className="side">
             <Status game={game} pos={pos} />
@@ -216,6 +220,8 @@ export function Replay() {
           </aside>
           {stats && (
             <section className="charts">
+              <LuckPanel run={chances} players={game.record.players} pos={pos} />
+              <PointsChart stats={stats} players={game.record.players} pos={pos} onSeek={step} />
               <DiceChart stats={stats} players={game.record.players} pos={pos} />
               <IncomeChart stats={stats} players={game.record.players} pos={pos} />
             </section>

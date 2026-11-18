@@ -8,6 +8,8 @@ declare module '@engine' {
     error(): string;
     stateJson(i: number): string;
     boardJson(): string;
+    chancePointsJson(): string;
+    winChances(state: number, first: number, count: number, seed: number): string;
     delete(): void;
   }
   export interface EngineModule {

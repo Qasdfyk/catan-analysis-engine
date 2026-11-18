@@ -3,7 +3,8 @@
 # before merging: Debug with sanitizers, Release with the default compiler,
 # Release with clang, a short benchmark run to prove they still run, 2000
 # random games, the difference test against catan-project's Python rules,
-# and the WebAssembly build with the web viewer's tests.
+# the WebAssembly build (same games and same win chances as native) with
+# the web viewer's tests.
 #
 # Usage: scripts/check.sh                  all checks
 #        scripts/check.sh --bench          same, then run the benchmarks for real
@@ -123,6 +124,13 @@ else
     echo "$bots, wasm:   $wasm"
     [ "$native" = "$wasm" ] || { echo "checksums differ" >&2; exit 1; }
   done
+  step "WebAssembly: same win chances as the native build"
+  # Win counts of every point of a game, folded into one number.
+  native="$(build/release/tools/catan_winrate --playouts 50 --threads "$jobs" tests/data/zoo-game-00088.json | grep 'wins checksum')"
+  wasm="$(node web/scripts/winrate-node.mjs --playouts 50 tests/data/zoo-game-00088.json | grep 'wins checksum')"
+  echo "native: $native"
+  echo "wasm:   $wasm"
+  [ "$native" = "$wasm" ] || { echo "win chances differ" >&2; exit 1; }
   if [ ! -d ../catan-project/frontend/src ]; then
     echo "web viewer: ../catan-project/frontend/src not found; the viewer draws catan-project's board" >&2
     exit 1
