@@ -1,35 +1,39 @@
-// catan_winrate: chances to win along a recorded game, by Monte Carlo.
+// catan_winrate: chances to win along recorded games, by Monte Carlo.
 //
-// A first sketch of step 10. At the start of every turn of a record, the
-// position is played out to the end many times by zoo bots (zoo.hpp), and
-// the share of playouts each seat wins is its chance to win from there.
+// One game: the chance of every seat before and after each roll, and how
+// much of each seat's swing came from the dice (luck) and how much from the
+// moves in between (decisions). See include/catan/winrate.hpp.
 //
 //   build/release/tools/catan_winrate --playouts 400 --threads 16 game.json
-//   build/release/tools/catan_winrate --playouts 200 --threads 16 records/*.json
 //
-// With several records it also checks calibration: of all the positions
-// where it said "30%", the player should have won about 30% of the games.
+// Many games: a calibration test. When the estimate says "30%", does the
+// player win about 30% of such games? A few positions are drawn from each
+// game, and the confidence intervals come from a bootstrap over games, not
+// positions: positions of one game share its winner, so they are not
+// independent, and treating them as if they were would make the intervals
+// too narrow.
 //
-// What a playout keeps from the position and what it draws anew:
-//   kept   the board, buildings, roads, robber, every hand, development
-//          cards already held, points, awards, whose turn it is
-//   drawn  the dice, stolen cards, the order of the undrawn development
-//          cards (nobody knows it), and the opponents: every seat is a new
-//          zoo bot each playout (--bots zoo), or the bot that sat there
-//          (--bots record, for games the zoo played)
-// Hands and held cards are those of the record, so this is a spectator's
-// view. A player's own view, with the hidden cards drawn from what they
-// could know, comes with the move review (step 13 of the plan).
+//   build/release/tools/catan_winrate --calibrate 4 --playouts 200 --threads 16 --bots record records/*.json
+//
+// --bots zoo (default) seats a new random zoo bot at every seat of every
+// playout: what the web page does, since it cannot know who played. --bots
+// record seats the bot that played the game (zoo and hard games of the
+// platform's tournaments record it), so playouts are played by the same
+// players as the real game.
 
 #include "catan/record.hpp"
-#include "catan/zoo.hpp"
+#include "catan/replay.hpp"
+#include "catan/winrate.hpp"
 
 #include <algorithm>
 #include <array>
 #include <atomic>
 #include <chrono>
+#include <cmath>
 #include <cstdio>
 #include <cstdlib>
+#include <fstream>
+#include <sstream>
 #include <string>
 #include <string_view>
 #include <thread>
@@ -45,64 +49,272 @@ struct Options {
   int threads = 1;
   std::uint64_t seed = 1;
   bool record_bots = false;
-  bool quiet = false;  // only the summary
+  int calibrate = 0;  // positions per game; 0 = show each game
+  int bootstrap = 1000;
 };
 
-struct Checkpoint {
-  int event = 0;  // the position before this event
-  cae::Game game;
+// One position to estimate, and who plays it out.
+struct Position {
+  const cae::Game* game;
+  const cae::SeatBots* bots;
 };
 
-struct Chances {
-  std::array<double, cae::kMaxPlayers> win{};
-  double unfinished = 0;
-};
-
-// Fisher-Yates over the cards not drawn yet.
-void shuffle_undrawn(cae::Game& game, cae::Rng& rng) {
-  for (int i = game.dev_deck_size - 1; i > game.dev_deck_next; --i) {
-    const int j = game.dev_deck_next + rng.below(i - game.dev_deck_next + 1);
-    std::swap(game.dev_deck[at(i)], game.dev_deck[at(j)]);
-  }
-}
-
-Chances estimate(const cae::Game& start, const std::array<std::optional<cae::ZooBot>, cae::kMaxPlayers>& recorded,
-                 int checkpoint, const Options& o) {
-  std::vector<std::array<int, cae::kMaxPlayers + 1>> per_thread(at(o.threads));
+// All playouts of many positions. The work is cut into chunks of 50
+// playouts that the threads take one by one from a shared counter, so no
+// thread idles while another still has a long position to finish. The
+// chunks add up to exactly what one thread would get (winrate.hpp).
+std::vector<cae::WinCounts> estimate(const std::vector<Position>& positions, const Options& o) {
+  constexpr int kChunk = 50;
+  const int chunks_per_position = (o.playouts + kChunk - 1) / kChunk;
+  const int jobs = static_cast<int>(positions.size()) * chunks_per_position;
+  std::vector<cae::WinCounts> part(at(jobs));
+  std::atomic<int> next{0};
   std::vector<std::thread> pool;
   for (int t = 0; t < o.threads; ++t) {
-    pool.emplace_back([&, t] {
-      auto& wins = per_thread[at(t)];
-      for (int p = t; p < o.playouts; p += o.threads) {
-        // Playout p of checkpoint c has its own stream, whatever the threads
-        cae::Rng rng(o.seed * 0x9e3779b97f4a7c15ULL ^ (static_cast<std::uint64_t>(checkpoint) << 32) ^
-                     static_cast<std::uint64_t>(p));
-        cae::ZooTable table;
-        table.game = start;
-        shuffle_undrawn(table.game, rng);
-        for (int s = 0; s < start.player_count; ++s) {
-          const auto& bot = recorded[at(s)];
-          table.bots[at(s)] = o.record_bots && bot ? *bot : cae::random_zoo_bot(rng);
-        }
-        const cae::ZooPlayout r = cae::play_out_zoo(table, rng);
-        ++wins[at(r.winner < 0 ? cae::kMaxPlayers : r.winner)];
+    pool.emplace_back([&] {
+      for (int j = next++; j < jobs; j = next++) {
+        const Position& p = positions[at(j / chunks_per_position)];
+        const int first = (j % chunks_per_position) * kChunk;
+        part[at(j)] = cae::play_out_chances(*p.game, first, std::min(kChunk, o.playouts - first), o.seed, *p.bots);
       }
     });
   }
   for (auto& th : pool) th.join();
-  Chances c;
-  for (const auto& wins : per_thread) {
-    for (int s = 0; s < cae::kMaxPlayers; ++s) c.win[at(s)] += wins[at(s)];
-    c.unfinished += wins[cae::kMaxPlayers];
+  std::vector<cae::WinCounts> out(positions.size());
+  for (int j = 0; j < jobs; ++j) out[at(j / chunks_per_position)] += part[at(j)];
+  return out;
+}
+
+struct Game {
+  std::string path;
+  cae::ReplayLog log;
+  cae::SeatBots bots{};
+  std::vector<cae::ChancePoint> points;
+};
+
+bool load(const std::string& path, const Options& o, Game& out) {
+  std::ifstream in(path, std::ios::binary);
+  std::stringstream text;
+  text << in.rdbuf();
+  if (!in) {
+    std::fprintf(stderr, "%s: cannot read\n", path.c_str());
+    return false;
   }
-  for (auto& w : c.win) w /= o.playouts;
-  c.unfinished /= o.playouts;
-  return c;
+  out.path = path;
+  out.log = cae::ReplayLog::from_text(text.str());
+  if (!out.log.error().empty()) {
+    std::fprintf(stderr, "%s: %s\n", path.c_str(), out.log.error().c_str());
+    return false;
+  }
+  if (o.record_bots) {
+    const json record = json::parse(text.str());
+    for (const json& player : record["players"]) {
+      const int seat = player.value("seat", -1);
+      if (seat >= 0 && seat < cae::kMaxPlayers) out.bots[at(seat)] = cae::zoo_bot_from_record(player);
+    }
+    for (int s = 0; s < out.log.states().front().player_count; ++s) {
+      if (!out.bots[at(s)]) {
+        std::fprintf(stderr, "%s: seat %d has no zoo bot in the record; use --bots zoo\n", path.c_str(), s);
+        return false;
+      }
+    }
+  }
+  out.points = cae::chance_points(out.log.states());
+  return true;
+}
+
+const char* kind_name(cae::PointKind k) {
+  switch (k) {
+    case cae::PointKind::kStart: return "start";
+    case cae::PointKind::kBeforeRoll: return "before roll";
+    case cae::PointKind::kAfterRoll: return "after roll";
+    case cae::PointKind::kEnd: return "end";
+  }
+  return "?";
+}
+
+// --- One game ----------------------------------------------------------------
+
+void show_game(const Game& g, const Options& o) {
+  const int players = g.log.states().front().player_count;
+  std::printf("%s: %zu points, winner seat %d\n%6s %5s %-12s %-12s %s\n", g.path.c_str(), g.points.size(),
+              g.log.states().back().winner, "state", "turn", "point", "points", "chance to win");
+  std::vector<std::array<double, cae::kMaxPlayers>> chance;
+  // Every win of every point, folded together; web/scripts/winrate-node.mjs
+  // prints the same number from the WebAssembly build.
+  std::uint64_t checksum = 0;
+  std::vector<Position> positions;
+  for (const cae::ChancePoint& p : g.points) positions.push_back({&g.log.state(p.state), &g.bots});
+  const auto t0 = std::chrono::steady_clock::now();
+  const std::vector<cae::WinCounts> counts = estimate(positions, o);
+  const double seconds = std::chrono::duration<double>(std::chrono::steady_clock::now() - t0).count();
+  for (std::size_t i = 0; i < g.points.size(); ++i) {
+    const cae::ChancePoint& p = g.points[i];
+    const cae::Game& state = g.log.state(p.state);
+    const cae::WinCounts& w = counts[i];
+    for (int s = 0; s < players; ++s) checksum += static_cast<std::uint64_t>(w.wins[at(s)]) * (i + 1) * at(s + 1);
+    std::array<double, cae::kMaxPlayers> c{};
+    std::string pts;
+    std::string pct;
+    for (int s = 0; s < players; ++s) {
+      c[at(s)] = w.share(s);
+      pts += std::to_string(state.visible_points(s)) + (s + 1 < players ? " " : "");
+      char buf[16];
+      std::snprintf(buf, sizeof buf, "%6.1f%%", 100 * c[at(s)]);
+      pct += buf;
+    }
+    chance.push_back(c);
+    std::printf("%6d %5d %-12s %-12s %s%s\n", p.state, p.turn, kind_name(p.kind), pts.c_str(), pct.c_str(),
+                w.unfinished > 0 ? "  (some playouts unfinished)" : "");
+  }
+
+  // Luck: across each roll. Decisions: everything else, setup included.
+  std::array<double, cae::kMaxPlayers> luck{};
+  std::array<double, cae::kMaxPlayers> decisions{};
+  for (std::size_t i = 1; i < g.points.size(); ++i) {
+    const bool roll = g.points[i].kind == cae::PointKind::kAfterRoll;
+    for (int s = 0; s < players; ++s) {
+      const double d = chance[i][at(s)] - chance[i - 1][at(s)];
+      (roll ? luck : decisions)[at(s)] += d;
+    }
+  }
+  std::printf("\n%-6s %8s %8s %10s %8s\n", "seat", "start", "luck", "decisions", "end");
+  for (int s = 0; s < players; ++s) {
+    std::printf("%-6d %7.1f%% %+7.1f%% %+9.1f%% %7.1f%%\n", s, 100 * chance.front()[at(s)], 100 * luck[at(s)],
+                100 * decisions[at(s)], 100 * chance.back()[at(s)]);
+  }
+  std::printf("(in percentage points; start + luck + decisions = end)\nwins checksum %llu\n",
+              static_cast<unsigned long long>(checksum));
+  const double total = static_cast<double>(g.points.size()) * o.playouts;
+  std::printf("%.0f playouts in %.2f s on %d threads: %.0f playouts/s\n\n", total, seconds, o.threads, total / seconds);
+}
+
+// --- Calibration -------------------------------------------------------------
+
+constexpr int kBuckets = 10;
+
+struct Prediction {
+  double chance = 0;
+  int won = 0;
+};
+
+struct Calibration {
+  std::array<long, kBuckets> said{};
+  std::array<long, kBuckets> won{};
+  std::array<double, kBuckets> sum_chance{};
+  double brier = 0;
+  long count = 0;
+
+  void add(const Prediction& p) {
+    const int b = std::min(kBuckets - 1, static_cast<int>(p.chance * kBuckets));
+    ++said[at(b)];
+    won[at(b)] += p.won;
+    sum_chance[at(b)] += p.chance;
+    brier += (p.chance - p.won) * (p.chance - p.won);
+    ++count;
+  }
+  [[nodiscard]] double won_share(int b) const {
+    return said[at(b)] > 0 ? static_cast<double>(won[at(b)]) / static_cast<double>(said[at(b)]) : NAN;
+  }
+  [[nodiscard]] double brier_score() const { return count > 0 ? brier / static_cast<double>(count) : NAN; }
+};
+
+double percentile(std::vector<double> v, double q) {
+  std::erase_if(v, [](double x) { return std::isnan(x); });
+  if (v.empty()) return NAN;
+  std::sort(v.begin(), v.end());
+  return v[std::min(v.size() - 1, static_cast<std::size_t>(q * static_cast<double>(v.size())))];
+}
+
+void calibrate(const std::vector<Game>& games, const Options& o) {
+  // Positions: `calibrate` turns per game, drawn at random among the points
+  // just before a roll, so early, middle and late game all show up.
+  struct Picked {
+    int game;
+    int state;
+  };
+  std::vector<Picked> picked;
+  std::vector<Position> todo;
+  for (std::size_t gi = 0; gi < games.size(); ++gi) {
+    const Game& g = games[gi];
+    if (g.log.states().back().winner < 0) continue;  // unfinished: no outcome to compare with
+    std::vector<int> candidates;
+    for (const auto& p : g.points) {
+      if (p.kind == cae::PointKind::kBeforeRoll) candidates.push_back(p.state);
+    }
+    cae::Rng pick(o.seed ^ (static_cast<std::uint64_t>(gi) << 20));
+    for (int i = static_cast<int>(candidates.size()) - 1; i > 0; --i) {
+      std::swap(candidates[at(i)], candidates[at(pick.below(i + 1))]);
+    }
+    candidates.resize(std::min(candidates.size(), at(o.calibrate)));
+    for (const int state_index : candidates) {
+      picked.push_back({static_cast<int>(gi), state_index});
+      todo.push_back({&g.log.state(state_index), &g.bots});
+    }
+  }
+  // Every position of every game at once, so the threads stay busy.
+  const auto t0 = std::chrono::steady_clock::now();
+  const std::vector<cae::WinCounts> counts = estimate(todo, o);
+  const long positions = static_cast<long>(picked.size());
+  const long long playouts = static_cast<long long>(positions) * o.playouts;
+
+  // Predictions grouped by game, for the bootstrap.
+  std::vector<std::vector<Prediction>> by_game;
+  int last_game = -1;
+  for (std::size_t k = 0; k < picked.size(); ++k) {
+    const Game& g = games[at(picked[k].game)];
+    const int winner = g.log.states().back().winner;
+    if (picked[k].game != last_game) by_game.emplace_back();
+    last_game = picked[k].game;
+    const cae::Game& state = g.log.state(picked[k].state);
+    for (int s = 0; s < state.player_count; ++s) by_game.back().push_back({counts[k].share(s), s == winner ? 1 : 0});
+  }
+  const double seconds = std::chrono::duration<double>(std::chrono::steady_clock::now() - t0).count();
+
+  Calibration all;
+  for (const auto& preds : by_game) {
+    for (const auto& p : preds) all.add(p);
+  }
+
+  // Bootstrap: draw as many games as there are, with replacement, and
+  // compute everything again; the spread of those results is the
+  // uncertainty. 95% interval = the 2.5th to the 97.5th percentile.
+  std::array<std::vector<double>, kBuckets> boot_won;
+  std::vector<double> boot_brier;
+  cae::Rng rng(o.seed + 12345);
+  const int n = static_cast<int>(by_game.size());
+  for (int b = 0; b < o.bootstrap && n > 0; ++b) {
+    Calibration c;
+    for (int k = 0; k < n; ++k) {
+      for (const auto& p : by_game[at(rng.below(n))]) c.add(p);
+    }
+    for (int k = 0; k < kBuckets; ++k) boot_won[at(k)].push_back(c.won_share(k));
+    boot_brier.push_back(c.brier_score());
+  }
+
+  std::printf("%d games, %ld positions, %d playouts each (%lld playouts) in %.1f s: %.0f playouts/s\n\n", n,
+              positions, o.playouts, playouts, seconds, static_cast<double>(playouts) / seconds);
+  std::printf("calibration: when it said ..., the player won ... (95%% interval, bootstrap over games)\n");
+  std::printf("%10s %8s %8s %17s %7s\n", "said", "mean", "won", "interval", "count");
+  for (int k = 0; k < kBuckets; ++k) {
+    if (all.said[at(k)] == 0) continue;
+    const double mean = all.sum_chance[at(k)] / static_cast<double>(all.said[at(k)]);
+    const double lo = percentile(boot_won[at(k)], 0.025);
+    const double hi = percentile(boot_won[at(k)], 0.975);
+    const bool inside = mean >= lo && mean <= hi;
+    std::printf("%3d-%3d%%  %7.1f%% %7.1f%%   %5.1f%% .. %5.1f%% %7ld%s\n", k * 10, k * 10 + 10, 100 * mean,
+                100 * all.won_share(k), 100 * lo, 100 * hi, all.said[at(k)], inside ? "" : "  <- outside");
+  }
+  const int players = games.front().log.states().front().player_count;
+  const double base = (1.0 / players) * (1 - 1.0 / players);
+  std::printf("\nBrier score %.4f (95%% interval %.4f .. %.4f); always saying 1/%d scores %.4f\n", all.brier_score(),
+              percentile(boot_brier, 0.025), percentile(boot_brier, 0.975), players, base);
 }
 
 [[noreturn]] void usage(const char* argv0) {
   std::fprintf(stderr,
-               "usage: %s [--playouts N] [--threads T] [--seed S] [--bots zoo|record] [--quiet] RECORD.json...\n",
+               "usage: %s [--playouts N] [--threads T] [--seed S] [--bots zoo|record]\n"
+               "          [--calibrate POSITIONS_PER_GAME] [--bootstrap B] RECORD.json...\n",
                argv0);
   std::exit(2);
 }
@@ -128,107 +340,26 @@ int main(int argc, char** argv) {
       const std::string_view b = value();
       if (b != "zoo" && b != "record") usage(argv[0]);
       o.record_bots = b == "record";
-    } else if (flag == "--quiet") {
-      o.quiet = true;
+    } else if (flag == "--calibrate") {
+      o.calibrate = std::atoi(value());
+    } else if (flag == "--bootstrap") {
+      o.bootstrap = std::atoi(value());
     } else if (!flag.empty() && flag[0] == '-') {
       usage(argv[0]);
     } else {
       files.emplace_back(flag);
     }
   }
-  if (files.empty() || o.playouts < 1 || o.threads < 1) usage(argv[0]);
+  if (files.empty() || o.playouts < 1 || o.threads < 1 || o.calibrate < 0) usage(argv[0]);
 
-  // Calibration: predictions in 10 buckets by chance, and how often the
-  // player then actually won. Brier score: mean squared error of the chance.
-  constexpr int kBuckets = 10;
-  std::array<long, kBuckets> said{};
-  std::array<long, kBuckets> won{};
-  std::array<double, kBuckets> sum_chance{};
-  double brier = 0;
-  long predictions = 0;
-  long positions = 0;
-  long long games_played = 0;
-  const auto t0 = std::chrono::steady_clock::now();
-
-  for (const std::string& path : files) {
-    json record;
-    cae::Game game;
-    std::array<std::optional<cae::ZooBot>, cae::kMaxPlayers> bots{};
-    try {
-      record = cae::read_record_file(path);
-      game = cae::game_from_record(record);
-      for (const json& player : record["players"]) {
-        const int seat = player.value("seat", -1);
-        if (seat >= 0 && seat < cae::kMaxPlayers) bots[at(seat)] = cae::zoo_bot_from_record(player);
-      }
-    } catch (const std::exception& e) {
-      std::fprintf(stderr, "%s: %s\n", path.c_str(), e.what());
-      return 1;
-    }
-
-    // The start of every turn after setup: the dice are about to be rolled.
-    std::vector<Checkpoint> checkpoints;
-    const json& events = record["events"];
-    for (std::size_t i = 0; i < events.size(); ++i) {
-      const bool turn_start = game.phase == cae::Phase::kRollDice && game.dice_roll == 0 &&
-                              (checkpoints.empty() || checkpoints.back().game.turn_number != game.turn_number);
-      if (turn_start) checkpoints.push_back({static_cast<int>(i), game});
-      if (const cae::Error e = cae::apply_event(game, events[i]); e != cae::Error::kNone) {
-        std::fprintf(stderr, "%s: event %zu refused: %s\n", path.c_str(), i, std::string(cae::error_name(e)).c_str());
-        return 1;
-      }
-    }
-    const int winner = game.winner;
-
-    if (!o.quiet) {
-      std::printf("%s: %zu turns, winner seat %d\n%6s %5s  %-23s %s\n", path.c_str(), checkpoints.size(), winner,
-                  "event", "turn", "points", "chance to win");
-    }
-    for (std::size_t c = 0; c < checkpoints.size(); ++c) {
-      const Checkpoint& cp = checkpoints[c];
-      const Chances chances = estimate(cp.game, bots, static_cast<int>(c), o);
-      games_played += o.playouts;
-      ++positions;
-      if (!o.quiet) {
-        std::string pts;
-        std::string pct;
-        for (int s = 0; s < cp.game.player_count; ++s) {
-          pts += std::to_string(cp.game.visible_points(s)) + (s + 1 < cp.game.player_count ? " " : "");
-          char buf[16];
-          std::snprintf(buf, sizeof buf, "%5.1f%%", 100 * chances.win[at(s)]);
-          pct += buf;
-        }
-        std::printf("%6d %5d  %-23s %s%s\n", cp.event, cp.game.turn_number, pts.c_str(), pct.c_str(),
-                    chances.unfinished > 0 ? "  (some playouts unfinished)" : "");
-      }
-      if (winner < 0) continue;
-      for (int s = 0; s < cp.game.player_count; ++s) {
-        const double p = chances.win[at(s)];
-        const int outcome = s == winner ? 1 : 0;
-        const int b = std::min(kBuckets - 1, static_cast<int>(p * kBuckets));
-        ++said[at(b)];
-        won[at(b)] += outcome;
-        sum_chance[at(b)] += p;
-        brier += (p - outcome) * (p - outcome);
-        ++predictions;
-      }
-    }
+  std::vector<Game> games(files.size());
+  for (std::size_t i = 0; i < files.size(); ++i) {
+    if (!load(files[i], o, games[i])) return 1;
   }
-
-  const double seconds = std::chrono::duration<double>(std::chrono::steady_clock::now() - t0).count();
-  std::printf("\n%ld positions in %zu games, %d playouts each (%lld playouts) in %.1f s: %.0f playouts/s\n", positions,
-              files.size(), o.playouts, games_played, seconds, static_cast<double>(games_played) / seconds);
-  if (predictions > 0) {
-    std::printf("\ncalibration: when it said ..., the player won ...\n%10s %10s %10s %8s\n", "said", "mean", "won",
-                "count");
-    for (int b = 0; b < kBuckets; ++b) {
-      if (said[at(b)] == 0) continue;
-      std::printf("%3d-%3d%%   %8.1f%% %9.1f%% %8ld\n", b * 10, b * 10 + 10,
-                  100 * sum_chance[at(b)] / static_cast<double>(said[at(b)]),
-                  100 * static_cast<double>(won[at(b)]) / static_cast<double>(said[at(b)]), said[at(b)]);
-    }
-    std::printf("Brier score %.4f (always saying 1/players scores %.4f with 4 players)\n",
-                brier / static_cast<double>(predictions), 0.1875);
+  if (o.calibrate > 0) {
+    calibrate(games, o);
+  } else {
+    for (const Game& g : games) show_game(g, o);
   }
   return 0;
 }

@@ -400,3 +400,17 @@ footer {
 .h2h td { text-align: center; border-radius: 6px; border: 2px solid var(--panel); }
 .h2h thead th { text-align: center; }
 .zoo-scroll p { margin-top: 12px; }
+
+/* --- Win chances: luck or decisions --- */
+.split { display: grid; grid-template-columns: minmax(90px, auto) 1fr 1fr auto; gap: 8px 14px; align-items: center; }
+.split-row { display: contents; }
+.split-row > div { display: flex; align-items: center; gap: 8px; }
+.split-track { position: relative; flex: 1; height: 10px; background: rgba(255, 255, 255, .04); border-radius: 3px; }
+.split-track::after { content: ''; position: absolute; left: 50%; top: -2px; bottom: -2px; width: 1px; background: var(--line); }
+.split-bar { position: absolute; top: 0; bottom: 0; border-radius: 3px; transition: left .3s, width .3s; }
+.split-bar.luck { background: var(--muted); }
+.split-bar.decision { background: var(--gold); }
+.split-row .mono { min-width: 46px; text-align: right; }
+.split-num { text-align: right; }
+.legend .chip { margin-right: 2px; }
+.split-err { position: absolute; top: 4px; height: 2px; background: rgba(255, 255, 255, .55); }

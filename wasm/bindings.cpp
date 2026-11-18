@@ -14,9 +14,15 @@
 // selfplay() runs the random player of catan_selfplay, single-threaded, to
 // compare the engine in the browser with the native build; zooSelfplay()
 // runs zoo bots, like `catan_selfplay --bots zoo`.
+//
+// Win chances (winrate.hpp): chancePointsJson() lists the positions to
+// estimate, winChances(state, first, count, seed) plays playouts first ..
+// first + count - 1 from one of them. Web Workers each open the record and
+// take chunks, and the page adds the counts up.
 
 #include "catan/random_player.hpp"
 #include "catan/replay.hpp"
+#include "catan/winrate.hpp"
 #include "catan/zoo.hpp"
 
 #include <emscripten/bind.h>
@@ -40,6 +46,24 @@ class Replay {
     return log_.state_json(i).dump();
   }
   std::string boardJson() const { return log_.board_json().dump(); }
+
+  std::string chancePointsJson() const {
+    nlohmann::json out = nlohmann::json::array();
+    for (const cae::ChancePoint& p : cae::chance_points(log_.states())) {
+      out.push_back({{"state", p.state}, {"kind", static_cast<int>(p.kind)}, {"turn", p.turn}, {"seat", p.seat}});
+    }
+    return out.dump();
+  }
+  // The seed is a double: JavaScript numbers are exact up to 2^53.
+  std::string winChances(int state, int first, int count, double seed) const {
+    if (state < 0 || state >= log_.state_count() || count < 0) return "null";
+    const cae::WinCounts w =
+        cae::play_out_chances(log_.state(state), first, count, static_cast<std::uint64_t>(seed));
+    const int players = log_.state(state).player_count;
+    nlohmann::json wins = nlohmann::json::array();
+    for (int s = 0; s < players; ++s) wins.push_back(w.wins[static_cast<std::size_t>(s)]);
+    return nlohmann::json{{"wins", wins}, {"unfinished", w.unfinished}, {"playouts", w.playouts}}.dump();
+  }
 
  private:
   cae::ReplayLog log_;
@@ -96,7 +120,9 @@ EMSCRIPTEN_BINDINGS(catan_engine) {
       .function("stateCount", &Replay::stateCount)
       .function("error", &Replay::error)
       .function("stateJson", &Replay::stateJson)
-      .function("boardJson", &Replay::boardJson);
+      .function("boardJson", &Replay::boardJson)
+      .function("chancePointsJson", &Replay::chancePointsJson)
+      .function("winChances", &Replay::winChances);
   emscripten::function("topologyJson", &topologyJson);
   emscripten::function("selfplay", &selfplay);
   emscripten::function("zooSelfplay", &zooSelfplay);

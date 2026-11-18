@@ -47,6 +47,7 @@ add_library(catan STATIC
   src/bits.cpp
   src/game.cpp
   src/random_player.cpp
+  src/winrate.cpp
   src/zoo.cpp)
 target_include_directories(catan PUBLIC
   ${PROJECT_SOURCE_DIR}/include)

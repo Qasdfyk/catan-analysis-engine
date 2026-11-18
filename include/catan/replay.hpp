@@ -33,6 +33,7 @@ class ReplayLog {
   [[nodiscard]] const std::string& error() const noexcept { return error_; }
 
   [[nodiscard]] const Game& state(int i) const { return states_.at(static_cast<std::size_t>(i)); }
+  [[nodiscard]] const std::vector<Game>& states() const noexcept { return states_; }
   // snapshot() of state i (record.hpp) plus what a viewer needs on top:
   // cards left in the bank.
   [[nodiscard]] nlohmann::json state_json(int i) const;

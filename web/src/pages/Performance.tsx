@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { runBenchmark, runScaling, useLastBenchmark, useScaling, workerCounts, type Bots } from '../bench';
+import { PASSES, PASS_SIZE, useLastChanceSpeed, workerCount } from '../chances';
 import { fmt, LogBars, type Bar } from '../components/Charts';
 import { NATIVE_CHECKSUMS, NATIVE_ZOO_CHECKSUMS, PROFILE, REPO_URL, SPEED, THREADS } from '../facts';
 
@@ -253,6 +254,51 @@ function Threads() {
   );
 }
 
+/** Playouts per second of the last chance-to-win estimate in Replay. */
+function WinChanceSpeed() {
+  const speed = useLastChanceSpeed();
+  return (
+    <section className="section">
+      <div className="section-head">
+        <h2>Win-chance playouts</h2>
+        <p>
+          The chance-to-win chart in Replay plays every position of a game out to the end{' '}
+          {fmt(PASSES * PASS_SIZE)} times with zoo bots, in {workerCount()} Web Workers on this machine. A playout starts
+          mid-game and the bots think about every move, so this is the speed that will bound the move review.
+        </p>
+      </div>
+      <div className="panel">
+        {speed ? (
+          <div>
+            <div className="result-main">
+              <span className="result-number">{fmt(speed.playouts / speed.seconds)}</span>
+              <span className="muted">playouts / s in this browser, {speed.workers} workers</span>
+            </div>
+            <dl className="result-grid">
+              <div>
+                <dt>Positions</dt>
+                <dd>{fmt(speed.points)}</dd>
+              </div>
+              <div>
+                <dt>Playouts</dt>
+                <dd>{fmt(speed.playouts)}</dd>
+              </div>
+              <div>
+                <dt>Time</dt>
+                <dd>{speed.seconds.toFixed(1)} s</dd>
+              </div>
+            </dl>
+          </div>
+        ) : (
+          <p className="muted">
+            Open <a href="#replay">Replay</a> and wait for the chance-to-win chart to finish; its speed shows up here.
+          </p>
+        )}
+      </div>
+    </section>
+  );
+}
+
 export function Performance() {
   const yours = useLastBenchmark();
   const bars: Bar[] = SPEED.map((s) => ({
@@ -338,6 +384,8 @@ export function Performance() {
           </div>
         </div>
       </section>
+
+      <WinChanceSpeed />
 
       <p className="muted small">
         Method and raw numbers: <a href={`${REPO_URL}/blob/main/docs/performance.md`}>docs/performance.md</a>.

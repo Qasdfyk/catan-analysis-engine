@@ -107,7 +107,7 @@ At the start of every turn of a record, `catan_winrate` plays the position out t
 
 ```sh
 build/release/tools/catan_winrate --playouts 400 --threads 16 game.json
-build/release/tools/catan_winrate --playouts 100 --threads 16 --quiet records/*.json
+build/release/tools/catan_winrate --calibrate 4 --playouts 200 --threads 16 records/*.json
 ```
 
 A playout keeps the position (board, buildings, hands, held cards, points, awards) and draws the rest anew: dice, stolen cards, the order of the undrawn development cards, and the bots: each seat becomes a new random zoo bot (`--bots zoo`, the default), or keeps the bot that sat there (`--bots record`). Hands are those of the record, so this is a spectator's view; a player's own view, with hidden cards drawn from what they could know, comes with the move review.
@@ -136,4 +136,4 @@ Read with care:
 - 100 playouts give a standard error of up to 5 points per estimate, which spreads the buckets.
 - The top buckets are slightly overconfident (said 85%, won 79%).
 
-The checkpoints and the calibration test properly, with a split of every change into luck and decisions, are step 10b.
+This first sketch is superseded by [win-chances.md](win-chances.md): points before and after every roll, the split into luck and decisions, and calibration with intervals from a bootstrap over games, which confirms the overconfidence at the top.
