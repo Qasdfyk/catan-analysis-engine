@@ -41,7 +41,7 @@ class StartError extends Error {}
  * of its own as {error}; an error event without a message means its script
  * never ran, usually a failed download.
  */
-function ask<T>(worker: Worker, message: object): Promise<T> {
+export function ask<T>(worker: Worker, message: object): Promise<T> {
   return new Promise((resolve, reject) => {
     worker.onmessage = (msg: MessageEvent<T | { error: string }>) => {
       const data = msg.data as { error?: string };

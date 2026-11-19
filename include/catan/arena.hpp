@@ -34,6 +34,7 @@
 //   LLR = n (p1 - p0) (2 mean - p0 - p1) / (2 var)
 // for n deals with mean score `mean` and variance `var`.
 
+#include "catan/belief.hpp"
 #include "catan/game.hpp"
 #include "catan/rng.hpp"
 #include "catan/zoo.hpp"
@@ -78,6 +79,9 @@ struct ArenaView {
   int seat;
   const TableMemory& memory;
   std::span<const Built> built;
+  // What every seat knows of the others' resources (belief.hpp). A player
+  // may read only known[seat].
+  const HandBelief& belief;
 };
 
 // A player: the next move for the seat, or nothing to let the table play the

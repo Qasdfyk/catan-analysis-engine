@@ -103,6 +103,9 @@ export const ARENA = {
     { candidate: 'zoo balanced, never trades', opponents: 'hard', win: 0.176, half: 0.008, games: 8000, note: 'trading is worth a lot' },
     { candidate: 'Catanatron AlphaBeta', opponents: 'hard', win: 0.065, half: 0.024, games: 400, note: 'no trades between players; Catanatron sees every hand' },
     { candidate: 'hard', opponents: 'Catanatron AlphaBeta', win: 0.52, half: 0.069, games: 200, note: 'no trades between players' },
+    { candidate: 'ISMCTS, 400 playouts', opponents: 'hard', win: 0.458, half: 0.04, games: 600, note: 'the hard bot plus search; sees only what its seat sees' },
+    { candidate: 'ISMCTS, 400 playouts', opponents: 'random elites', win: 0.448, half: 0.049, games: 400, note: '' },
+    { candidate: 'ISMCTS, 400 playouts', opponents: 'Catanatron AlphaBeta', win: 0.66, half: 0.093, games: 100, note: 'no trades between players' },
   ],
   /**
    * Set A: 4000 positions from 1000 native zoo games (seed 1001), scored by
@@ -125,3 +128,54 @@ export const ARENA = {
     { name: 'first settlement on a rich corner', passed: 181, tried: 200 },
   ],
 } as const;
+
+/**
+ * The searching bot on one decision of the example game (catan_mcts
+ * --decisions 8 --decision 3 --iterations 250 --workers W): playouts per
+ * second natively, and the checksum the browser must match for W workers.
+ */
+export const MCTS_SPEED = {
+  /** --iterations 2000 per worker, i7-11800H. */
+  threads: [
+    { workers: 1, playoutsPerSecond: 3_720 },
+    { workers: 2, playoutsPerSecond: 7_320 },
+    { workers: 4, playoutsPerSecond: 13_600 },
+    { workers: 8, playoutsPerSecond: 18_000 },
+    { workers: 16, playoutsPerSecond: 23_700 },
+  ] as { workers: number; playoutsPerSecond: number }[],
+  /** --iterations 250 --workers W: what the browser's W workers must match. */
+  checksums: {
+    1: '7708012',
+    2: '15528196',
+    3: '22959948',
+    4: '30351844',
+    5: '37743836',
+    6: '47800848',
+    7: '54112432',
+    8: '64041912',
+    9: '71053844',
+    10: '77613476',
+    11: '87546912',
+    12: '95435100',
+    13: '100865808',
+    14: '109034752',
+    15: '116222568',
+    16: '124138696',
+    17: '132739096',
+    18: '140687420',
+    19: '148239536',
+    20: '155528012',
+    21: '160450248',
+    22: '165364788',
+    23: '173497440',
+    24: '182558740',
+    25: '190674776',
+    26: '195401280',
+    27: '203957976',
+    28: '210349304',
+    29: '220646864',
+    30: '226634044',
+    31: '235399304',
+    32: '240822224',
+  } as Record<number, string>,
+};
