@@ -23,6 +23,9 @@ namespace cae {
 // The elites of a file in the order it lists them (best final score first).
 // Throws std::runtime_error if the file cannot be read.
 [[nodiscard]] std::vector<ZooBot> load_elites(const std::string& path);
+// The same from the file's JSON (the web page bundles the file as text).
+// Throws on a malformed or empty archive.
+[[nodiscard]] std::vector<ZooBot> elites_from_json(const nlohmann::json& j);
 
 // A bot by the name the tools take:
 //   hard                         the hard level

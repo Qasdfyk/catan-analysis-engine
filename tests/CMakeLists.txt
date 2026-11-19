@@ -7,6 +7,7 @@ add_executable(catan_tests
   record_test.cpp
   replay_test.cpp
   random_player_test.cpp
+  setup_review_test.cpp
   winrate_test.cpp
   zoo_test.cpp)
 target_link_libraries(catan_tests PRIVATE catan_record catan_warnings GTest::gtest_main)

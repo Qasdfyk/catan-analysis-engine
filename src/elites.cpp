@@ -131,10 +131,13 @@ ZooBot zoo_bot_named(std::string name, const std::string& elites_path) {
 std::vector<ZooBot> load_elites(const std::string& path) {
   std::ifstream in(path);
   if (!in) throw std::runtime_error("cannot read " + path);
-  const json j = json::parse(in);
+  return elites_from_json(json::parse(in));
+}
+
+std::vector<ZooBot> elites_from_json(const json& j) {
   std::vector<ZooBot> out;
   for (const json& e : j.at("elites")) out.push_back(zoo_bot_from_json(e.at("bot")));
-  if (out.empty()) throw std::runtime_error(path + " holds no elites");
+  if (out.empty()) throw std::runtime_error("the archive holds no elites");
   return out;
 }
 

@@ -7,6 +7,8 @@ import { MoveLog, Players, Status } from '../components/GamePanels';
 import { DiceChart, IncomeChart, PointsChart } from '../components/ReplayCharts';
 import { LuckPanel, WinChart } from '../components/WinChances';
 import { useWinChances } from '../chances';
+import { SetupHeat, SetupPanel } from '../components/SetupReview';
+import { focusMove, useSetupReview } from '../setup';
 import { EXAMPLES, exampleRecord, readRecordBytes } from '../engine';
 import { useOpenGame, usePlayback } from '../hooks';
 import { turnStart } from '../nav';
@@ -29,6 +31,8 @@ export function Replay() {
   const stats = useMemo(() => (game ? gameStats(game) : null), [game]);
   // Monte Carlo in Web Workers, started as soon as a record opens.
   const chances = useWinChances(game ? (source?.text ?? null) : null);
+  // The setup review, in its own workers, also from the start.
+  const setup = useSetupReview(game ? (source?.text ?? null) : null);
 
   // The example opens by itself, so the tab is never empty.
   useEffect(() => {
@@ -101,6 +105,15 @@ export function Replay() {
     setPlaying(!playing);
   };
 
+  // The heat map of the setup settlement at this move, if there is one.
+  const heat = () => {
+    if (!setup || !topo || !game) return null;
+    const m = focusMove(setup.moves, pos);
+    const review = m === null ? undefined : setup.reviews[m];
+    if (m === null || !review) return null;
+    return <SetupHeat review={review} move={setup.moves[m]} topo={topo} players={game.record.players} />;
+  };
+
   const shownError = message || (error && `${source?.label}: ${error}`) || (game?.error && `${source?.label}: the engine stopped early: ${game.error}`);
 
   return (
@@ -168,7 +181,7 @@ export function Replay() {
       {game && topo ? (
         <div className="viewer">
           <section className="board-pane">
-            <GameBoard game={game} topo={topo} pos={pos} />
+            <GameBoard game={game} topo={topo} pos={pos} overlay={heat()} />
             <div className="controls">
               <button type="button" title="Start (Home)" onClick={() => step(0)}>
                 ⏮
@@ -220,6 +233,7 @@ export function Replay() {
           </aside>
           {stats && (
             <section className="charts">
+              <SetupPanel run={setup} players={game.record.players} pos={pos} onSeek={step} />
               <LuckPanel run={chances} players={game.record.players} pos={pos} />
               <PointsChart stats={stats} players={game.record.players} pos={pos} onSeek={step} />
               <DiceChart stats={stats} players={game.record.players} pos={pos} />

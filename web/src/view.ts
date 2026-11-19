@@ -6,7 +6,8 @@
 import type { Building, GameView, HexCoords, Player, Position, Road } from '@platform/types/game';
 import { RESOURCES, type GameRecord, type GameState, type Topology } from './types';
 
-const position = ({ q, r, direction }: { q: number; r: number; direction: number }): Position => ({
+/** A corner or side of the topology as catan-project's Position. */
+export const position = ({ q, r, direction }: { q: number; r: number; direction: number }): Position => ({
   hex: { q, r, s: -q - r },
   direction,
 });

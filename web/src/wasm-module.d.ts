@@ -10,11 +10,15 @@ declare module '@engine' {
     boardJson(): string;
     chancePointsJson(): string;
     winChances(state: number, first: number, count: number, seed: number): string;
+    setupMovesJson(): string;
+    setupReviewStep(move: number, seed: number, first: number, finalists: number, confirm: number): string;
     delete(): void;
   }
   export interface EngineModule {
     Replay: new (recordText: string) => Replay;
     topologyJson(): string;
+    /** "" on success, else why the archive was refused. */
+    setElites(json: string): string;
     selfplay(games: number, players: number, seed: number): string;
     zooSelfplay(games: number, players: number, seed: number): string;
   }
