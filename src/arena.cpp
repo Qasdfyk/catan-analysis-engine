@@ -74,6 +74,7 @@ ArenaGame play_arena_game(const Deal& deal, std::span<const ArenaPlayer> seats, 
   Game game = Game::create(deal.board, Settings{}, players, deal.first_seat, deal.deck);
   Rng rng(mix(deal.seed, static_cast<std::uint64_t>(game_number)));
   TableMemory memory;
+  HandBelief belief;
   std::vector<Built> built;
   built.reserve(2 * kMaxPlayers * (kMaxSettlements + kMaxRoads));
   int rolls = 0;
@@ -91,7 +92,7 @@ ArenaGame play_arena_game(const Deal& deal, std::span<const ArenaPlayer> seats, 
     if (seat < 0) break;
     memory.sync(game);
     const Game before = game;
-    const std::optional<Action> action = seats[at(seat)](ArenaView{game, seat, memory, built});
+    const std::optional<Action> action = seats[at(seat)](ArenaView{game, seat, memory, built, belief});
     Error e = Error::kBadArgument;
     if (action) {
       e = action->kind == ActionKind::kRollDice ? roll(seat) : apply_action(game, seat, *action, rng);
@@ -122,6 +123,7 @@ ArenaGame play_arena_game(const Deal& deal, std::span<const ArenaPlayer> seats, 
       }
     }
     note_new_pieces(before, game, built, memory);
+    belief.observe(before, game);
     ++out.actions;
   }
   out.winner = game.winner;

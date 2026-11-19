@@ -26,8 +26,15 @@
 // stands. Each worker reviews whole moves, round by round, so the page can
 // draw the heat map as it sharpens. Playouts seat the MAP-Elites given once
 // to setElites() (the page bundles data/elites.json).
+//
+// Search (mcts.hpp): mctsDecisionsJson(count) lists that many decisions
+// the searching bot would search, spread over the game; mctsSearch(k, count,
+// iterations, seed, worker) runs worker `worker`'s part of decision k (its
+// own seed, as catan_mcts --workers does), and the page merges the parts of
+// its Web Workers at the root. Playouts seat the elites of setElites().
 
 #include "catan/elites.hpp"
+#include "catan/mcts.hpp"
 #include "catan/random_player.hpp"
 #include "catan/replay.hpp"
 #include "catan/setup_review.hpp"
@@ -147,9 +154,51 @@ class Replay {
     return review_json(*review).dump();
   }
 
+  std::string mctsDecisionsJson(int count) {
+    nlohmann::json out = nlohmann::json::array();
+    for (const cae::RecordDecision& d : decisions(count)) {
+      out.push_back({{"state", d.state},
+                     {"seat", d.seat},
+                     {"phase", std::string(cae::phase_name(log_.state(d.state).phase))}});
+    }
+    return out.dump();
+  }
+  // Root statistics of one worker's search of decision k of `count`, and its time.
+  std::string mctsSearch(int k, int count, int iterations, double seed, int worker, double c, double prior) {
+    const std::vector<cae::RecordDecision>& list = decisions(count);
+    if (k < 0 || k >= static_cast<int>(list.size()) || iterations < 1) return "null";
+    cae::MctsSettings settings;
+    settings.iterations = iterations;
+    settings.exploration = c;
+    settings.zoo_prior = prior;
+    const cae::RecordDecision& d = list[static_cast<std::size_t>(k)];
+    const auto t0 = std::chrono::steady_clock::now();
+    const cae::MctsSearch s =
+        cae::search_part(log_.state(d.state), d, elites(), settings, static_cast<std::uint64_t>(seed), worker);
+    const double seconds = std::chrono::duration<double>(std::chrono::steady_clock::now() - t0).count();
+    nlohmann::json moves = nlohmann::json::array();
+    for (const cae::MctsMove& m : s.root) {
+      moves.push_back({{"move", cae::action_text(m.action)},
+                       {"kind", std::string(cae::action_name(m.action.kind))},
+                       {"target", m.action.target},
+                       {"prior", m.prior},
+                       {"visits", m.visits},
+                       {"wins", m.wins}});
+    }
+    return nlohmann::json{{"moves", moves}, {"iterations", s.iterations}, {"nodes", s.nodes}, {"seconds", seconds}}
+        .dump();
+  }
+
  private:
   cae::ReplayLog log_;
   std::map<int, std::unique_ptr<cae::SetupReview>> reviews_;
+  std::map<int, std::vector<cae::RecordDecision>> decisions_;
+
+  const std::vector<cae::RecordDecision>& decisions(int count) {
+    auto& list = decisions_[count];
+    if (list.empty()) list = cae::spread_decisions(log_.states(), count);
+    return list;
+  }
 };
 
 std::string topologyJson() { return cae::topology_json().dump(); }
@@ -207,7 +256,9 @@ EMSCRIPTEN_BINDINGS(catan_engine) {
       .function("chancePointsJson", &Replay::chancePointsJson)
       .function("winChances", &Replay::winChances)
       .function("setupMovesJson", &Replay::setupMovesJson)
-      .function("setupReviewStep", &Replay::setupReviewStep);
+      .function("setupReviewStep", &Replay::setupReviewStep)
+      .function("mctsDecisionsJson", &Replay::mctsDecisionsJson)
+      .function("mctsSearch", &Replay::mctsSearch);
   emscripten::function("topologyJson", &topologyJson);
   emscripten::function("setElites", &setElites);
   emscripten::function("selfplay", &selfplay);

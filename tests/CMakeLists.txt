@@ -1,7 +1,9 @@
 add_executable(catan_tests
   arena_test.cpp
+  belief_test.cpp
   bits_test.cpp
   map_elites_test.cpp
+  mcts_test.cpp
   topology_test.cpp
   game_test.cpp
   record_test.cpp

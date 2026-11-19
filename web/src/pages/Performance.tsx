@@ -4,7 +4,8 @@ import { useState } from 'react';
 import { runBenchmark, runScaling, useLastBenchmark, useScaling, workerCounts, type Bots } from '../bench';
 import { PASSES, PASS_SIZE, useLastChanceSpeed, workerCount } from '../chances';
 import { fmt, LogBars, type Bar } from '../components/Charts';
-import { NATIVE_CHECKSUMS, NATIVE_ZOO_CHECKSUMS, PROFILE, REPO_URL, SPEED, THREADS } from '../facts';
+import { MCTS_SPEED, NATIVE_CHECKSUMS, NATIVE_ZOO_CHECKSUMS, PROFILE, REPO_URL, SPEED, THREADS } from '../facts';
+import { runSearchScaling, SEARCH, useSearchPoints } from '../search';
 
 // A zoo bot thinks about every move, so its games take longer: fewer of them.
 const GAME_COUNTS: Record<Bots, number[]> = { random: [5_000, 20_000, 100_000], zoo: [500, 2_000, 10_000] };
@@ -299,6 +300,126 @@ function WinChanceSpeed() {
   );
 }
 
+/**
+ * The searching bot on 1, 2, 4, ... Web Workers: one decision of the example
+ * game, each worker a search of its own, merged at the root.
+ */
+function SearchSpeed() {
+  const points = useSearchPoints();
+  const [running, setRunning] = useState(false);
+  const [error, setError] = useState('');
+  const counts = workerCounts();
+
+  const run = async () => {
+    setRunning(true);
+    setError('');
+    try {
+      await runSearchScaling();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : String(e));
+    } finally {
+      setRunning(false);
+    }
+  };
+
+  const series: Series[] = [
+    { name: 'native', tone: 'gold', points: MCTS_SPEED.threads.map((t) => ({ threads: t.workers, gamesPerSecond: t.playoutsPerSecond })) },
+    { name: 'browser', tone: 'green', points: points.map((p) => ({ threads: p.workers, gamesPerSecond: p.playoutsPerSecond })) },
+  ];
+  const last = points.at(-1);
+  const total = last ? last.moves.reduce((a, m) => a + m.visits, 0) : 0;
+  const top = last ? [...last.moves].sort((a, b) => b.visits - a.visits).slice(0, 6) : [];
+  const native = last ? MCTS_SPEED.checksums[last.workers] : undefined;
+
+  return (
+    <section className="section two">
+      <div>
+        <div className="section-head">
+          <h2>Search on Web Workers</h2>
+          <p>
+            The searching bot (ISMCTS) decides a move by playing the game out from every option, {fmt(SEARCH.iterations)} times
+            per worker here. Each worker builds its own tree with its own random hands for the opponents, and the trees are added
+            up at the root (root parallelization): no shared memory, no locks, so more workers simply mean more playouts.
+          </p>
+        </div>
+        <div className="panel">
+          <div className="legend small">
+            <span>
+              <span className="swatch" style={{ background: 'var(--gold)' }} /> native, i7-11800H
+            </span>
+            <span>
+              <span className="swatch" style={{ background: 'var(--green)' }} /> your browser
+            </span>
+          </div>
+          <ThreadChart series={series} />
+          <div className="threads-run">
+            <button type="button" onClick={run} disabled={running}>
+              {running ? `Searching on ${counts[points.length] ?? counts.at(-1)} workers…` : points.length ? 'Run again' : 'Search here'}
+            </button>
+            <span className="muted small">
+              {last && !running
+                ? `${fmt(last.playoutsPerSecond)} playouts/s on ${last.workers} workers (native: ${fmt(MCTS_SPEED.threads[0].playoutsPerSecond)} on one thread).`
+                : `Decision ${SEARCH.decision + 1} of ${SEARCH.decisions} spread over the example game, on ${counts.join(', ')} workers.`}
+            </span>
+          </div>
+          {error && <p className="message error">The search failed: {error}. Reload the page and try again.</p>}
+        </div>
+      </div>
+      <div>
+        <div className="section-head">
+          <h2>What it thinks</h2>
+          <p>
+            The moves it looked at most, with the share of their playouts it won. It plays the move visited most: the search sends
+            more playouts where the result looks good, so visits are a steadier verdict than a win rate measured on a few games.
+          </p>
+        </div>
+        <div className="panel">
+          {last ? (
+            <>
+              <p className="muted small">
+                State {last.decision.state}, seat {last.decision.seat}, {last.decision.phase.replace('_', ' ')}:{' '}
+                {fmt(total)} playouts on {last.workers} workers.
+              </p>
+              <table className="zoo-table">
+                <thead>
+                  <tr>
+                    <th>move</th>
+                    <th>visits</th>
+                    <th>won</th>
+                    <th>prior</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {top.map((m, i) => (
+                    <tr key={m.move}>
+                      <th scope="row" className="mono">
+                        {i === 0 ? '▶ ' : ''}
+                        {m.move.replaceAll('_', ' ')}
+                      </th>
+                      <td className="mono">{fmt(m.visits)}</td>
+                      <td className="mono">{m.visits ? `${((100 * m.wins) / m.visits).toFixed(1)}%` : '–'}</td>
+                      <td className="mono">{m.prior.toFixed(2)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              <p className={`verdict${native === last.checksum ? ' ok' : native ? ' bad' : ''}`}>
+                {native
+                  ? native === last.checksum
+                    ? `✓ Checksum matches catan_mcts --workers ${last.workers}: the browser drew the same hands and played the same playouts.`
+                    : `✗ catan_mcts --workers ${last.workers} prints ${native}: something differs.`
+                  : `Checksum ${last.checksum}; catan_mcts --workers ${last.workers} prints the same for the same search.`}
+              </p>
+            </>
+          ) : (
+            <p className="muted">Run the search to see the moves it weighs.</p>
+          )}
+        </div>
+      </div>
+    </section>
+  );
+}
+
 export function Performance() {
   const yours = useLastBenchmark();
   const bars: Bar[] = SPEED.map((s) => ({
@@ -386,6 +507,8 @@ export function Performance() {
       </section>
 
       <WinChanceSpeed />
+
+      <SearchSpeed />
 
       <p className="muted small">
         Method and raw numbers: <a href={`${REPO_URL}/blob/main/docs/performance.md`}>docs/performance.md</a>.

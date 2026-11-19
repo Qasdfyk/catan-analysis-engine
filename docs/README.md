@@ -12,3 +12,4 @@ Design notes and benchmark write-ups land here, one per step, with the numbers a
 - [arena.md](arena.md): the arena with SPRT, Catanatron through a bridge, validation set A with a baseline model, sanity positions C.
 - [map-elites.md](map-elites.md): MAP-Elites over the zoo, the best bot of every style; the winner's curse and re-evaluation; the Robber and the leader.
 - [setup-review.md](setup-review.md): the initial placement graded corner by corner: successive halving, a confirmation round against the winner's curse, and whether a better setup wins more often.
+- [mcts.md](mcts.md): the searching bot: ISMCTS over its own turn, what a seat knows of the hidden cards and states drawn to match it, PUCT with the zoo bot as a prior, tuning, the arena, speed and root parallelization.

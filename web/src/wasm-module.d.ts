@@ -12,6 +12,8 @@ declare module '@engine' {
     winChances(state: number, first: number, count: number, seed: number): string;
     setupMovesJson(): string;
     setupReviewStep(move: number, seed: number, first: number, finalists: number, confirm: number): string;
+    mctsDecisionsJson(count: number): string;
+    mctsSearch(k: number, count: number, iterations: number, seed: number, worker: number, c: number, prior: number): string;
     delete(): void;
   }
   export interface EngineModule {

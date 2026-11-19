@@ -179,6 +179,13 @@ else
   echo "native: $native"
   echo "wasm:   $wasm"
   [ "$native" = "$wasm" ] || { echo "setup reviews differ" >&2; exit 1; }
+
+  step "WebAssembly: same search as the native build"
+  native="$(build/release/tools/catan_mcts --decisions 4 --iterations 30 --workers 2 tests/data/zoo-game-00088.json | grep 'mcts checksum')"
+  wasm="$(node web/scripts/mcts-node.mjs --decisions 4 --iterations 30 --workers 2 tests/data/zoo-game-00088.json | grep 'mcts checksum')"
+  echo "native: $native"
+  echo "wasm:   $wasm"
+  [ "$native" = "$wasm" ] || { echo "searches differ" >&2; exit 1; }
   if [ ! -d ../catan-project/frontend/src ]; then
     echo "web viewer: ../catan-project/frontend/src not found; the viewer draws catan-project's board" >&2
     exit 1

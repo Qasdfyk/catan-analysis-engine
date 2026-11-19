@@ -24,3 +24,6 @@ target_link_libraries(catan_validate PRIVATE catan_record catan_warnings Threads
 
 add_executable(catan_map_elites map_elites.cpp)
 target_link_libraries(catan_map_elites PRIVATE catan_record catan_warnings Threads::Threads)
+
+add_executable(catan_mcts mcts.cpp)
+target_link_libraries(catan_mcts PRIVATE catan_record catan_warnings Threads::Threads)

@@ -20,6 +20,12 @@
 //                                through tools/catanatron_bridge.py; needs --python with
 //                                Catanatron installed (docs/arena.md)
 //   catanatron:weighted          Catanatron's WeightedRandomPlayer, a quick check of the bridge
+//   mcts[:N]                     the searching bot (mcts.hpp) with N playouts per decision
+//                                (default 400); its own moves outside the search and in the
+//                                playouts are the hard bot's. --mcts-c and --mcts-prior set
+//                                PUCT's exploration and the zoo move's prior, --mcts-rollouts
+//                                hard|elites the opponents in its playouts (default elites),
+//                                --mcts-peek lets it search the true state (a measurement only)
 // --opponents takes one player for all three seats or three, comma-separated.
 //
 // Modes: --mode plain (default) | rotate | duplicate. A deal is one game in
@@ -40,6 +46,7 @@
 
 #include "catan/arena.hpp"
 #include "catan/elites.hpp"
+#include "catan/mcts.hpp"
 #include "catan/record.hpp"
 #include "catan/replay.hpp"
 
@@ -192,7 +199,8 @@ cae::ArenaPlayer catanatron_player(Bridge& bridge, BridgeStats& stats) {
 // --- Players by name -----------------------------------------------------------
 
 struct PlayerSpec {
-  enum class Kind { kHard, kZooRandom, kZoo, kEliteRandom, kCatanatron } kind = Kind::kHard;
+  enum class Kind { kHard, kZooRandom, kZoo, kEliteRandom, kCatanatron, kMcts } kind = Kind::kHard;
+  int iterations = 400;  // kMcts
   cae::ZooBot bot;
   std::string bridge_player;  // "alphabeta" or "weighted"
   std::string name;
@@ -220,6 +228,12 @@ PlayerSpec parse_player(const std::string& text) {
   if (text == "catanatron" || text == "catanatron:weighted") {
     p.kind = PlayerSpec::Kind::kCatanatron;
     p.bridge_player = text == "catanatron" ? "alphabeta" : "weighted";
+    return p;
+  }
+  if (text == "mcts" || text.rfind("mcts:", 0) == 0) {
+    p.kind = PlayerSpec::Kind::kMcts;
+    if (text.size() > 5) p.iterations = std::max(1, std::atoi(text.c_str() + 5));
+    p.bot = cae::hard_bot();
     return p;
   }
   // hard, zoo:ARCHETYPE/PERSONALITY[:SEED], elite:N, each with +leader=X
@@ -257,6 +271,8 @@ struct Options {
   bool compare = false;
   std::string python;
   std::string bridge_script;
+  cae::MctsSettings mcts;
+  bool mcts_elites = true;  // opponents in the search's playouts: elites, else hard
 };
 
 // What one thread needs to seat players: its own bridge, if any.
@@ -293,6 +309,13 @@ struct Seating {
           }
         }
         return catanatron[p.bridge_player][at(seat)];
+      }
+      case PlayerSpec::Kind::kMcts: {
+        cae::MctsSettings settings = o.mcts;
+        settings.iterations = p.iterations;
+        settings.trades = o.trades;
+        return cae::mcts_player(p.bot, o.mcts_elites ? elites() : std::vector<cae::ZooBot>{}, settings,
+                                deal_seed ^ (0x3c75000ULL + static_cast<std::uint64_t>(slot)));
       }
     }
     return {};
@@ -428,7 +451,8 @@ void print_summary(const Options& o, const std::string& who, const Summary& s, d
   std::fprintf(stderr,
                "usage: %s [--candidate P] [--baseline P] [--opponents P[,P,P]] [--mode plain|rotate|duplicate] [--deals N]\n"
                "          [--threads T] [--seed S] [--no-trades] [--sprt P0 P1] [--alpha A] [--beta B] [--batch N]\n"
-               "          [--compare-modes] [--python PATH] [--bridge PATH] [--elites PATH]\n",
+               "          [--compare-modes] [--python PATH] [--bridge PATH] [--elites PATH]\n"
+               "          [--mcts-c C] [--mcts-prior P] [--mcts-rollouts hard|elites] [--mcts-peek]\n",
                argv0);
   std::exit(2);
 }
@@ -491,6 +515,16 @@ int main(int argc, char** argv) {
       o.bridge_script = value();
     } else if (flag == "--elites") {
       g_elites_path = value();
+    } else if (flag == "--mcts-c") {
+      o.mcts.exploration = std::atof(value().c_str());
+    } else if (flag == "--mcts-prior") {
+      o.mcts.zoo_prior = std::atof(value().c_str());
+    } else if (flag == "--mcts-rollouts") {
+      const std::string r = value();
+      if (r != "hard" && r != "elites") usage(argv[0]);
+      o.mcts_elites = r == "elites";
+    } else if (flag == "--mcts-peek") {
+      o.mcts.peek = true;
     } else {
       usage(argv[0]);
     }

@@ -45,9 +45,11 @@ include(cmake/Dependencies.cmake)
 # Position independent so the Python module (a shared library) can link it.
 add_library(catan STATIC
   src/arena.cpp
+  src/belief.cpp
   src/bits.cpp
   src/game.cpp
   src/map_elites.cpp
+  src/mcts.cpp
   src/random_player.cpp
   src/setup_review.cpp
   src/winrate.cpp
