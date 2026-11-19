@@ -5,7 +5,7 @@
 # random games, zoo games, a short arena match, a tiny MAP-Elites search,
 # the validation set and the sanity positions, the Catanatron bridge where Catanatron is installed,
 # the difference test against catan-project's Python rules,
-# the WebAssembly build (same games and same win chances as native) with
+# the WebAssembly build (same games, win chances and setup review as native) with
 # the web viewer's tests.
 #
 # Usage: scripts/check.sh                  all checks
@@ -172,6 +172,13 @@ else
   echo "native: $native"
   echo "wasm:   $wasm"
   [ "$native" = "$wasm" ] || { echo "win chances differ" >&2; exit 1; }
+  step "WebAssembly: same setup review as the native build"
+  # A small budget: one thread in Node plays the full one in about a minute.
+  native="$(build/release/tools/catan_setup --first 4 --confirm 40 --threads "$jobs" tests/data/zoo-game-00088.json | grep 'setup checksum')"
+  wasm="$(node web/scripts/setup-node.mjs --first 4 --confirm 40 tests/data/zoo-game-00088.json | grep 'setup checksum')"
+  echo "native: $native"
+  echo "wasm:   $wasm"
+  [ "$native" = "$wasm" ] || { echo "setup reviews differ" >&2; exit 1; }
   if [ ! -d ../catan-project/frontend/src ]; then
     echo "web viewer: ../catan-project/frontend/src not found; the viewer draws catan-project's board" >&2
     exit 1

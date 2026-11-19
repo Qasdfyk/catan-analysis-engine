@@ -16,6 +16,9 @@ if(NOT EMSCRIPTEN)
   target_link_libraries(catan_arena PRIVATE catan_record catan_warnings Threads::Threads)
 endif()
 
+add_executable(catan_setup setup.cpp)
+target_link_libraries(catan_setup PRIVATE catan_record catan_warnings Threads::Threads)
+
 add_executable(catan_validate validate.cpp)
 target_link_libraries(catan_validate PRIVATE catan_record catan_warnings Threads::Threads)
 

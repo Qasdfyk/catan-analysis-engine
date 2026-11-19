@@ -49,6 +49,7 @@ add_library(catan STATIC
   src/game.cpp
   src/map_elites.cpp
   src/random_player.cpp
+  src/setup_review.cpp
   src/winrate.cpp
   src/zoo.cpp)
 target_include_directories(catan PUBLIC

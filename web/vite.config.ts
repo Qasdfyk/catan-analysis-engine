@@ -23,7 +23,8 @@ export default defineConfig({
     dedupe: ['react', 'react-dom'],
   },
   // The dev server only serves files under these folders.
-  server: { fs: { allow: ['.', platform] } },
+  // ../data: the MAP-Elites archive the setup review bundles.
+  server: { fs: { allow: ['.', '../data', platform] } },
   worker: { format: 'es' },
   test: { environment: 'node' },
 });

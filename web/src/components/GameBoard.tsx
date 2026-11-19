@@ -2,7 +2,7 @@
 // marks of the last move computed the way the game computes them
 // (builtPieces, producingTiles), so a move looks the same in both.
 
-import { useMemo } from 'react';
+import { useMemo, type ReactNode } from 'react';
 import { Board, type BoardTargets } from '@platform/components/Board';
 import { builtPieces, NO_BUILT, producingTiles } from '@platform/utils/changes';
 import type { OpenGame } from '../engine';
@@ -17,9 +17,11 @@ interface Props {
   topo: Topology;
   /** The state to draw: 0 before the first event, i after event i - 1. */
   pos: number;
+  /** Drawn over the board in its coordinates (the setup heat map). */
+  overlay?: ReactNode;
 }
 
-export function GameBoard({ game, topo, pos }: Props) {
+export function GameBoard({ game, topo, pos, overlay }: Props) {
   const { view, before, players, producing } = useMemo(() => {
     const state = game.state(pos);
     const view = toGameView(state, game.record, topo);
@@ -35,17 +37,20 @@ export function GameBoard({ game, topo, pos }: Props) {
 
   return (
     <div className="board-area">
-      <Board
-        game={view}
-        players={players}
-        targets={NO_TARGETS}
-        onSettlement={ignore}
-        onRoad={ignore}
-        onCity={ignore}
-        onRobber={ignore}
-        producing={producing}
-        recent={before ? builtPieces(before, view) : NO_BUILT}
-      />
+      <div className="board-stack">
+        <Board
+          game={view}
+          players={players}
+          targets={NO_TARGETS}
+          onSettlement={ignore}
+          onRoad={ignore}
+          onCity={ignore}
+          onRobber={ignore}
+          producing={producing}
+          recent={before ? builtPieces(before, view) : NO_BUILT}
+        />
+        {overlay}
+      </div>
     </div>
   );
 }

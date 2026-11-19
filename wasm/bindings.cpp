@@ -19,9 +19,18 @@
 // estimate, winChances(state, first, count, seed) plays playouts first ..
 // first + count - 1 from one of them. Web Workers each open the record and
 // take chunks, and the page adds the counts up.
+//
+// Setup review (setup_review.hpp): setupMovesJson() lists the settlements
+// of the setup; setupReviewStep(move) runs one more round of that move's
+// review (successive halving, then the confirmation) and answers where it
+// stands. Each worker reviews whole moves, round by round, so the page can
+// draw the heat map as it sharpens. Playouts seat the MAP-Elites given once
+// to setElites() (the page bundles data/elites.json).
 
+#include "catan/elites.hpp"
 #include "catan/random_player.hpp"
 #include "catan/replay.hpp"
+#include "catan/setup_review.hpp"
 #include "catan/winrate.hpp"
 #include "catan/zoo.hpp"
 
@@ -29,9 +38,54 @@
 
 #include <chrono>
 #include <cstdint>
+#include <map>
+#include <memory>
 #include <string>
+#include <vector>
 
 namespace {
+
+// The pool of every playout of the setup review; empty until setElites().
+std::vector<cae::ZooBot>& elites() {
+  static std::vector<cae::ZooBot> pool;
+  return pool;
+}
+
+// "" on success, else why the archive was refused.
+std::string setElites(const std::string& text) {
+  try {
+    elites() = cae::elites_from_json(nlohmann::json::parse(text));
+    return "";
+  } catch (const std::exception& e) {
+    return e.what();
+  }
+}
+
+nlohmann::json review_json(const cae::SetupReview& r) {
+  nlohmann::json candidates = nlohmann::json::array();
+  for (int c = 0; c < static_cast<int>(r.candidates().size()); ++c) {
+    const cae::SetupCandidate& k = r.candidates()[static_cast<std::size_t>(c)];
+    candidates.push_back({{"node", k.node},
+                          {"value", r.value(c)},
+                          {"playouts", r.value_playouts(c)},
+                          {"dropped", k.dropped},
+                          {"finalist", k.finalist},
+                          {"halvingWins", k.halving.wins},
+                          {"confirmWins", k.confirm.wins}});
+  }
+  nlohmann::json out = {{"done", r.done()},
+                        {"rounds", r.rounds()},
+                        {"playouts", r.playouts()},
+                        {"seat", r.seat()},
+                        {"played", r.played()},
+                        {"best", r.best()},
+                        {"candidates", candidates}};
+  if (r.done()) {
+    const cae::SetupReview::Loss l = r.loss();
+    out["loss"] = {{"loss", l.loss}, {"error", l.error}};
+  }
+  return out;
+}
 
 class Replay {
  public:
@@ -65,8 +119,37 @@ class Replay {
     return nlohmann::json{{"wins", wins}, {"unfinished", w.unfinished}, {"playouts", w.playouts}}.dump();
   }
 
+  std::string setupMovesJson() const {
+    nlohmann::json out = nlohmann::json::array();
+    for (const cae::SetupMove& m : cae::setup_moves(log_.states())) {
+      out.push_back({{"state", m.state}, {"seat", m.seat}, {"node", m.node}, {"round", m.round}});
+    }
+    return out.dump();
+  }
+  // One more round of the review of setup move `move`, started on the first
+  // call with that budget (catan_setup's --first, --finalists, --confirm;
+  // the page passes their defaults, 100, 4 and 1600).
+  std::string setupReviewStep(int move, double seed, int first, int finalists, int confirm) {
+    const std::vector<cae::SetupMove> moves = cae::setup_moves(log_.states());
+    if (move < 0 || move >= static_cast<int>(moves.size())) return "null";
+    auto& review = reviews_[move];
+    if (!review) {
+      const cae::SetupMove& m = moves[static_cast<std::size_t>(move)];
+      if (first < 1 || finalists < 1 || confirm < 1) return "null";
+      cae::SetupReviewConfig config;
+      config.first_playouts = first;
+      config.finalists = finalists;
+      config.confirm_playouts = confirm;
+      config.seed = static_cast<std::uint64_t>(seed);
+      review = std::make_unique<cae::SetupReview>(log_.state(m.state), m.node, config, elites());
+    }
+    review->step();
+    return review_json(*review).dump();
+  }
+
  private:
   cae::ReplayLog log_;
+  std::map<int, std::unique_ptr<cae::SetupReview>> reviews_;
 };
 
 std::string topologyJson() { return cae::topology_json().dump(); }
@@ -122,8 +205,11 @@ EMSCRIPTEN_BINDINGS(catan_engine) {
       .function("stateJson", &Replay::stateJson)
       .function("boardJson", &Replay::boardJson)
       .function("chancePointsJson", &Replay::chancePointsJson)
-      .function("winChances", &Replay::winChances);
+      .function("winChances", &Replay::winChances)
+      .function("setupMovesJson", &Replay::setupMovesJson)
+      .function("setupReviewStep", &Replay::setupReviewStep);
   emscripten::function("topologyJson", &topologyJson);
+  emscripten::function("setElites", &setElites);
   emscripten::function("selfplay", &selfplay);
   emscripten::function("zooSelfplay", &zooSelfplay);
 }

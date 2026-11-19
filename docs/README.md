@@ -11,3 +11,4 @@ Design notes and benchmark write-ups land here, one per step, with the numbers a
 - [win-chances.md](win-chances.md): chances to win along a game by Monte Carlo, the split into luck and decisions and its noise, calibration with bootstrap intervals, speed native and in the browser.
 - [arena.md](arena.md): the arena with SPRT, Catanatron through a bridge, validation set A with a baseline model, sanity positions C.
 - [map-elites.md](map-elites.md): MAP-Elites over the zoo, the best bot of every style; the winner's curse and re-evaluation; the Robber and the leader.
+- [setup-review.md](setup-review.md): the initial placement graded corner by corner: successive halving, a confirmation round against the winner's curse, and whether a better setup wins more often.

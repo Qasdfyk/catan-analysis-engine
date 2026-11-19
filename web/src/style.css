@@ -440,3 +440,21 @@ footer {
   .style-cell { font-size: 11px; aspect-ratio: 1.1; }
   .style-axis { font-size: 10px; }
 }
+
+/* --- Setup review --- */
+.board-stack { position: relative; }
+.setup-heat { position: absolute; inset: 0; pointer-events: none; }
+.setup-heat g { pointer-events: auto; }
+.setup-heat-label { font: 700 15px var(--sans); fill: #fff; text-anchor: middle; paint-order: stroke; stroke: #111; stroke-width: 4px; }
+.setup-table { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 8px; }
+.setup-table th { text-align: left; font-weight: 500; color: var(--muted); padding: 4px 6px; border-bottom: 1px solid var(--line); }
+.setup-table td { padding: 5px 6px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+.setup-table .num { text-align: right; }
+.setup-table tbody tr { cursor: pointer; }
+.setup-table tbody tr:hover { background: var(--panel-2); }
+.setup-table tr.current { background: var(--panel-2); box-shadow: inset 3px 0 0 var(--gold); }
+.setup-panel { overflow-x: auto; }
+.verdict { font-size: 11px; padding: 2px 8px; border-radius: 999px; border: 1px solid currentColor; }
+.verdict.best { color: var(--green); }
+.verdict.noise { color: var(--gold); }
+.verdict.loss { color: var(--danger); }
