@@ -15,7 +15,11 @@ const EXTENT = HEX_SIZE * 5.3;
 const VIEW_BOX = `${-EXTENT} ${-EXTENT} ${EXTENT * 2} ${EXTENT * 2}`;
 
 const pct = (x: number) => `${(100 * x).toFixed(1)}%`;
-const pp = (x: number) => `${x >= 0 ? '−' : '+'}${Math.abs(100 * x).toFixed(1)}`;
+// A loss as a change of chance: −3.2 lost, +0.4 gained, 0.0 for the best corner itself.
+const pp = (x: number) => {
+  const v = Math.abs(100 * x).toFixed(1);
+  return v === '0.0' ? v : `${x > 0 ? '−' : '+'}${v}`;
+};
 
 /** Drawn over the board: every legal corner of the settlement in focus, coloured by how far behind the best it is. */
 export function SetupHeat({ review, move, topo, players }: { review: Review; move: SetupMove; topo: Topology; players: RecordPlayer[] }) {
