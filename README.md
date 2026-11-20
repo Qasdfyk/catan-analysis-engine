@@ -12,6 +12,8 @@ Work in progress. So far there is the rules engine: the full rules of catan-proj
 4. Win chances from simulated games, then a search bot, then a small neural network trained by self-play.
 5. Move grades from the drop in win chances against the best move, judged only on what the player could see at the time.
 
+Next is the whole post-game flow on catan-project: a game ends, the player is asked "Review this game?", and the review opens. Games of people on catan-project, played with their consent, are used to measure the review, never to train it. Support for Colonist games depends on the company's written permission, which its Terms require. Steps, status and reasons: [docs/plan.md](docs/plan.md).
+
 The engine only looks at finished games. It gives no advice during a game.
 
 ## Build

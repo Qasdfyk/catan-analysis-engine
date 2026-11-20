@@ -61,4 +61,4 @@ node web/scripts/selfplay-node.mjs --games 20000
 ## Not done yet
 
 - Hidden information: the viewer shows everything (stolen cards, development cards), which is right for reviewing a finished game. A "seen by player X" view comes with the move grades, which must judge a move only by what the player knew.
-- Colonist records: the format converter comes with the browser extension (step 16a in the plan).
+- Records from other sites: a platform-neutral converter interface is step 13c, built and tested on catan-project records only. Colonist records need the company's written permission first (step 17, see [plan.md](plan.md#why-the-colonist-step-is-conditional)).
