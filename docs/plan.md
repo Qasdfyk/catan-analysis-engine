@@ -21,13 +21,13 @@ Status: **done**, **next**, **later**, or **conditional** (depends on someone el
 | 10c | MAP-Elites over the zoo | [map-elites.md](map-elites.md) |
 | 11 | Setup review: every corner of the initial placement graded | [setup-review.md](setup-review.md) |
 | 12a | The ISMCTS bot | [mcts.md](mcts.md) |
+| 12b | The ISMCTS bot as the platform's expert level, and golden positions B | [expert.md](expert.md) |
 
 ## Stage A: a demo of the full post-game flow
 
 | Step | Status | What |
 |---|---|---|
-| 12b | next | The ISMCTS bot as an "expert" level on catan-project, and golden positions B: a few positions analysed deeply once, frozen as a test set. |
-| 13a | later | The post-game flow on catan-project: the game ends, the player is asked "Review this game?", and the viewer opens with that game's record. First as a button on the end screen; the viewer takes a record from outside the page. |
+| 13a | next | The post-game flow on catan-project: the game ends, the player is asked "Review this game?", and the viewer opens with that game's record. First as a button on the end screen; the viewer takes a record from outside the page. |
 | 13b | later | A start page for players rather than developers: "dice or decisions?" first, with an example game, its chance curve, the luck split and the setup heat map. Engine speed stays on the Engine tab. |
 | 13c | later | A converter interface that does not depend on any platform: an adapter from a foreign record format to the engine's `Replay`. Designed and tested only on catan-project records. |
 
