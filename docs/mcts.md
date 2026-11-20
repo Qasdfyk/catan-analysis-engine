@@ -90,7 +90,7 @@ Nearly linear up to the 8 physical cores, then the hyper-threads add little, the
 
 ## Root parallelization and the browser
 
-A search can be split into W independent searches, each with its own seed (its own drawn hands and its own tree), whose root statistics are added up (`merge_searches`). That is root parallelization (Chaslot, Winands and van den Herik 2008): no shared tree, no locks, so threads and Web Workers scale like the independent games of `catan_selfplay`. The cost is that W small trees are shallower than one big one. `catan_mcts --workers W` runs it natively; the Performance page of the viewer runs the same searches on Web Workers, and `scripts/check.sh` compares a checksum of every visit and win of four decisions between the native build and WebAssembly under Node: equal.
+A search can be split into W independent searches, each with its own seed (its own drawn hands and its own tree), whose root statistics are added up (`merge_searches`). That is root parallelization (Chaslot, Winands and van den Herik 2008): no shared tree, no locks, so threads and Web Workers scale like the independent games of `catan_selfplay`. The cost is that W small trees are shallower than one big one. `catan_mcts --workers W` runs it natively, and `scripts/check.sh` compares a checksum of every visit and win of four decisions between the native build and WebAssembly under Node: equal.
 
 ## Limits
 

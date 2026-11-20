@@ -1,18 +1,145 @@
-// How the engine is built and checked: the pieces and how they connect, the
-// bitmask a player's buildings live in (explorable on the example game), the
-// tests that keep the rules equal to the game's, the data layout and the
-// bot zoo that will play the opponents in simulations.
+// The engine page: how it is built, that its rules equal the game's, how fast
+// it is (measured in this browser too), the bitmask a player's buildings live
+// in, and how strong its bots are. Kept to what a first visit needs; the full
+// story and every number's method are in the repository's docs.
 
 import { useEffect, useMemo, useState } from 'react';
 import { getVertexCoords, hexCorners, hexToPixel, HEX_SIZE, RESOURCE_COLORS } from '@platform/utils/hexLayout';
 import { PLAYER_COLORS } from '@platform/utils/labels';
+import { runBenchmark, useLastBenchmark, type Bots } from '../bench';
 import { Arena } from '../components/Arena';
-import { StyleMap } from '../components/StyleMap';
-import { Zoo } from '../components/Zoo';
+import { fmt, LogBars, type Bar } from '../components/Charts';
 import { exampleRecord, type OpenGame } from '../engine';
-import { CORRECTNESS, GAME_LAYOUT, REPO_URL } from '../facts';
+import { CORRECTNESS, NATIVE_CHECKSUMS, NATIVE_ZOO_CHECKSUMS, PROFILE, REPO_URL, SPEED } from '../facts';
 import { useOpenGame } from '../hooks';
 import type { Topology } from '../types';
+
+// A zoo bot thinks about every move, so its games take longer: fewer of them.
+const GAME_COUNTS: Record<Bots, number[]> = { random: [5_000, 20_000, 100_000], zoo: [500, 2_000, 10_000] };
+const CHECKSUMS: Record<Bots, Record<number, string>> = { random: NATIVE_CHECKSUMS, zoo: NATIVE_ZOO_CHECKSUMS };
+
+function Runner() {
+  const last = useLastBenchmark();
+  const [bots, setBots] = useState<Bots>('random');
+  const [games, setGames] = useState(20_000);
+  const [running, setRunning] = useState(false);
+  const [error, setError] = useState('');
+
+  const run = async () => {
+    setRunning(true);
+    setError('');
+    try {
+      await runBenchmark(games, bots);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : String(e));
+    } finally {
+      setRunning(false);
+    }
+  };
+
+  return (
+    <div className="panel runner">
+      <div className="runner-controls">
+        <div>
+          <h3>Run it on your machine</h3>
+          <p className="muted small">
+            {bots === 'random' ? (
+              <>
+                One Web Worker plays whole games between random players, the same games as{' '}
+                <code>catan_selfplay --games N --seed 1</code> in the native build.
+              </>
+            ) : (
+              <>
+                Zoo bots: the platform's hard bot with its archetypes and trading personalities, ported from Go to C++. They
+                will be the opponents in the review's simulations. Same games as{' '}
+                <code>catan_selfplay --games N --seed 1 --bots zoo</code>.
+              </>
+            )}
+          </p>
+        </div>
+        <div className="segmented" role="radiogroup" aria-label="Players">
+          {(['random', 'zoo'] as const).map((b) => (
+            <button
+              key={b}
+              type="button"
+              role="radio"
+              aria-checked={bots === b}
+              className={bots === b ? 'on' : ''}
+              onClick={() => {
+                setBots(b);
+                setGames(GAME_COUNTS[b][1]);
+              }}
+            >
+              {b === 'random' ? 'Random players' : 'Zoo bots'}
+            </button>
+          ))}
+        </div>
+        <div className="segmented" role="radiogroup" aria-label="Games">
+          {GAME_COUNTS[bots].map((n) => (
+            <button key={n} type="button" role="radio" aria-checked={games === n} className={games === n ? 'on' : ''} onClick={() => setGames(n)}>
+              {fmt(n)} games
+            </button>
+          ))}
+        </div>
+        <button type="button" className="primary" onClick={run} disabled={running}>
+          {running ? 'Playing…' : 'Run'}
+        </button>
+      </div>
+      {running && <div className="progress" aria-label="running" />}
+      {error && <p className="message error">The benchmark failed: {error}. Reload the page and try again.</p>}
+      {last && !running && (
+        <div className="result">
+          <div className="result-main">
+            <span className="result-number">{fmt(last.games / last.seconds)}</span>
+            <span className="muted">games / s in this browser{last.bots === 'zoo' ? ', zoo bots' : ''}</span>
+          </div>
+          <dl className="result-grid">
+            <div>
+              <dt>Games</dt>
+              <dd>{fmt(last.games)}</dd>
+            </div>
+            <div>
+              <dt>Time</dt>
+              <dd>{last.seconds.toFixed(2)} s</dd>
+            </div>
+            <div>
+              <dt>Per game</dt>
+              <dd>{((last.seconds / last.games) * 1e6).toFixed(0)} µs</dd>
+            </div>
+            <div>
+              <dt>Moves / s</dt>
+              <dd>{(last.actions / last.seconds / 1e6).toFixed(2)} M</dd>
+            </div>
+            <div>
+              <dt>Moves per game</dt>
+              <dd>{(last.actions / last.games).toFixed(0)}</dd>
+            </div>
+            <div>
+              <dt>Checksum</dt>
+              <dd className="mono">{last.checksum}</dd>
+            </div>
+          </dl>
+          <Verdict games={last.games} checksum={last.checksum} refused={last.refused} native={CHECKSUMS[last.bots][last.games]} />
+        </div>
+      )}
+    </div>
+  );
+}
+
+/** Whether the browser played exactly the games the native build plays. */
+function Verdict({ games, checksum, refused, native }: { games: number; checksum: string; refused: number; native?: string }) {
+  const same = native === checksum;
+  return (
+    <p className={`verdict${refused === 0 && same ? ' ok' : native ? ' bad' : ''}`}>
+      {native
+        ? same
+          ? `✓ Checksum matches the native build: WebAssembly played the same ${fmt(games)} games, move for move.`
+          : `✗ The native build prints ${native} for these games: something differs.`
+        : 'The checksum is a hash of every game; the native build prints the same one for the same games.'}
+      {refused > 0 && ` ${refused} moves were refused: the engine and the player disagree.`}
+    </p>
+  );
+}
 
 function Architecture() {
   const box = (title: string, lines: string[], tone = '') => (
@@ -215,57 +342,91 @@ function Testing() {
   );
 }
 
-function Layout() {
-  const lines = GAME_LAYOUT.bytes / GAME_LAYOUT.cacheLine;
-  return (
-    <div className="panel layout">
-      <div className="cache-lines" aria-label={`${lines} cache lines of ${GAME_LAYOUT.cacheLine} bytes`}>
-        {Array.from({ length: lines }, (_, i) => (
-          <span key={i}>{i * GAME_LAYOUT.cacheLine}</span>
-        ))}
-      </div>
-      <div className="layout-facts">
-        <div>
-          <span className="mono big">{GAME_LAYOUT.bytes} B</span>
-          <span className="muted small">a whole game state, {lines} cache lines</span>
-        </div>
-        <div>
-          <span className="mono big">0</span>
-          <span className="muted small">pointers or heap allocations</span>
-        </div>
-        <div>
-          <span className="mono big gold">{GAME_LAYOUT.copyNs} ns</span>
-          <span className="muted small">to copy it, one memcpy</span>
-        </div>
-      </div>
-      <p className="muted small">
-        A search copies the position before every simulated game. At 21 ns per copy against about 93 µs per game, copying
-        costs 0.02% of the time, so it needs no cleverness such as undoing moves.
-      </p>
-    </div>
-  );
-}
+const TOOLS = ['C++20', 'Go', 'CMake presets', 'GoogleTest', 'Google Benchmark', 'ASan + UBSan', 'perf', 'pybind11', 'Emscripten + embind', 'Web Workers', 'TypeScript', 'React', 'Vite', 'Vitest'];
 
-const TOOLS = ['C++20', 'Go', 'CMake presets', 'GoogleTest', 'Google Benchmark', 'ASan + UBSan', 'perf', 'pybind11', 'Emscripten + embind', 'TypeScript', 'React', 'Vite', 'Vitest'];
-
-export function HowItWorks() {
+export function Engine() {
   const [text, setText] = useState<string | null>(null);
   useEffect(() => {
     exampleRecord().then(setText, () => {});
   }, []);
   const { game, topo } = useOpenGame(text);
 
+  const yours = useLastBenchmark();
+  const bars: Bar[] = SPEED.map((s) => ({
+    label: s.name,
+    value: s.gamesPerSecond,
+    note: s.note,
+    tone: s.short === 'Native C++' ? 'gold' : 'muted',
+  }));
+  if (yours?.bots === 'random') bars.push({ label: 'This engine, your browser', value: yours.games / yours.seconds, note: 'WebAssembly, one worker', tone: 'green' });
+
   return (
     <>
       <div className="page-head">
         <div>
-          <h1>How it works</h1>
-          <p className="lede">One C++ engine, built three ways, and kept equal to the game's own rules by a test that compares them after every move.</p>
+          <h1>The engine</h1>
+          <p className="lede">
+            One C++ engine, built three ways, kept equal to the game's own rules by a test that compares them after every move,
+            and fast enough to play out thousands of games per decision.
+          </p>
         </div>
       </div>
 
       <section className="section first">
         <Architecture />
+      </section>
+
+      <Testing />
+
+      <section className="section">
+        <div className="section-head">
+          <h2>Speed</h2>
+          <p>
+            Whole four-player games between random players, per second, on one core. The scale is logarithmic; the Python
+            engines run the same random player, so the bars compare engines, not players.
+          </p>
+        </div>
+        <div className="panel">
+          <LogBars bars={bars} unit="games / s" />
+        </div>
+      </section>
+
+      <section className="section two">
+        <div>
+          <Runner />
+        </div>
+        <div>
+          <div className="panel profile">
+            <h3>Where the time went</h3>
+            <p className="muted small">
+              <code>perf</code> showed 3.5 instructions per cycle and almost no cache misses: the engine was not waiting for
+              memory, it was doing too much work.
+            </p>
+            <div className="profile-row">
+              <span>Longest road search</span>
+              <div className="profile-bar">
+                <div style={{ width: `${PROFILE.before.longestRoadShare * 100}%` }} />
+              </div>
+              <span className="mono">{Math.round(PROFILE.before.longestRoadShare * 100)}%</span>
+            </div>
+            <p className="muted small">
+              of all samples. Two fixes: recompute only the players a move can affect, and find legal roads with a few mask
+              operations instead of 72 checks.
+            </p>
+            <div className="before-after">
+              <div>
+                <span className="muted small">before</span>
+                <span className="mono big">{fmt(PROFILE.before.gamesPerSecond)}</span>
+              </div>
+              <span className="arrow">→</span>
+              <div>
+                <span className="muted small">after</span>
+                <span className="mono big gold">{fmt(PROFILE.after.gamesPerSecond)}</span>
+              </div>
+              <span className="muted small">games / s · same games, same checksum</span>
+            </div>
+          </div>
+        </div>
       </section>
 
       <section className="section">
@@ -279,21 +440,7 @@ export function HowItWorks() {
         {game && topo ? <Bitboard game={game} topo={topo} /> : <div className="panel placeholder-block" aria-busy="true" />}
       </section>
 
-      <Testing />
-
-      <section className="section">
-        <div className="section-head">
-          <h2>Data layout</h2>
-          <p>The state is one flat struct of fixed-size arrays and masks, so it sits in a few cache lines and copies in one go.</p>
-        </div>
-        <Layout />
-      </section>
-
-      <Zoo />
-
       <Arena />
-
-      <StyleMap />
 
       <section className="section">
         <div className="section-head">

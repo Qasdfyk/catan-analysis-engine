@@ -17,14 +17,7 @@ export interface BenchResult {
   seconds: number;
 }
 
-/** One point of the scaling run: `workers` workers together. */
-export interface ScalingPoint {
-  workers: number;
-  gamesPerSecond: number;
-}
-
 let last: BenchResult | null = null;
-let scaling: ScalingPoint[] = [];
 const listeners = new Set<() => void>();
 const changed = () => listeners.forEach((f) => f());
 const subscribe = (f: () => void) => (listeners.add(f), () => listeners.delete(f));
@@ -85,50 +78,7 @@ export async function runBenchmark(games: number, bots: Bots = 'random'): Promis
   }
 }
 
-/** 1, 2, 4, ... up to the number of logical cores the browser reports (at most 32). */
-export function workerCounts(cores = navigator.hardwareConcurrency || 4): number[] {
-  const counts: number[] = [];
-  for (let n = 1; n <= Math.min(cores, 32); n *= 2) counts.push(n);
-  if (counts.at(-1)! < Math.min(cores, 32)) counts.push(Math.min(cores, 32));
-  return counts;
-}
-
-/**
- * Plays `gamesPerWorker` games on 1, 2, 4, ... workers at once and reports
- * games per second for each count. Each worker gets its own seed, so they
- * play different games, like threads of the native build. The clock starts
- * once every worker has compiled the module and stops when the last one is
- * done, so it measures the games, not the start-up.
- */
-export async function runScaling(gamesPerWorker: number, onPoint?: (p: ScalingPoint) => void): Promise<ScalingPoint[]> {
-  scaling = [];
-  changed();
-  for (const n of workerCounts()) {
-    const started = await Promise.allSettled(Array.from({ length: n }, () => startWorker()));
-    const workers = started.flatMap((s) => (s.status === 'fulfilled' ? [s.value] : []));
-    try {
-      const failed = started.find((s) => s.status === 'rejected');
-      if (failed) throw failed.reason;
-      const start = performance.now();
-      await Promise.all(workers.map((w, i) => ask(w, { games: gamesPerWorker, seed: i + 1 })));
-      const seconds = (performance.now() - start) / 1000;
-      const point = { workers: n, gamesPerSecond: (n * gamesPerWorker) / seconds };
-      scaling = [...scaling, point];
-      changed();
-      onPoint?.(point);
-    } finally {
-      workers.forEach((w) => w.terminate());
-    }
-  }
-  return scaling;
-}
-
 /** The last single-worker result in this tab, or null before the first run. */
 export function useLastBenchmark(): BenchResult | null {
   return useSyncExternalStore(subscribe, () => last);
-}
-
-/** The scaling points measured so far in this tab. */
-export function useScaling(): ScalingPoint[] {
-  return useSyncExternalStore(subscribe, () => scaling);
 }

@@ -5,16 +5,14 @@
 import { PLATFORM_URL, REPO_URL } from './facts';
 import { useHashTab } from './hooks';
 import type { Tab } from './nav';
-import { HowItWorks } from './pages/HowItWorks';
-import { Performance } from './pages/Performance';
+import { Engine } from './pages/Engine';
 import { Replay } from './pages/Replay';
 import { Start } from './pages/Start';
 
 const NAV: { tab: Tab; label: string }[] = [
   { tab: 'start', label: 'Start' },
   { tab: 'replay', label: 'Replay' },
-  { tab: 'performance', label: 'Performance' },
-  { tab: 'how-it-works', label: 'How it works' },
+  { tab: 'engine', label: 'Engine' },
 ];
 
 export function App() {
@@ -42,8 +40,7 @@ export function App() {
       <main className="page" key={tab}>
         {tab === 'start' && <Start />}
         {tab === 'replay' && <Replay />}
-        {tab === 'performance' && <Performance />}
-        {tab === 'how-it-works' && <HowItWorks />}
+        {tab === 'engine' && <Engine />}
       </main>
       <footer>
         <span>

@@ -1,10 +1,9 @@
 // The replay viewer: open a record (or the example), step through it by
 // hand or let it play.
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { GameBoard } from '../components/GameBoard';
 import { MoveLog, Players, Status } from '../components/GamePanels';
-import { DiceChart, IncomeChart, PointsChart } from '../components/ReplayCharts';
 import { LuckPanel, WinChart } from '../components/WinChances';
 import { useWinChances } from '../chances';
 import { SetupHeat, SetupPanel } from '../components/SetupReview';
@@ -12,7 +11,6 @@ import { focusMove, useSetupReview } from '../setup';
 import { EXAMPLES, exampleRecord, readRecordBytes } from '../engine';
 import { useOpenGame, usePlayback } from '../hooks';
 import { turnStart } from '../nav';
-import { gameStats } from '../stats';
 
 const SPEEDS = [0.5, 1, 2, 4];
 
@@ -27,8 +25,6 @@ export function Replay() {
   const { game, topo, error } = useOpenGame(source?.text ?? null);
   const playback = usePlayback(game);
   const { pos, go, playing, setPlaying, speed, setSpeed } = playback;
-  // Every state of the game is read once here; the charts then cut at pos.
-  const stats = useMemo(() => (game ? gameStats(game) : null), [game]);
   // Monte Carlo in Web Workers, started as soon as a record opens.
   const chances = useWinChances(game ? (source?.text ?? null) : null);
   // The setup review, in its own workers, also from the start.
@@ -122,12 +118,16 @@ export function Replay() {
         <div>
           <h1>Replay</h1>
           <p className="lede">
-            Step through a finished game. The rules engine rebuilds every state from the record, here in WebAssembly; the
-            record never leaves your computer.
+            Step through a finished game, rebuilt state by state by the engine in WebAssembly, and watch each player's chance
+            to win change.
           </p>
         </div>
         <div className="open">
-          <label className="button primary" htmlFor="file">
+          <label
+            className="button primary"
+            htmlFor="file"
+            title="A .json or .json.gz record that catan-project saves after every game; you can also drop one anywhere on the page"
+          >
             Open a game record…
           </label>
           <input
@@ -167,10 +167,6 @@ export function Replay() {
           </select>
         </div>
       </div>
-      <p className="hint">
-        Records are the <code>.json</code> or <code>.json.gz</code> files catan-project saves after every game. Drop one
-        anywhere on the page.
-      </p>
 
       {shownError && (
         <p className="message error" role="status">
@@ -231,15 +227,10 @@ export function Replay() {
             <Players state={game.state(pos)} players={game.record.players} />
             <MoveLog game={game} pos={pos} onPick={step} />
           </aside>
-          {stats && (
-            <section className="charts">
-              <SetupPanel run={setup} players={game.record.players} pos={pos} onSeek={step} />
-              <LuckPanel run={chances} players={game.record.players} pos={pos} />
-              <PointsChart stats={stats} players={game.record.players} pos={pos} onSeek={step} />
-              <DiceChart stats={stats} players={game.record.players} pos={pos} />
-              <IncomeChart stats={stats} players={game.record.players} pos={pos} />
-            </section>
-          )}
+          <section className="charts">
+            <SetupPanel run={setup} players={game.record.players} pos={pos} onSeek={step} />
+            <LuckPanel run={chances} players={game.record.players} pos={pos} />
+          </section>
         </div>
       ) : (
         !shownError && <div className="board-area placeholder viewer-placeholder" aria-busy="true" />

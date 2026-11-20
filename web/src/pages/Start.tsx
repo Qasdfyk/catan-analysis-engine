@@ -3,8 +3,7 @@
 
 import { useEffect, useState } from 'react';
 import { PLAYER_COLORS } from '@platform/utils/labels';
-import { useLastBenchmark } from '../bench';
-import { fmt, LogBars, Stat, type Bar } from '../components/Charts';
+import { fmt, Stat } from '../components/Charts';
 import { GameBoard } from '../components/GameBoard';
 import { exampleRecord } from '../engine';
 import { CORRECTNESS, REPO_URL, SPEED, SPEEDUP_VS_PYTHON } from '../facts';
@@ -58,46 +57,30 @@ const BUILDING_BLOCKS = [
 ];
 
 const ROADMAP = [
-  { done: true, title: 'Rules engine in C++20', text: 'Full rules, difference-tested against the Python game' },
-  { done: true, title: 'Performance', text: 'Profiled with perf; 2.6× faster after two targeted fixes' },
-  { done: true, title: 'WebAssembly replay viewer', text: 'This page' },
-  { done: true, title: 'Bot zoo', text: 'Sixteen styles of bot, to play varied games (in Replay and How it works)' },
-  { done: true, title: 'Chance to win', text: 'Monte Carlo in Web Workers, split into luck and decisions (in Replay)' },
-  { done: true, title: 'Arena and tuned zoo', text: 'SPRT matches, Catanatron, and MAP-Elites: the best bot of each style (in How it works)' },
-  { done: true, title: 'Initial placement', text: 'The first graded decision: every corner of the setup by successive halving (in Replay)' },
-  { done: true, title: 'Search', text: 'A bot that searches (ISMCTS) without seeing hidden cards; the arena and Web Workers (in How it works and Performance)' },
+  { done: true, title: 'Rules engine in C++20', text: 'Full rules, difference-tested against the Python game, profiled with perf' },
+  { done: true, title: 'Replay in the browser', text: "WebAssembly, with each player's chance to win from Monte Carlo in Web Workers" },
+  { done: true, title: 'Bots and search', text: 'A zoo of bot styles, an SPRT arena, and an ISMCTS bot that sees only its own cards' },
   { done: false, title: 'Value network', text: 'A learned evaluation of positions, trained on self-play' },
   { done: false, title: 'Post-game review', text: 'Which moves won or lost the game, shown here move by move' },
 ];
 
 export function Start() {
-  const yours = useLastBenchmark();
-  const bars: Bar[] = SPEED.map((s) => ({
-    label: s.short,
-    value: s.gamesPerSecond,
-    note: s.note,
-    tone: s.short === 'Native C++' ? 'gold' : 'muted',
-  }));
-  if (yours) {
-    bars.push({ label: 'Your browser', value: yours.games / yours.seconds, note: 'WebAssembly, measured just now', tone: 'green' });
-  }
-
   return (
     <>
       <section className="hero">
         <div className="hero-text">
-          <p className="eyebrow">C++20 · WebAssembly · bitboards</p>
+          <p className="eyebrow">C++20 · WebAssembly · Monte Carlo search</p>
           <h1>A Catan rules engine that plays {fmt(SPEED[2].gamesPerSecond)} games a second</h1>
           <p className="lede">
             The foundation of a post-game analyzer for Catan. It runs right here in your browser: replay a finished game move
-            by move, or measure the engine on your own CPU.
+            by move and watch each player's chance to win change.
           </p>
           <div className="cta">
             <a className="button primary" href="#/replay">
               Watch a game
             </a>
-            <a className="button" href="#/performance">
-              Run the benchmark
+            <a className="button" href="#/engine">
+              How it works
             </a>
             <a className="button ghost" href={REPO_URL}>
               Source on GitHub ↗
@@ -116,24 +99,6 @@ export function Start() {
 
       <section className="section">
         <div className="section-head">
-          <h2>Speed</h2>
-          <p>
-            Whole four-player games between random players, per second, on one core. The scale is logarithmic: each line
-            is ten times the one before.
-          </p>
-        </div>
-        <div className="panel">
-          <LogBars bars={bars} unit="games / s" />
-          {!yours && (
-            <p className="panel-foot">
-              <a href="#/performance">Add your browser to this chart →</a>
-            </p>
-          )}
-        </div>
-      </section>
-
-      <section className="section">
-        <div className="section-head">
           <h2>How it is built</h2>
         </div>
         <div className="blocks">
@@ -148,14 +113,14 @@ export function Start() {
           ))}
         </div>
         <p className="panel-foot">
-          <a href="#/how-it-works">Explore the bitboard and the tests in How it works →</a>
+          <a href="#/engine">The tests, the benchmark and the bots →</a>
         </p>
       </section>
 
       <section className="section">
         <div className="section-head">
           <h2>Roadmap</h2>
-          <p>The engine is step one. The goal is a review that tells you, after the game, which decisions mattered.</p>
+          <p>The goal is a review that tells you, after the game, which decisions mattered.</p>
         </div>
         <ol className="roadmap">
           {ROADMAP.map((r) => (
