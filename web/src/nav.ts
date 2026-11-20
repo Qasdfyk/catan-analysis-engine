@@ -4,12 +4,16 @@
 import { isTradeTalk } from './events';
 import type { RecordEvent } from './types';
 
-export const TABS = ['start', 'replay', 'performance', 'how-it-works'] as const;
+export const TABS = ['start', 'replay', 'engine'] as const;
 export type Tab = (typeof TABS)[number];
 
-/** "#/performance" -> "performance"; anything unknown is the start page. */
+/** Tabs that were merged into another; old links still land on the right page. */
+const MOVED: Record<string, Tab> = { performance: 'engine', 'how-it-works': 'engine' };
+
+/** "#/engine" -> "engine"; anything unknown is the start page. */
 export function tabFromHash(hash: string): Tab {
   const name = hash.replace(/^#\/?/, '').split(/[/?]/)[0];
+  if (name in MOVED) return MOVED[name];
   return (TABS as readonly string[]).includes(name) ? (name as Tab) : 'start';
 }
 

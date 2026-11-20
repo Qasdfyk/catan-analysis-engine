@@ -93,9 +93,8 @@ out="$(build/release/tools/catan_arena --candidate elite:0 --opponents elites --
 rm -f "$tmp_elites"
 echo "$out"
 echo "$out" | grep -q " 0 unfinished, 0 refused moves" || { echo "elite games went wrong" >&2; exit 1; }
-step "MAP-Elites: data/elites.json loads, the page's map matches it"
+step "MAP-Elites: data/elites.json loads"
 build/release/tools/catan_arena --candidate elite:0 --opponents hard --deals 16 --threads "$jobs" | tail -1
-python3 scripts/style-map-web.py --check
 
 step "validation set A: reads back, baseline model scores it"
 gzip -dc data/set-a.jsonl.gz | build/release/tools/catan_validate eval --model data/baseline.json | tail -1

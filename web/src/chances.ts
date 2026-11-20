@@ -10,7 +10,7 @@
 // of the luck/decision split between passes says how far to trust it (batch
 // means).
 
-import { useEffect, useRef, useState, useSyncExternalStore } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 /** PointKind of winrate.hpp. */
 export const Kind = { Start: 0, BeforeRoll: 1, AfterRoll: 2, End: 3 } as const;
@@ -150,26 +150,6 @@ export interface ChanceRun {
   error: string;
 }
 
-/** The speed of the last finished estimate, for the Performance page. */
-export interface ChanceSpeed {
-  playouts: number;
-  seconds: number;
-  workers: number;
-  points: number;
-}
-let lastSpeed: ChanceSpeed | null = null;
-const speedListeners = new Set<() => void>();
-export function useLastChanceSpeed(): ChanceSpeed | null {
-  return useSyncExternalStore(
-    (f) => (speedListeners.add(f), () => speedListeners.delete(f)),
-    () => lastSpeed,
-  );
-}
-function noteSpeed(s: ChanceSpeed) {
-  lastSpeed = s;
-  speedListeners.forEach((f) => f());
-}
-
 function spawn(): Worker {
   return new Worker(new URL('./chances-worker.ts', import.meta.url), { type: 'module' });
 }
@@ -252,7 +232,6 @@ export function useWinChances(recordText: string | null): ChanceRun | null {
           publish();
           give(w);
           if (live.current.done >= live.current.total) {
-            noteSpeed({ playouts: live.current.total, seconds: (performance.now() - t0) / 1000, workers: n, points: live.current.points.length });
             stop();
           }
         }

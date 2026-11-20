@@ -33,7 +33,7 @@ A cell is given by what the bot does in its games, averaged:
 
 400 games give a win rate to about ±4 points (95%). The elite of a cell is the bot that looked best, and looking best includes luck, so the score an elite carries is too high. This is the optimizer's curse of decision analysis (Smith and Winkler, 2006): choosing by noisy estimates guarantees disappointment on average.
 
-Plain MAP-Elites stores the search score. The recheck alone is not enough: its score was also used to choose (a candidate takes the cell when the recheck says so), so it is cursed too, only less. Re-evaluation helps more: games played after a choice carry none of that choice's luck, so a lucky elite sinks back toward what it is worth and the next good candidate takes the cell. This is the archive re-evaluation of noisy quality-diversity (Flageat and Cully, 2023, [arXiv:2302.00463](https://arxiv.org/abs/2302.00463)). Only the final deals are honest, which is why the page and every table here show final scores.
+Plain MAP-Elites stores the search score. The recheck alone is not enough: its score was also used to choose (a candidate takes the cell when the recheck says so), so it is cursed too, only less. Re-evaluation helps more: games played after a choice carry none of that choice's luck, so a lucky elite sinks back toward what it is worth and the next good candidate takes the cell. This is the archive re-evaluation of noisy quality-diversity (Flageat and Cully, 2023, [arXiv:2302.00463](https://arxiv.org/abs/2302.00463)). Only the final deals are honest, which is why every table here shows final scores.
 
 How large the curse is with and without the recheck and re-evaluation is a measurement you can run yourself (two commands, a few minutes each):
 

@@ -5,10 +5,14 @@ import type { RecordEvent } from './types';
 const ev = (action: string): RecordEvent => ({ turn: 0, seat: 0, action, payload: {} });
 
 describe('tabFromHash', () => {
+  it('sends the old Performance and How it works links to the engine page', () => {
+    expect(tabFromHash('#/performance')).toBe('engine');
+    expect(tabFromHash('#/how-it-works')).toBe('engine');
+  });
+
   it('reads the tab after #/', () => {
-    expect(tabFromHash('#/performance')).toBe('performance');
+    expect(tabFromHash('#/engine')).toBe('engine');
     expect(tabFromHash('#replay')).toBe('replay');
-    expect(tabFromHash('#/how-it-works')).toBe('how-it-works');
     expect(tabFromHash('#/replay?x=1')).toBe('replay');
   });
   it('falls back to the start page', () => {

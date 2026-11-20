@@ -110,8 +110,8 @@ footer {
 .page-head { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 16px; margin-bottom: 8px; }
 .page-head h1 { font-size: 32px; }
 .lede { color: var(--muted); font-size: 17px; max-width: 640px; }
-.hint { color: var(--muted); font-size: 13px; margin-bottom: 20px; }
-.open { display: flex; gap: 8px; flex-wrap: wrap; }
+.open { display: flex; gap: 8px; flex-wrap: wrap; min-width: 0; max-width: 100%; }
+.open select { min-width: 0; max-width: 100%; }
 
 /* --- Start --- */
 .hero { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 520px); gap: 40px; align-items: center; }
@@ -188,19 +188,11 @@ footer {
 .chart .grid { stroke: var(--line); }
 .chart .axis { fill: var(--muted); font: 11px var(--mono); }
 .chart .label { fill: var(--text); font: 11px var(--mono); }
-.chart .muted-fill { fill: var(--muted); }
-.chart .ideal { stroke: var(--line-2); stroke-dasharray: 4 4; stroke-width: 1.5; }
-.chart .series { fill: none; stroke-width: 2.5; stroke-linejoin: round; }
-.chart .series.gold { stroke: var(--gold); }
 .chart .dot.gold { fill: var(--gold); stroke: var(--panel); stroke-width: 2; }
-.chart .series.green { stroke: var(--green); }
 .chart .dot.green { fill: var(--green); stroke: var(--panel); stroke-width: 2; }
-.chart .gold-fill { fill: var(--gold); }
-.chart .green-fill { fill: var(--green); }
-.threads-run { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; margin-top: 8px; }
 
 /* --- Performance --- */
-.runner { margin-top: 24px; }
+.runner { margin-top: 0; }
 .runner-controls { display: flex; flex-wrap: wrap; align-items: center; gap: 16px; }
 .runner-controls > div:first-child { flex: 1 1 320px; }
 .runner-controls p { margin-top: 4px; }
@@ -298,31 +290,10 @@ footer {
 .chart .cursor { stroke: var(--gold); stroke-width: 1.5; }
 .chart .cursor-dot { stroke: var(--panel); stroke-width: 2; }
 
-.dice-chart { display: grid; grid-template-columns: repeat(11, minmax(0, 1fr)); gap: 6px; height: 160px; }
-.dice-col { display: flex; flex-direction: column; min-width: 0; }
-.dice-bar-area { position: relative; flex: 1; border-bottom: 1px solid var(--line-2); }
-.dice-bar { position: absolute; bottom: 0; left: 10%; right: 10%; background: #5a606b; border-radius: 4px 4px 0 0; transition: height .2s; }
-.dice-bar.seven { background: #8a4b47; }
-.dice-bar.now { background: var(--gold); }
-.dice-expected { position: absolute; left: 0; right: 0; height: 0; border-top: 2px solid var(--text); opacity: .55; }
-.dice-sum { text-align: center; font: 12px var(--mono); color: var(--muted); margin-top: 4px; }
-
-.income { display: flex; flex-direction: column; gap: 12px; }
-.income-row { display: grid; grid-template-columns: 110px minmax(0, 1fr) 36px; gap: 4px 12px; align-items: center; font-size: 14px; }
 .income-name { display: flex; align-items: center; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
-.income-bar { display: flex; height: 16px; background: var(--panel-2); border-radius: 4px; overflow: hidden; }
-.res-seg { height: 100%; transition: width .2s; }
-.res-seg.wood { background: var(--wood); }
-.res-seg.brick { background: var(--brick); }
-.res-seg.sheep { background: var(--sheep); }
-.res-seg.wheat { background: var(--wheat); }
-.res-seg.ore { background: var(--ore); }
-.income-total { text-align: right; }
-.income-extra { grid-column: 2 / -1; margin-top: -2px; }
 .legend { display: flex; flex-wrap: wrap; gap: 4px 14px; margin-top: 14px; }
-.swatch { display: inline-block; width: 10px; height: 10px; border-radius: 2px; vertical-align: -1px; }
 
-/* --- How it works --- */
+/* --- The engine page --- */
 .section.first { margin-top: 32px; }
 .arch { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr) auto minmax(0, 1fr); gap: 14px; align-items: center; }
 .arch-col { display: flex; flex-direction: column; gap: 10px; }
@@ -373,11 +344,6 @@ footer {
 .mutant-cells span.caught { background: var(--green); border-color: var(--green); opacity: 1; }
 @media (max-width: 520px) { .mutant-row { grid-template-columns: minmax(0, 1fr) auto; } .mutant-row > .small:first-child { grid-column: 1 / -1; } }
 
-.cache-lines { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 3px; }
-.cache-lines span { padding: 18px 0 4px 4px; border-radius: 4px; background: rgba(230, 185, 58, .14); border: 1px solid rgba(230, 185, 58, .35); font: 10px var(--mono); color: var(--muted); }
-.layout-facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin: 18px 0 12px; }
-.layout-facts > div { display: flex; flex-direction: column; }
-.layout-facts .big { font-size: 26px; }
 .tools { display: flex; flex-wrap: wrap; gap: 8px; }
 .tools span { padding: 6px 12px; border: 1px solid var(--line-2); border-radius: 999px; font: 13px var(--mono); color: var(--text); background: var(--panel); }
 .tools-note { margin-top: 14px; }
@@ -386,21 +352,14 @@ footer {
   *, *::before, *::after { animation: none !important; transition: none !important; }
 }
 
-/* The bot zoo on How it works */
-.section.zoo { display: grid; grid-template-columns: minmax(0, 1fr); gap: 32px; }
-.section.zoo .h2h-panel { max-width: 680px; }
+/* Tables (the arena on the engine page) */
 .zoo-scroll { overflow-x: auto; }
-.zoo-table, .h2h { width: 100%; border-collapse: collapse; font-size: 14px; }
-.zoo-table th, .zoo-table td, .h2h th, .h2h td { padding: 8px 10px; text-align: left; border-bottom: 1px solid var(--line); white-space: nowrap; }
-.zoo-table thead th, .h2h thead th { color: var(--muted); font-weight: 500; font-size: 12px; }
+.zoo-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+.zoo-table th, .zoo-table td { padding: 8px 10px; text-align: left; border-bottom: 1px solid var(--line); white-space: nowrap; }
+.zoo-table thead th { color: var(--muted); font-weight: 500; font-size: 12px; }
 .zoo-table tbody th { font-weight: 600; }
 .zoo-table tbody th .small { display: block; font-weight: 400; white-space: normal; max-width: 240px; }
-.zoo-share { display: inline-flex; align-items: center; gap: 8px; min-width: 110px; }
-.zoo-bar { display: inline-block; height: 8px; border-radius: 4px; max-width: 60px; }
-.h2h td { text-align: center; border-radius: 6px; border: 2px solid var(--panel); }
-.h2h thead th { text-align: center; }
 .zoo-scroll p { margin-top: 12px; }
-.zoo-table.wrap th { white-space: normal; }
 
 /* --- Win chances: luck or decisions --- */
 .split { display: grid; grid-template-columns: minmax(90px, auto) 1fr 1fr auto; gap: 8px 14px; align-items: center; }
@@ -415,31 +374,6 @@ footer {
 .split-num { text-align: right; }
 .legend .chip { margin-right: 2px; }
 .split-err { position: absolute; top: 4px; height: 2px; background: rgba(255, 255, 255, .55); }
-
-/* The map of styles (StyleMap.tsx) */
-.style-map { display: grid; grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); gap: 16px; align-items: start; }
-.style-controls { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; margin-bottom: 14px; }
-.style-controls .segmented button { padding: 6px 10px; font-size: 13px; }
-.style-grid { display: grid; gap: 4px; align-items: center; }
-.style-axis { font-size: 11px; color: var(--muted); padding-right: 6px; white-space: nowrap; }
-.style-axis.center { text-align: center; padding: 4px 0 0; }
-.style-cell { position: relative; aspect-ratio: 1.4; min-width: 0; padding: 0; display: grid; place-items: center; border: 1px solid var(--line-2); border-radius: 6px; font-size: 13px; color: var(--text); }
-.style-cell.empty { background: transparent; color: var(--muted); border-style: dashed; }
-.style-cell.on { outline: 2px solid var(--gold); outline-offset: 1px; }
-.style-zoo { position: absolute; top: 4px; right: 4px; width: 6px; height: 6px; border-radius: 50%; background: var(--gold); }
-.style-zoo.inline { position: static; display: inline-block; margin: 0 2px 0 4px; }
-.style-legend { margin-top: 12px; }
-.style-detail-head { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
-.style-win { font-size: 28px; color: var(--text); }
-.style-genes { display: grid; gap: 6px; margin: 12px 0 0; }
-.style-genes div { display: flex; justify-content: space-between; gap: 12px; border-bottom: 1px solid var(--line); padding-bottom: 4px; }
-.style-genes dt { color: var(--muted); font-size: 12px; }
-.style-genes dd { margin: 0; font-size: 12px; text-align: right; }
-@media (max-width: 760px) {
-  .style-map { grid-template-columns: minmax(0, 1fr); }
-  .style-cell { font-size: 11px; aspect-ratio: 1.1; }
-  .style-axis { font-size: 10px; }
-}
 
 /* --- Setup review --- */
 .board-stack { position: relative; }
