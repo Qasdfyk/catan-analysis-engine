@@ -63,6 +63,8 @@ set_target_properties(catan PROPERTIES POSITION_INDEPENDENT_CODE ON)
 # Game records (JSON) on top of the rules.
 add_library(catan_record STATIC
   src/elites.cpp
+  src/expert.cpp
+  src/golden.cpp
   src/record.cpp
   src/replay.cpp)
 target_link_libraries(catan_record PUBLIC catan nlohmann_json::nlohmann_json PRIVATE catan_warnings)

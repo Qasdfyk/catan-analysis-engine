@@ -142,7 +142,11 @@ MctsSearch mcts_search(const Game& game, int seat, const std::array<Cards, kMaxP
   std::vector<int> legal;
   std::vector<int> path;
 
+  const bool timed = settings.deadline != std::chrono::steady_clock::time_point{};
+  int done = 0;
   for (int it = 0; it < settings.iterations; ++it) {
+    if (timed && it > 0 && std::chrono::steady_clock::now() >= settings.deadline) break;
+    ++done;
     Rng rng(mix(seed, static_cast<std::uint64_t>(it)));
     // 1. A state that agrees with what the seat knows.
     ZooTable table;
@@ -225,7 +229,7 @@ MctsSearch mcts_search(const Game& game, int seat, const std::array<Cards, kMaxP
   }
 
   MctsSearch out;
-  out.iterations = settings.iterations;
+  out.iterations = done;
   out.nodes = static_cast<int>(tree.size());
   int most = -1;
   for (const int c : tree.front().children) {
