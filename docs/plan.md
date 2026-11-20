@@ -28,7 +28,7 @@ Status: **done**, **next**, **later**, or **conditional** (depends on someone el
 |---|---|---|
 | 12b | next | The ISMCTS bot as an "expert" level on catan-project, and golden positions B: a few positions analysed deeply once, frozen as a test set. |
 | 13a | later | The post-game flow on catan-project: the game ends, the player is asked "Review this game?", and the viewer opens with that game's record. First as a button on the end screen; the viewer takes a record from outside the page. |
-| 13b | later | A start page for players rather than developers: "dice or decisions?" first, with an example game, its chance curve, the luck split and the setup heat map. Engine speed stays on the Performance tab. |
+| 13b | later | A start page for players rather than developers: "dice or decisions?" first, with an example game, its chance curve, the luck split and the setup heat map. Engine speed stays on the Engine tab. |
 | 13c | later | A converter interface that does not depend on any platform: an adapter from a foreign record format to the engine's `Replay`. Designed and tested only on catan-project records. |
 
 The demo is ready when 13a works, 13b shows the example game, and the whole flow fits in a short screen recording.
