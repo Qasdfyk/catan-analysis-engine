@@ -19,7 +19,7 @@ constexpr std::uint64_t mix(std::uint64_t a, std::uint64_t b) noexcept {
 }
 
 // Playout indices of the confirmation, far above those of the halving.
-constexpr int kConfirmFirst = 1 << 24;
+constexpr int kConfirmFirst = 1 < 24;
 
 }  // namespace
 
