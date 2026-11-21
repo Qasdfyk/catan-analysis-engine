@@ -146,6 +146,14 @@ footer {
 .stat-value.green { color: var(--green); }
 .stat-label { color: var(--muted); font-size: 13px; margin-top: 2px; }
 
+.how { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr)); gap: 16px; }
+.how h3 { margin: 10px 0 6px; }
+.how p { color: var(--muted); font-size: 14px; }
+.how-step {
+  display: grid; place-items: center; width: 28px; height: 28px; border-radius: 50%;
+  border: 2px solid var(--gold); color: var(--gold); font-family: var(--mono); font-size: 14px;
+}
+
 .blocks { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr)); gap: 16px; }
 .block h3 { margin: 12px 0 6px; }
 .block p { color: var(--muted); font-size: 14px; }
@@ -287,6 +295,14 @@ footer {
 .chart.seekable { cursor: ew-resize; touch-action: none; user-select: none; }
 .chart .played { fill: rgba(255, 255, 255, .025); }
 .chart .points-line { fill: none; stroke-width: 2; stroke-linejoin: round; }
+/* The player the review is for, over the others as context */
+.chart .points-line.focus { stroke-width: 3; }
+.chart .points-line.faded { opacity: .35; stroke-width: 1.5; }
+.legend .focus { font-weight: 600; }
+.split-row.faded { opacity: .6; }
+.split-row.focus .income-name { font-weight: 700; }
+label.check { display: inline-flex; align-items: center; gap: 6px; margin-top: 8px; cursor: pointer; }
+.focus-pick { display: inline-flex; align-items: center; gap: 8px; }
 .chart .cursor { stroke: var(--gold); stroke-width: 1.5; }
 .chart .cursor-dot { stroke: var(--panel); stroke-width: 2; }
 
@@ -392,3 +408,4 @@ footer {
 .verdict.best { color: var(--green); }
 .verdict.noise { color: var(--gold); }
 .verdict.loss { color: var(--danger); }
+.example-review .charts { align-items: start; }

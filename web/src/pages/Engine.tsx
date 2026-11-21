@@ -8,9 +8,9 @@ import { getVertexCoords, hexCorners, hexToPixel, HEX_SIZE, RESOURCE_COLORS } fr
 import { PLAYER_COLORS } from '@platform/utils/labels';
 import { runBenchmark, useLastBenchmark, type Bots } from '../bench';
 import { Arena } from '../components/Arena';
-import { fmt, LogBars, type Bar } from '../components/Charts';
+import { fmt, LogBars, Stat, type Bar } from '../components/Charts';
 import { exampleRecord, type OpenGame } from '../engine';
-import { CORRECTNESS, NATIVE_CHECKSUMS, NATIVE_ZOO_CHECKSUMS, PROFILE, REPO_URL, SPEED } from '../facts';
+import { CORRECTNESS, NATIVE_CHECKSUMS, NATIVE_ZOO_CHECKSUMS, PROFILE, REPO_URL, SPEED, SPEEDUP_VS_PYTHON } from '../facts';
 import { useOpenGame } from '../hooks';
 import type { Topology } from '../types';
 
@@ -371,6 +371,13 @@ export function Engine() {
           </p>
         </div>
       </div>
+
+      <section className="stats">
+        <Stat value={SPEED[2].gamesPerSecond} label="games per second, one core" />
+        <Stat value={SPEEDUP_VS_PYTHON} suffix="×" label="faster per move than the Python rules" tone="gold" />
+        <Stat value={0} label="differences from the reference rules" tone="green" />
+        <Stat value={CORRECTNESS.coverage * 100} suffix="%" label="of the reference rules exercised" />
+      </section>
 
       <section className="section first">
         <Architecture />

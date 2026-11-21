@@ -90,16 +90,30 @@ export interface SetupRun {
   workers: number;
   seconds: number;
   error: string;
+  /** Computed ahead of time (the start page's example), not in this browser. */
+  precomputed?: boolean;
 }
 
 function spawn(): Worker {
   return new Worker(new URL('./setup-worker.ts', import.meta.url), { type: 'module' });
 }
 
-/** Reviews the setup of a record in the background as soon as it opens. */
-export function useSetupReview(recordText: string | null): SetupRun | null {
+/** Move indices with the seat's own settlements first, the rest in game order. */
+export function reviewOrder(moves: SetupMove[], seat: number): number[] {
+  const all = moves.map((_, i) => i);
+  return [...all.filter((i) => moves[i].seat === seat), ...all.filter((i) => moves[i].seat !== seat)];
+}
+
+/**
+ * Reviews the setup of a record in the background as soon as it opens, the
+ * settlements of `seat` (whose review it is) first.
+ */
+export function useSetupReview(recordText: string | null, seat = 0): SetupRun | null {
   const [run, setRun] = useState<SetupRun | null>(null);
   const live = useRef<SetupRun | null>(null);
+  // Read when the moves arrive; picking another player later does not restart the review.
+  const firstSeat = useRef(seat);
+  firstSeat.current = seat;
 
   useEffect(() => {
     setRun(null);
@@ -111,6 +125,7 @@ export function useSetupReview(recordText: string | null): SetupRun | null {
     const workers = Array.from({ length: n }, spawn);
     const t0 = performance.now();
     let next = 0;
+    let order: number[] = [];
     let frame = 0;
     const publish = () => {
       if (frame) return;
@@ -130,8 +145,8 @@ export function useSetupReview(recordText: string | null): SetupRun | null {
       stop();
     };
     const give = (w: Worker) => {
-      if (!live.current || next >= live.current.moves.length) return;
-      w.postMessage({ move: next++, seed: SETUP_SEED, budget: BUDGET });
+      if (!live.current || next >= order.length) return;
+      w.postMessage({ move: order[next++], seed: SETUP_SEED, budget: BUDGET });
     };
 
     workers.forEach((w) => {
@@ -144,7 +159,10 @@ export function useSetupReview(recordText: string | null): SetupRun | null {
         const data = msg.data as { error?: string; moves?: SetupMove[]; move?: number; review?: Review };
         if (typeof data.error === 'string') return fail(data.error);
         if (data.moves) {
-          live.current ??= { moves: data.moves, reviews: [], workers: n, seconds: 0, error: '' };
+          if (!live.current) {
+            live.current = { moves: data.moves, reviews: [], workers: n, seconds: 0, error: '' };
+            order = reviewOrder(data.moves, firstSeat.current);
+          }
           if (data.moves.length === 0) {
             publish();
             stop();

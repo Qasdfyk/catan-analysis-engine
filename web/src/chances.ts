@@ -148,6 +148,8 @@ export interface ChanceRun {
   workers: number;
   seconds: number;
   error: string;
+  /** Computed ahead of time (the start page's example), not in this browser. */
+  precomputed?: boolean;
 }
 
 function spawn(): Worker {

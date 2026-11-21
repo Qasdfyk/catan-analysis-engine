@@ -1,22 +1,27 @@
-// The replay viewer: open a record (or the example), step through it by
-// hand or let it play.
+// The replay viewer: open a record (a file, an example, or the game the
+// opening page hands over), step through it by hand or let it play.
 
 import { useEffect, useState } from 'react';
+import { readRecord } from '../adapters';
 import { GameBoard } from '../components/GameBoard';
 import { MoveLog, Players, Status } from '../components/GamePanels';
 import { LuckPanel, WinChart } from '../components/WinChances';
 import { useWinChances } from '../chances';
 import { SetupHeat, SetupPanel } from '../components/SetupReview';
 import { focusMove, useSetupReview } from '../setup';
-import { EXAMPLES, exampleRecord, readRecordBytes } from '../engine';
+import { EXAMPLES, exampleRecord } from '../engine';
+import { expectsHandoff, receiveFromOpener } from '../handoff';
 import { useOpenGame, usePlayback } from '../hooks';
-import { turnStart } from '../nav';
+import { reviewSeat, turnStart } from '../nav';
+import { seatName } from '../components/GamePanels';
 
 const SPEEDS = [0.5, 1, 2, 4];
 
 interface Source {
   text: string;
   label: string;
+  /** The seat of the player who asked for the review (from the game page). */
+  seat?: number;
 }
 
 export function Replay() {
@@ -24,26 +29,70 @@ export function Replay() {
   const [message, setMessage] = useState('');
   const { game, topo, error } = useOpenGame(source?.text ?? null);
   const playback = usePlayback(game);
+  // Whose review it is: picked on the page, else the seat the game page
+  // named, else the first person in the game. A new record starts over.
+  const [picked, setPicked] = useState<number | null>(null);
+  useEffect(() => setPicked(null), [source]);
+  const focus = picked ?? (game ? reviewSeat(game.record.players, source?.seat) : 0);
   const { pos, go, playing, setPlaying, speed, setSpeed } = playback;
   // Monte Carlo in Web Workers, started as soon as a record opens.
   const chances = useWinChances(game ? (source?.text ?? null) : null);
   // The setup review, in its own workers, also from the start.
-  const setup = useSetupReview(game ? (source?.text ?? null) : null);
+  const setup = useSetupReview(game ? (source?.text ?? null) : null, focus);
 
-  // The example opens by itself, so the tab is never empty.
+  // Opened by the game page ("Review this game"): wait for its record.
+  // Otherwise the example opens by itself, so the tab is never empty.
+  const [waiting, setWaiting] = useState(() => expectsHandoff(location.hash));
   useEffect(() => {
-    exampleRecord().then(
-      (text) => setSource((s) => s ?? { text, label: EXAMPLES[0].label }),
-      (e) => setMessage(`Cannot load the example game: ${e.message}`),
-    );
+    const showExample = () =>
+      exampleRecord().then(
+        (text) => setSource((s) => s ?? { text, label: EXAMPLES[0].label }),
+        (e) => setMessage(`Cannot load the example game: ${e.message}`),
+      );
+    if (!expectsHandoff(location.hash)) {
+      void showExample();
+      return;
+    }
+    const stop = receiveFromOpener((h, origin) => {
+      setWaiting(false);
+      if (h.type === 'catan-review:error') {
+        setMessage(`The game page could not send the game: ${h.message}`);
+        return;
+      }
+      const label = h.label ?? `a game from ${new URL(origin).host}`;
+      readRecord(h.record).then(
+        ({ text }) => {
+          setSource({ text, label, seat: h.seat });
+          setMessage('');
+        },
+        (e) => setMessage(`${label}: cannot read it, because ${e instanceof Error ? e.message : String(e)}.`),
+      );
+    });
+    if (!stop) {
+      setWaiting(false);
+      setMessage('This link waits for a game from the page that opened it, and no page did. Here is the example game instead.');
+      void showExample();
+      return;
+    }
+    // The game page answers within a second; after that it was probably closed.
+    const late = setTimeout(() => {
+      setWaiting((w) => {
+        if (w) setMessage('The game page has not sent the game. Is its tab still open? Try "Review this game" again.');
+        return false;
+      });
+    }, 15000);
+    return () => {
+      stop();
+      clearTimeout(late);
+    };
   }, []);
 
   const openFile = async (file: File) => {
     try {
-      setSource({ text: await readRecordBytes(await file.arrayBuffer()), label: file.name });
+      setSource({ text: (await readRecord(await file.arrayBuffer())).text, label: file.name });
       setMessage('');
     } catch (e) {
-      setMessage(`${file.name}: cannot read it (${e instanceof Error ? e.message : String(e)}).`);
+      setMessage(`${file.name}: cannot read it, because ${e instanceof Error ? e.message : String(e)}.`);
     }
   };
 
@@ -165,6 +214,19 @@ export function Replay() {
               </option>
             ))}
           </select>
+          {game && (
+            <label className="focus-pick small muted">
+              Review for
+              <select value={focus} onChange={(e) => setPicked(Number(e.target.value))} aria-label="Whose review">
+                {game.record.players.map((p) => (
+                  <option key={p.seat} value={p.seat}>
+                    {seatName(game.record.players, p.seat)}
+                    {p.kind === 'bot' ? ' (bot)' : ''}
+                  </option>
+                ))}
+              </select>
+            </label>
+          )}
         </div>
       </div>
 
@@ -220,7 +282,7 @@ export function Replay() {
             <p className="position">
               Move {pos} of {game.stateCount - 1} · turn {game.state(pos).turn} · {source?.label}
             </p>
-            <WinChart run={chances} players={game.record.players} stateCount={game.stateCount} pos={pos} onSeek={step} />
+            <WinChart run={chances} players={game.record.players} stateCount={game.stateCount} pos={pos} focus={focus} onSeek={step} />
           </section>
           <aside className="side">
             <Status game={game} pos={pos} />
@@ -228,10 +290,14 @@ export function Replay() {
             <MoveLog game={game} pos={pos} onPick={step} />
           </aside>
           <section className="charts">
-            <SetupPanel run={setup} players={game.record.players} pos={pos} onSeek={step} />
-            <LuckPanel run={chances} players={game.record.players} pos={pos} />
+            <SetupPanel run={setup} players={game.record.players} pos={pos} focus={focus} onSeek={step} />
+            <LuckPanel run={chances} players={game.record.players} pos={pos} focus={focus} />
           </section>
         </div>
+      ) : waiting && !shownError ? (
+        <p className="message" role="status">
+          Waiting for the game from the page that opened this one…
+        </p>
       ) : (
         !shownError && <div className="board-area placeholder viewer-placeholder" aria-busy="true" />
       )}

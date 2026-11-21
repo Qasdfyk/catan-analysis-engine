@@ -2,6 +2,7 @@
 // while a setup settlement is shown, and a panel grading all eight of them.
 // Numbers come from setup.ts; both fill in as the workers finish rounds.
 
+import { useState } from 'react';
 import { HEX_SIZE, getVertexCoords } from '@platform/utils/hexLayout';
 import { PLAYER_COLORS } from '@platform/utils/labels';
 import { bestValue, BUDGET, heatColor, verdict, type Review, type SetupMove, type SetupRun } from '../setup';
@@ -56,18 +57,37 @@ export function SetupHeat({ review, move, topo, players }: { review: Review; mov
 
 const VERDICT = { best: 'best', noise: 'within noise', loss: 'loses' } as const;
 
-/** All eight settlements: the corner played, the best one, the loss, a verdict. Click a row to go there. */
-export function SetupPanel({ run, players, pos, onSeek }: { run: SetupRun | null; players: RecordPlayer[]; pos: number; onSeek: (pos: number) => void }) {
+/**
+ * The settlements of the setup: the corner played, the best one, the loss, a
+ * verdict. The player the review is for by default, everyone on request.
+ * Click a row to go there.
+ */
+export function SetupPanel({
+  run,
+  players,
+  pos,
+  focus,
+  onSeek,
+}: {
+  run: SetupRun | null;
+  players: RecordPlayer[];
+  pos: number;
+  focus: number;
+  onSeek: (pos: number) => void;
+}) {
+  const [everyone, setEveryone] = useState(false);
   if (!run) return null;
   const done = run.reviews.filter((r) => r?.done).length;
   const playouts = run.reviews.reduce((a, r) => a + (r?.playouts ?? 0), 0);
   return (
     <div className="panel chart-panel setup-panel">
       <div className="chart-head">
-        <h3>Initial placement</h3>
+        <h3>{everyone ? 'Initial placement' : `${seatName(players, focus)}'s initial placement`}</h3>
         <span className="muted small">
           {run.error
             ? run.error
+            : run.precomputed
+              ? `${fmt(playouts)} playouts, computed ahead by the same engine`
             : done < run.moves.length
               ? `reviewing… ${done} of ${run.moves.length} settlements · ${fmt(playouts)} playouts`
               : `${fmt(playouts)} playouts in ${run.seconds.toFixed(1)} s on ${run.workers} workers`}
@@ -85,6 +105,7 @@ export function SetupPanel({ run, players, pos, onSeek }: { run: SetupRun | null
         </thead>
         <tbody>
           {run.moves.map((m, i) => {
+            if (!everyone && m.seat !== focus) return null;
             const r = run.reviews[i];
             const v = r ? verdict(r) : null;
             const shown = pos === m.state || pos === m.state + 1;
@@ -111,6 +132,9 @@ export function SetupPanel({ run, players, pos, onSeek }: { run: SetupRun | null
           })}
         </tbody>
       </table>
+      <label className="small muted check">
+        <input type="checkbox" checked={everyone} onChange={(e) => setEveryone(e.target.checked)} /> all players
+      </label>
       <p className="muted small chart-note">
         For each settlement of the setup, every corner the player could have taken is played out to the end by
         MAP-Elites bots. Successive halving gives every corner {BUDGET.first} playouts, keeps the better half and

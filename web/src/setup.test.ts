@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { bestValue, focusMove, heatColor, verdict, type Review, type SetupMove } from './setup';
+import { bestValue, focusMove, heatColor, reviewOrder, verdict, type Review, type SetupMove } from './setup';
 
 const moves: SetupMove[] = [
   { state: 0, seat: 0, node: 10, round: 0 },
@@ -60,5 +60,13 @@ describe('heatColor', () => {
     expect(heatColor(0)).toBe('hsl(120 70% 50%)');
     expect(heatColor(0.15)).toBe('hsl(0 70% 50%)');
     expect(heatColor(1)).toBe('hsl(0 70% 50%)');
+  });
+});
+
+describe('reviewOrder', () => {
+  it("reviews the seat's own settlements first", () => {
+    const moves = [0, 1, 2, 2, 1, 0].map((seat, i) => ({ state: i, seat, node: i, round: 0 }));
+    expect(reviewOrder(moves, 2)).toEqual([2, 3, 0, 1, 4, 5]);
+    expect(reviewOrder(moves, 0)).toEqual([0, 5, 1, 2, 3, 4]);
   });
 });

@@ -18,6 +18,8 @@ interface Props {
   players: RecordPlayer[];
   stateCount: number;
   pos: number;
+  /** The player the review is for: drawn on top, the others faded. */
+  focus: number;
 }
 
 function Progress({ run }: { run: ChanceRun }) {
@@ -25,14 +27,16 @@ function Progress({ run }: { run: ChanceRun }) {
   const finished = run.done >= run.total;
   return (
     <span className="muted small">
-      {finished
+      {run.precomputed
+        ? `${fmt(run.total)} playouts, computed ahead by the same engine`
+        : finished
         ? `${fmt(run.total)} playouts in ${run.seconds.toFixed(1)} s on ${run.workers} workers · ${fmt(run.total / Math.max(run.seconds, 1e-3))}/s`
         : `estimating… ${passes} of 10 passes · ${fmt(run.done)} playouts`}
     </span>
   );
 }
 
-export function WinChart({ run, players, stateCount, pos, onSeek }: Props & { onSeek: (pos: number) => void }) {
+export function WinChart({ run, players, stateCount, pos, focus, onSeek }: Props & { onSeek: (pos: number) => void }) {
   const svg = useRef<SVGSVGElement>(null);
   const w = 760;
   const h = 190;
@@ -93,15 +97,23 @@ export function WinChart({ run, players, stateCount, pos, onSeek }: Props & { on
           </g>
         ))}
         <rect className="played" x={pad.l} y={pad.t} width={Math.max(0, x(pos) - pad.l)} height={h - pad.t - pad.b} />
-        {paths.map((d, seat) => d && <path key={seat} d={d} className="points-line" stroke={seatColor(players, seat)} />)}
+        {/* The focused player last, so it is drawn over the others. */}
+        {[...paths.keys()]
+          .sort((a, b) => Number(a === focus) - Number(b === focus))
+          .map(
+            (seat) =>
+              paths[seat] && (
+                <path key={seat} d={paths[seat]} className={`points-line ${seat === focus ? 'focus' : 'faded'}`} stroke={seatColor(players, seat)} />
+              ),
+          )}
         <line className="cursor" x1={x(pos)} x2={x(pos)} y1={pad.t - 4} y2={h - pad.b} />
         {shown?.map((c, seat) => (
-          <circle key={seat} cx={x(pos)} cy={y(c)} r={4} fill={seatColor(players, seat)} className="cursor-dot" />
+          <circle key={seat} cx={x(pos)} cy={y(c)} r={seat === focus ? 5 : 3} fill={seatColor(players, seat)} className="cursor-dot" />
         ))}
       </svg>
       <div className="legend small">
         {players.map((_, seat) => (
-          <span key={seat}>
+          <span key={seat} className={seat === focus ? 'focus' : 'muted'}>
             <span className="chip" style={{ background: seatColor(players, seat) }} /> {seatName(players, seat)}{' '}
             <b className="mono">{shown ? `${(100 * shown[seat]).toFixed(0)}%` : '…'}</b>
           </span>
@@ -116,7 +128,7 @@ export function WinChart({ run, players, stateCount, pos, onSeek }: Props & { on
  * decisions added or took, where it ended. Bars run left (lost) or right
  * (gained) from the middle.
  */
-export function LuckPanel({ run, players, pos }: Omit<Props, 'stateCount'>) {
+export function LuckPanel({ run, players, pos, focus }: Omit<Props, 'stateCount'>) {
   const seats = players.length;
   const ready = run && run.points.length > 0 && completePasses(run.counts, run.points.length).length > 0;
   if (!run || !ready) {
@@ -162,8 +174,9 @@ export function LuckPanel({ run, players, pos }: Omit<Props, 'stateCount'>) {
         <span className="muted small">dice</span>
         <span className="muted small">decisions</span>
         <span className="muted small split-num">start → end</span>
-        {players.map((_, seat) => (
-          <div key={seat} className="split-row">
+        {/* The player the review is for first; the others are the context. */}
+        {[focus, ...players.map((_, seat) => seat).filter((seat) => seat !== focus)].map((seat) => (
+          <div key={seat} className={`split-row ${seat === focus ? 'focus' : 'faded'}`}>
             <span className="income-name">
               <span className="chip" style={{ background: seatColor(players, seat) }} />
               {seatName(players, seat)}

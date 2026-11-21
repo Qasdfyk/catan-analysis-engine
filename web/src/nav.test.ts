@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { playbackDelay, tabFromHash, turnStart } from './nav';
+import { playbackDelay, reviewSeat, tabFromHash, turnStart } from './nav';
 import type { RecordEvent } from './types';
 
 const ev = (action: string): RecordEvent => ({ turn: 0, seat: 0, action, payload: {} });
@@ -40,5 +40,19 @@ describe('playbackDelay', () => {
   it('lingers on rolls and hurries through chatter', () => {
     expect(playbackDelay(ev('roll_dice'))).toBeGreaterThan(playbackDelay(ev('build_road')));
     expect(playbackDelay(ev('offer_trade'))).toBeLessThan(playbackDelay(ev('build_road')));
+  });
+});
+
+describe('reviewSeat', () => {
+  const players = [
+    { seat: 0, kind: 'bot' },
+    { seat: 1, kind: 'human' },
+    { seat: 2, kind: 'human' },
+  ];
+  it('takes the seat the game page named', () => expect(reviewSeat(players, 2)).toBe(2));
+  it('ignores a seat the game does not have', () => expect(reviewSeat(players, 3)).toBe(1));
+  it('else the first person, else seat 0', () => {
+    expect(reviewSeat(players)).toBe(1);
+    expect(reviewSeat([{ seat: 0, kind: 'bot' }, { seat: 1, kind: 'bot' }])).toBe(0);
   });
 });

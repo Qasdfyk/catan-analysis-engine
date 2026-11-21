@@ -39,3 +39,12 @@ export function playbackDelay(event: RecordEvent | undefined): number {
   if (event.action === 'roll_dice') return 700;
   return 450;
 }
+
+/**
+ * Whose review it is: the seat the game page named, if the record has it,
+ * else the first person (not a bot), else seat 0.
+ */
+export function reviewSeat(players: { seat: number; kind: string }[], asked?: number): number {
+  if (asked !== undefined && players.some((p) => p.seat === asked)) return asked;
+  return players.find((p) => p.kind === 'human')?.seat ?? 0;
+}
