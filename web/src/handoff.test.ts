@@ -26,11 +26,15 @@ describe('handoff', () => {
   });
 
   it('accepts only the messages of the protocol', () => {
-    expect(parseHandoff({ type: 'catan-review:record', version: 1, record: '{}', label: 'Game r1' })).toEqual({
+    expect(parseHandoff({ type: 'catan-review:record', version: 1, record: '{}', label: 'Game r1', seat: 2 })).toEqual({
       type: 'catan-review:record',
       record: '{}',
       label: 'Game r1',
+      seat: 2,
     });
+    // A seat that cannot be one is dropped, not trusted.
+    expect(parseHandoff({ type: 'catan-review:record', version: 1, record: '{}', seat: 7 })).toMatchObject({ seat: undefined });
+    expect(parseHandoff({ type: 'catan-review:record', version: 1, record: '{}', seat: '1' })).toMatchObject({ seat: undefined });
     expect(parseHandoff({ type: 'catan-review:error', version: 1, message: 'gone' })).toEqual({ type: 'catan-review:error', message: 'gone' });
     expect(parseHandoff({ type: 'catan-review:record', version: 2, record: '{}' })).toBeNull();
     expect(parseHandoff({ type: 'catan-review:record', version: 1, record: 42 })).toBeNull();
@@ -52,7 +56,7 @@ describe('handoff', () => {
     deliver(message, { postMessage() {} }); // another window
     deliver({ type: 'something-else' }); // another script on the opener
     deliver(message);
-    expect(got).toEqual([[{ type: 'catan-review:record', record: '{}', label: undefined }, 'http://localhost:5173']]);
+    expect(got).toEqual([[{ type: 'catan-review:record', record: '{}', label: undefined, seat: undefined }, 'http://localhost:5173']]);
     stop();
     deliver(message);
     expect(got).toHaveLength(1);

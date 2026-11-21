@@ -56,20 +56,21 @@ When a game on catan-project ends, the game-over dialog offers "Review this game
 ```
 game page:  window.open(viewer + "#/replay?from=opener")   (not noopener: the viewer needs window.opener)
 viewer   -> game page: {type: "catan-review:ready", version: 1}
-game page -> viewer:   {type: "catan-review:record", version: 1, record, label}
+game page -> viewer:   {type: "catan-review:record", version: 1, record, label, seat}
                     or {type: "catan-review:error", version: 1, message}
 ```
 
 - **The viewer speaks first.** A message posted to a window whose page has not loaded yet is lost, so the game page waits for `ready` before it sends. It answers every `ready` for half an hour, so a reload of the viewer gets the game again.
 - **Who may talk to whom.** The game page sends the record only to the viewer's origin (`postMessage(..., origin)`), so if the tab navigates elsewhere the browser drops it, and it listens only to the window it opened. The viewer takes records only from its own opener, but from any origin: a browser extension or another platform can use the same door. A record is data to look at, checked like any file (`web/src/adapters.ts`).
 - **The record never leaves the computer.** It goes from tab to tab, not over the network or into a URL. The cost: a review cannot be shared as a link.
+- **The review is the asking player's.** `seat` says who clicked. The viewer draws that player's chance on top with the others faded, puts them first in the luck split, lists only their settlements in the setup review (the others on request) and reviews those first. The others stay as context: a player's chance moves with everyone's dice and moves. "Review for" switches to another seat; a record opened from a file starts with its first person.
 - `#/replay?from=opener` without an opener (a bookmark, a reload after the game tab closed) says so and shows the example game.
 
 Code: `web/src/handoff.ts` here, `frontend/src/net/review.ts` in catan-project, whose end-to-end test plays a game and checks that a stand-in viewer receives its record. `VITE_REVIEW_URL` points the game at a local viewer (`npm run dev -- --port 5174`).
 
 ## The start page
 
-The start page is for players: it replays the example game with its review following along (the chance curve, the luck split, the setup heat map while the settlements go down). The review is computed ahead of time by `node web/scripts/review-example.mjs` (about 40 s on 15 threads) into `web/public/example-review.json`, 13 KB gzipped, so the page shows it at once, also on a phone. The numbers are the ones Replay computes live for the same game: the same module, seeds and playouts per point; `web/src/review.test.ts` plays a sample of points again and compares. Rerun the script after any change to the engine, the bots or the elites that changes playouts.
+The start page is for players: it replays the example game with Alice's review following along (the chance curve, the luck split, the setup heat map while the settlements go down). The review is computed ahead of time by `node web/scripts/review-example.mjs` (about 40 s on 15 threads) into `web/public/example-review.json`, 13 KB gzipped, so the page shows it at once, also on a phone. The numbers are the ones Replay computes live for the same game: the same module, seeds and playouts per point; `web/src/review.test.ts` plays a sample of points again and compares. Rerun the script after any change to the engine, the bots or the elites that changes playouts.
 
 ## Speed
 

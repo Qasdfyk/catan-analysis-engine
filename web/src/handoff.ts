@@ -9,7 +9,7 @@
 //
 //   game page:  window.open(viewer + "#/replay?from=opener")
 //   viewer   -> opener: {type: "catan-review:ready", version: 1}
-//   opener   -> viewer: {type: "catan-review:record", version: 1, record, label?}
+//   opener   -> viewer: {type: "catan-review:record", version: 1, record, label?, seat?}
 //                    or {type: "catan-review:error", version: 1, message}
 //
 // The viewer speaks first because a message sent to a window that has not
@@ -24,7 +24,8 @@ export const ERROR = 'catan-review:error';
 export const VERSION = 1;
 
 export type Handoff =
-  | { type: typeof RECORD; record: string | ArrayBuffer; label?: string }
+  /** seat: the player who asked; the review is about their decisions. */
+  | { type: typeof RECORD; record: string | ArrayBuffer; label?: string; seat?: number }
   | { type: typeof ERROR; message: string };
 
 /** The parts of `window` the handoff uses, so tests can pass a fake one. */
@@ -46,7 +47,12 @@ export function parseHandoff(data: unknown): Handoff | null {
   const d = data as Record<string, unknown>;
   if (d.version !== VERSION) return null;
   if (d.type === RECORD && (typeof d.record === 'string' || d.record instanceof ArrayBuffer)) {
-    return { type: RECORD, record: d.record, label: typeof d.label === 'string' ? d.label : undefined };
+    return {
+      type: RECORD,
+      record: d.record,
+      label: typeof d.label === 'string' ? d.label : undefined,
+      seat: Number.isInteger(d.seat) && (d.seat as number) >= 0 && (d.seat as number) < 4 ? (d.seat as number) : undefined,
+    };
   }
   if (d.type === ERROR && typeof d.message === 'string') return { type: ERROR, message: d.message };
   return null;

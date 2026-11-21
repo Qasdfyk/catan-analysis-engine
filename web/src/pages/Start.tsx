@@ -11,6 +11,7 @@ import { LuckPanel, WinChart } from '../components/WinChances';
 import { exampleRecord, type OpenGame } from '../engine';
 import { CORRECTNESS, PLATFORM_URL, REPO_URL, SPEED } from '../facts';
 import { useOpenGame, usePlayback } from '../hooks';
+import { reviewSeat } from '../nav';
 import { exampleReview, type ExampleReview } from '../review';
 import { focusMove } from '../setup';
 import type { Topology } from '../types';
@@ -93,6 +94,8 @@ export function Start() {
   }, []);
   const { game, topo } = useOpenGame(text);
   const { pos, go } = usePlayback(game, { autoplay: true, loop: true });
+  // The review is Alice's, the one person in the example; the bots are context.
+  const focus = game ? reviewSeat(game.record.players) : 0;
 
   return (
     <>
@@ -125,14 +128,14 @@ export function Start() {
           <div className="section-head">
             <h2>The example game, reviewed</h2>
             <p>
-              Alice against three bots. The chart follows the board above; click it to jump. The same review runs live on any
-              game you open in <a href="#/replay">Replay</a>.
+              Seen by Alice, who played three hard bots: her line on top, the bots faded as context. The chart follows the board
+              above; click it to jump. The same review runs live on any game you open in <a href="#/replay">Replay</a>.
             </p>
           </div>
-          <WinChart run={review.chances} players={game.record.players} stateCount={game.stateCount} pos={pos} onSeek={go} />
+          <WinChart run={review.chances} players={game.record.players} stateCount={game.stateCount} pos={pos} focus={focus} onSeek={go} />
           <div className="charts">
-            <LuckPanel run={review.chances} players={game.record.players} pos={pos} />
-            <SetupPanel run={review.setup} players={game.record.players} pos={pos} onSeek={go} />
+            <LuckPanel run={review.chances} players={game.record.players} pos={pos} focus={focus} />
+            <SetupPanel run={review.setup} players={game.record.players} pos={pos} focus={focus} onSeek={go} />
           </div>
         </section>
       )}
