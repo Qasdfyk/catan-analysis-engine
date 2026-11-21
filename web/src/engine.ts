@@ -63,6 +63,7 @@ export const EXAMPLES = [
   { file: 'zoo/wood-brick.json.gz', label: 'Zoo: wood-brick wins', note: 'settlements and the Longest Road' },
   { file: 'zoo/port.json.gz', label: 'Zoo: port wins', note: 'one resource and the port that sells it' },
   { file: 'zoo/balanced.json.gz', label: 'Zoo: balanced wins', note: 'the hard bot, shaken a little' },
+  { file: 'expert/expert-wins.json.gz', label: 'Expert wins', note: 'the searching bot against three hard bots on the platform' },
 ] as const;
 
 const examples = new Map<string, Promise<string>>();

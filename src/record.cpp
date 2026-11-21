@@ -486,6 +486,44 @@ std::optional<Action> action_from_event(const json& event) {
   return a;
 }
 
+json event_from_action(const Action& a) {
+  const auto hex = [](Cube c) { return json{{"q", c.q}, {"r", c.r}, {"s", -c.q - c.r}}; };
+  const auto spelled = [&](const Spelling& sp) { return json{{"hex", hex(sp.hex)}, {"direction", sp.direction}}; };
+  const auto cards = [](const Cards& c) {
+    json out = json::object();
+    for (int r = 0; r < kResourceCount; ++r) {
+      if (c[at(r)] != 0) out[std::string(resource_name(static_cast<Resource>(r)))] = c[at(r)];
+    }
+    return out;
+  };
+  json payload = json::object();
+  switch (a.kind) {
+    case ActionKind::kBuildSettlement:
+    case ActionKind::kUpgradeCity: payload = spelled(kTopology.node_spelling[at(a.target)]); break;
+    case ActionKind::kBuildRoad: payload = spelled(kTopology.edge_spelling[at(a.target)]); break;
+    case ActionKind::kMoveRobber: payload["hex"] = hex(kTopology.hex_cube[at(a.target)]); break;
+    case ActionKind::kSteal: payload["victim_seat"] = a.target; break;
+    case ActionKind::kConfirmTrade: payload["partner_seat"] = a.target; break;
+    case ActionKind::kDiscard: payload["cards"] = cards(a.give); break;
+    case ActionKind::kOfferTrade:
+      payload["give"] = cards(a.give);
+      payload["get"] = cards(a.get);
+      break;
+    case ActionKind::kRespondTrade: payload["accept"] = a.accept; break;
+    case ActionKind::kTradeWithBank:
+      payload["give"] = resource_name(a.first);
+      payload["get"] = resource_name(a.second);
+      break;
+    case ActionKind::kPlayYearOfPlenty:
+      payload["first"] = resource_name(a.first);
+      payload["second"] = resource_name(a.second);
+      break;
+    case ActionKind::kPlayMonopoly: payload["resource"] = resource_name(a.first); break;
+    default: break;
+  }
+  return json{{"action", action_name(a.kind)}, {"payload", std::move(payload)}};
+}
+
 std::optional<ZooBot> zoo_bot_from_record(const json& player) {
   if (!player.is_object() || !player.contains("bot_level") || !player["bot_level"].is_string()) {
     return std::nullopt;

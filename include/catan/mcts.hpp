@@ -52,6 +52,7 @@
 #include "catan/zoo.hpp"
 
 #include <array>
+#include <chrono>
 #include <cstdint>
 #include <optional>
 #include <span>
@@ -68,6 +69,12 @@ struct MctsSettings {
   // would be worth. Never in a real game.
   bool peek = false;
   bool trades = true;  // false: no offers to players, decline every offer
+  // Stop early once this time has passed, after at least one playout: a bot
+  // in a live game gets a time budget, not a playout count. The default (the
+  // clock's epoch) means no limit, so a search stays reproducible. With a
+  // deadline the number of playouts depends on the machine, and so may the
+  // move.
+  std::chrono::steady_clock::time_point deadline{};
 };
 
 // One move at the root and its statistics.
@@ -82,7 +89,7 @@ struct MctsMove {
 struct MctsSearch {
   std::vector<MctsMove> root;  // in the order the moves were first seen
   Action best;
-  int iterations = 0;
+  int iterations = 0;  // playouts made (fewer than asked when a deadline stopped it)
   int nodes = 0;
 };
 

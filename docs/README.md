@@ -15,3 +15,4 @@ Design notes and benchmark write-ups land here, one per step, with the numbers a
 - [map-elites.md](map-elites.md): MAP-Elites over the zoo, the best bot of every style; the winner's curse and re-evaluation; the Robber and the leader.
 - [setup-review.md](setup-review.md): the initial placement graded corner by corner: successive halving, a confirmation round against the winner's curse, and whether a better setup wins more often.
 - [mcts.md](mcts.md): the searching bot: ISMCTS over its own turn, what a seat knows of the hidden cards and states drawn to match it, PUCT with the zoo bot as a prior, tuning, the arena, speed and root parallelization.
+- [expert.md](expert.md): the searching bot as the platform's expert level, a separate process fed the game's record, and golden positions B: 1 200 decisions labelled once by deep Monte Carlo.

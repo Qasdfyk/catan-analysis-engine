@@ -44,6 +44,12 @@ class RecordError : public std::runtime_error {
 // what a bot chose. Nothing for an event that does not parse.
 [[nodiscard]] std::optional<Action> action_from_event(const nlohmann::json& event);
 
+// The inverse: the move as the platform takes it, {"action": "build_road",
+// "payload": {"hex": {...}, "direction": 3}}. Corners and sides use their
+// canonical spelling, card counts list only the resources in play. This is
+// how a bot of the engine plays on the platform (catan_expert).
+[[nodiscard]] nlohmann::json event_from_action(const Action& action);
+
 // The bot that played a seat of a record: "hard", or "zoo" rebuilt from the
 // shaken weights and trading in its bot_style (so no Go random generator is
 // needed). Nothing for people and the other levels.

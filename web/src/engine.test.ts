@@ -71,6 +71,11 @@ describe('engine in WebAssembly', () => {
     }
   });
 
+  it('ships an expert example won by the expert', () => {
+    const record = JSON.parse(records.find((r) => r.name === 'expert/expert-wins.json.gz')!.text);
+    expect(record.players[record.result.winner_seat].bot_level).toBe('expert');
+  });
+
   it('reads gzip and plain JSON alike', async () => {
     const plain = new TextEncoder().encode('{"a": 1}');
     const zipped = readFileSync(new URL('../public/example.json.gz', import.meta.url));

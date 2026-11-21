@@ -2,10 +2,12 @@ add_executable(catan_tests
   arena_test.cpp
   belief_test.cpp
   bits_test.cpp
+  expert_test.cpp
   map_elites_test.cpp
   mcts_test.cpp
   topology_test.cpp
   game_test.cpp
+  golden_test.cpp
   record_test.cpp
   replay_test.cpp
   random_player_test.cpp

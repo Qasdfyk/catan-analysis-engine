@@ -27,3 +27,9 @@ target_link_libraries(catan_map_elites PRIVATE catan_record catan_warnings Threa
 
 add_executable(catan_mcts mcts.cpp)
 target_link_libraries(catan_mcts PRIVATE catan_record catan_warnings Threads::Threads)
+
+add_executable(catan_expert expert.cpp)
+target_link_libraries(catan_expert PRIVATE catan_record catan_warnings Threads::Threads)
+
+add_executable(catan_golden golden.cpp)
+target_link_libraries(catan_golden PRIVATE catan_record catan_warnings Threads::Threads)
