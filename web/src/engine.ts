@@ -2,6 +2,7 @@
 // ReplayLog objects (C++), states parsed from JSON on demand.
 
 import createEngine, { type EngineModule, type Replay } from '@engine';
+import { readRecord } from './adapters';
 import type { BoardInfo, GameRecord, GameState, Topology } from './types';
 
 let module: Promise<EngineModule> | null = null;
@@ -77,19 +78,9 @@ export function exampleRecord(file: string = EXAMPLES[0].file): Promise<string> 
         if (!response.ok) throw new Error(`${file}: HTTP ${response.status}`);
         return response.arrayBuffer();
       })
-      .then(readRecordBytes);
+      .then(async (bytes) => (await readRecord(bytes)).text);
     text.catch(() => examples.delete(file));
     examples.set(file, text);
   }
   return text;
-}
-
-/** Plain JSON or gzip (what the platform downloads), told apart by the first two bytes. */
-export async function readRecordBytes(bytes: ArrayBuffer): Promise<string> {
-  const head = new Uint8Array(bytes, 0, Math.min(2, bytes.byteLength));
-  if (head[0] === 0x1f && head[1] === 0x8b) {
-    const stream = new Blob([bytes]).stream().pipeThrough(new DecompressionStream('gzip'));
-    return await new Response(stream).text();
-  }
-  return new TextDecoder().decode(bytes);
 }

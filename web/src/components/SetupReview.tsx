@@ -68,6 +68,8 @@ export function SetupPanel({ run, players, pos, onSeek }: { run: SetupRun | null
         <span className="muted small">
           {run.error
             ? run.error
+            : run.precomputed
+              ? `${fmt(playouts)} playouts, computed ahead by the same engine`
             : done < run.moves.length
               ? `reviewing… ${done} of ${run.moves.length} settlements · ${fmt(playouts)} playouts`
               : `${fmt(playouts)} playouts in ${run.seconds.toFixed(1)} s on ${run.workers} workers`}

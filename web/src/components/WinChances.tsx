@@ -25,7 +25,9 @@ function Progress({ run }: { run: ChanceRun }) {
   const finished = run.done >= run.total;
   return (
     <span className="muted small">
-      {finished
+      {run.precomputed
+        ? `${fmt(run.total)} playouts, computed ahead by the same engine`
+        : finished
         ? `${fmt(run.total)} playouts in ${run.seconds.toFixed(1)} s on ${run.workers} workers · ${fmt(run.total / Math.max(run.seconds, 1e-3))}/s`
         : `estimating… ${passes} of 10 passes · ${fmt(run.done)} playouts`}
     </span>

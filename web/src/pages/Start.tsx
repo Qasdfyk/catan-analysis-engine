@@ -1,30 +1,34 @@
-// The landing page: what the project is, in one look. The board on the right
-// is the example game replaying itself through the engine.
+// The landing page, for players: was it the dice or your decisions? The
+// example game replays on the board while its review, computed ahead of time
+// (scripts/review-example.mjs), follows along: the chance curve, the luck
+// split, and the heat map of the setup while the settlements go down.
 
 import { useEffect, useState } from 'react';
 import { PLAYER_COLORS } from '@platform/utils/labels';
-import { fmt, Stat } from '../components/Charts';
 import { GameBoard } from '../components/GameBoard';
-import { exampleRecord } from '../engine';
-import { CORRECTNESS, REPO_URL, SPEED, SPEEDUP_VS_PYTHON } from '../facts';
+import { SetupHeat, SetupPanel } from '../components/SetupReview';
+import { LuckPanel, WinChart } from '../components/WinChances';
+import { exampleRecord, type OpenGame } from '../engine';
+import { CORRECTNESS, PLATFORM_URL, REPO_URL, SPEED } from '../facts';
 import { useOpenGame, usePlayback } from '../hooks';
+import { exampleReview, type ExampleReview } from '../review';
+import { focusMove } from '../setup';
+import type { Topology } from '../types';
+import { fmt } from '../components/Charts';
 
-function LiveBoard() {
-  const [text, setText] = useState<string | null>(null);
-  useEffect(() => {
-    exampleRecord().then(setText, () => {});
-  }, []);
-  const { game, topo } = useOpenGame(text);
-  const { pos } = usePlayback(game, { autoplay: true, loop: true });
-
-  if (!game || !topo) return <div className="board-area placeholder" aria-busy="true" />;
+function LiveBoard({ game, topo, pos, review }: { game: OpenGame; topo: Topology; pos: number; review: ExampleReview | null }) {
   const state = game.state(pos);
   const players = game.record.players;
+  // While a setup settlement is shown, the board says how good each corner was.
+  const m = review ? focusMove(review.setup.moves, pos) : null;
+  const setupReview = m === null ? undefined : review?.setup.reviews[m];
+  const heat =
+    review && m !== null && setupReview ? <SetupHeat review={setupReview} move={review.setup.moves[m]} topo={topo} players={players} /> : null;
   return (
     <a className="live-board" href="#/replay" title="Open this game in the replay viewer">
-      <GameBoard game={game} topo={topo} pos={pos} />
+      <GameBoard game={game} topo={topo} pos={pos} overlay={heat} />
       <div className="live-caption">
-        <span className="live-dot" /> Replaying an example game · turn {state.turn}
+        <span className="live-dot" /> {heat ? 'Reviewing the setup' : 'Replaying the example game'} · turn {state.turn}
       </div>
       <div className="live-score">
         {state.players.map((p, seat) => (
@@ -38,47 +42,72 @@ function LiveBoard() {
   );
 }
 
+const HOW = [
+  {
+    title: 'Play',
+    text: 'A game on catan-project, against friends or bots. Nothing watches you during the game: the review only ever looks at finished games.',
+  },
+  {
+    title: 'Click "Review this game"',
+    text: 'The game page hands its record to this page, tab to tab. It is not uploaded anywhere: the review runs on your computer.',
+  },
+  {
+    title: 'See where it was won',
+    text: 'The chance to win after every move, how much of it the dice gave or took, and how your opening settlements compare with every other corner you could have taken.',
+  },
+];
+
 const BUILDING_BLOCKS = [
   {
     icon: '⬡',
     title: 'Rules as bitmasks',
-    text: 'The 54 corners and 72 sides of the board fit in 64- and 128-bit masks. A whole game state is 768 bytes with no pointers, so copying it for a simulation is one memcpy.',
+    text: `The rules are C++20 with the board as 64- and 128-bit masks: ${fmt(SPEED[2].gamesPerSecond)} whole games a second on one core, which is what playing out thousands of games per move needs.`,
   },
   {
     icon: '≡',
     title: 'Checked against the original',
-    text: `A difference test runs the C++ engine and catan-project's Python rules side by side and compares the full state after every action. It covers ${Math.round(CORRECTNESS.coverage * 100)}% of the Python rules and caught ${CORRECTNESS.mutantsCaught} of ${CORRECTNESS.mutants} planted bugs.`,
+    text: `A difference test runs the engine and catan-project's Python rules side by side after every action. It covers ${Math.round(CORRECTNESS.coverage * 100)}% of the Python rules and caught ${CORRECTNESS.mutantsCaught} of ${CORRECTNESS.mutants} planted bugs.`,
   },
   {
     icon: '◈',
     title: 'Same engine in the browser',
-    text: 'Emscripten compiles the same C++ to WebAssembly. Random games played here give the same checksum as the native build, so the page runs the real engine, not a copy.',
+    text: 'Emscripten compiles the same C++ to WebAssembly, and Web Workers run the playouts in parallel, so the review needs no server.',
   },
 ];
 
 const ROADMAP = [
   { done: true, title: 'Rules engine in the browser', text: "C++20, difference-tested against the Python game, built to WebAssembly with each player's chance to win" },
   { done: true, title: 'Bots and search', text: "A zoo of bot styles, an SPRT arena, and an ISMCTS bot that sees only its own cards, now the game's expert level" },
-  { done: false, title: 'Review after the game', text: 'Finish a game on catan-project, answer "Review this game?", and the review opens' },
-  { done: false, title: 'Move review', text: 'Which moves won or lost the game, shown here move by move' },
+  { done: true, title: 'Review after the game', text: 'Finish a game on catan-project, click "Review this game", and the review opens here' },
+  { done: false, title: 'Move review', text: 'Every decision graded against the best move, judged only on what the player could see' },
   { done: false, title: 'Value network', text: 'A learned evaluation of positions, trained on self-play only' },
   { done: false, title: 'Colonist games', text: "Only with Colonist's written permission, which its Terms require" },
 ];
 
 export function Start() {
+  const [text, setText] = useState<string | null>(null);
+  const [review, setReview] = useState<ExampleReview | null>(null);
+  useEffect(() => {
+    exampleRecord().then(setText, () => {});
+    exampleReview().then(setReview, () => {});
+  }, []);
+  const { game, topo } = useOpenGame(text);
+  const { pos, go } = usePlayback(game, { autoplay: true, loop: true });
+
   return (
     <>
       <section className="hero">
         <div className="hero-text">
-          <p className="eyebrow">C++20 · WebAssembly · Monte Carlo search</p>
-          <h1>A Catan rules engine that plays {fmt(SPEED[2].gamesPerSecond)} games a second</h1>
+          <p className="eyebrow">A post-game review for Catan</p>
+          <h1>Was it the dice, or your decisions?</h1>
           <p className="lede">
-            The foundation of a post-game analyzer for Catan. It runs right here in your browser: replay a finished game move
-            by move and watch each player's chance to win change.
+            After a game, see each player's chance to win move by move, how much of it the dice decided, and how good the
+            opening settlements were. It is computed in your browser by a C++ engine that plays the rest of the game out
+            thousands of times.
           </p>
           <div className="cta">
             <a className="button primary" href="#/replay">
-              Watch a game
+              Review a game
             </a>
             <a className="button" href="#/engine">
               How it works
@@ -88,14 +117,43 @@ export function Start() {
             </a>
           </div>
         </div>
-        <LiveBoard />
+        {game && topo ? <LiveBoard game={game} topo={topo} pos={pos} review={review} /> : <div className="board-area placeholder" aria-busy="true" />}
       </section>
 
-      <section className="stats">
-        <Stat value={SPEED[2].gamesPerSecond} label="games per second, one core" />
-        <Stat value={SPEEDUP_VS_PYTHON} suffix="×" label="faster per move than the Python rules" tone="gold" />
-        <Stat value={0} label="differences from the reference rules" tone="green" />
-        <Stat value={CORRECTNESS.coverage * 100} suffix="%" label="of the reference rules exercised" />
+      {game && review && (
+        <section className="section example-review">
+          <div className="section-head">
+            <h2>The example game, reviewed</h2>
+            <p>
+              Alice against three bots. The chart follows the board above; click it to jump. The same review runs live on any
+              game you open in <a href="#/replay">Replay</a>.
+            </p>
+          </div>
+          <WinChart run={review.chances} players={game.record.players} stateCount={game.stateCount} pos={pos} onSeek={go} />
+          <div className="charts">
+            <LuckPanel run={review.chances} players={game.record.players} pos={pos} />
+            <SetupPanel run={review.setup} players={game.record.players} pos={pos} onSeek={go} />
+          </div>
+        </section>
+      )}
+
+      <section className="section">
+        <div className="section-head">
+          <h2>Review your own game</h2>
+        </div>
+        <ol className="how">
+          {HOW.map((h, i) => (
+            <li className="panel" key={h.title}>
+              <span className="how-step">{i + 1}</span>
+              <h3>{h.title}</h3>
+              <p>{h.text}</p>
+            </li>
+          ))}
+        </ol>
+        <p className="panel-foot">
+          <a href={PLATFORM_URL}>catan-project on GitHub ↗</a> · or drop a saved game record on the{' '}
+          <a href="#/replay">Replay</a> tab.
+        </p>
       </section>
 
       <section className="section">
@@ -114,7 +172,7 @@ export function Start() {
           ))}
         </div>
         <p className="panel-foot">
-          <a href="#/engine">The tests, the benchmark and the bots →</a>
+          <a href="#/engine">Speed, tests and bots →</a>
         </p>
       </section>
 

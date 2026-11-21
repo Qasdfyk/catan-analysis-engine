@@ -49,6 +49,28 @@ What this costs:
 - The page is React (`web/src/App.tsx`), one component per tab in `web/src/pages/`: Start, Replay and Engine. The page is a demo for a first visit, so it shows the strongest few results and leaves the rest to `docs/`; the old `#/performance` and `#/how-it-works` links land on Engine. Under the replay the page shows the chance to win (also a timeline to click), the review of the initial placement, and how much of each player's swing came from dice. Tabs are hash routes (`#/replay`), because GitHub Pages serves a single file and cannot route `/replay` back to it. Charts are hand-written SVG and divs (`web/src/components/Charts.tsx`), with no chart library. The numbers the page quotes from `docs/` live in one file, `web/src/facts.ts`. Vite's `dedupe` makes catan-project's files use the viewer's React, since two copies on one page break React.
 - `web/src/view.ts` fills the parts of `GameView` the board reads; the rest (log, timers) gets neutral values. A new field the board starts to read shows up as a type error in `npm run build`, because `tsc` checks catan-project's files too.
 
+## Review this game
+
+When a game on catan-project ends, the game-over dialog offers "Review this game?". The button opens the viewer in a new tab with that game, without a file to download and upload. The two pages are on different origins (the game on localhost or its own server, the viewer on GitHub Pages), so they talk by `window.postMessage`, which works across origins between a page and the window it opened:
+
+```
+game page:  window.open(viewer + "#/replay?from=opener")   (not noopener: the viewer needs window.opener)
+viewer   -> game page: {type: "catan-review:ready", version: 1}
+game page -> viewer:   {type: "catan-review:record", version: 1, record, label}
+                    or {type: "catan-review:error", version: 1, message}
+```
+
+- **The viewer speaks first.** A message posted to a window whose page has not loaded yet is lost, so the game page waits for `ready` before it sends. It answers every `ready` for half an hour, so a reload of the viewer gets the game again.
+- **Who may talk to whom.** The game page sends the record only to the viewer's origin (`postMessage(..., origin)`), so if the tab navigates elsewhere the browser drops it, and it listens only to the window it opened. The viewer takes records only from its own opener, but from any origin: a browser extension or another platform can use the same door. A record is data to look at, checked like any file (`web/src/adapters.ts`).
+- **The record never leaves the computer.** It goes from tab to tab, not over the network or into a URL. The cost: a review cannot be shared as a link.
+- `#/replay?from=opener` without an opener (a bookmark, a reload after the game tab closed) says so and shows the example game.
+
+Code: `web/src/handoff.ts` here, `frontend/src/net/review.ts` in catan-project, whose end-to-end test plays a game and checks that a stand-in viewer receives its record. `VITE_REVIEW_URL` points the game at a local viewer (`npm run dev -- --port 5174`).
+
+## The start page
+
+The start page is for players: it replays the example game with its review following along (the chance curve, the luck split, the setup heat map while the settlements go down). The review is computed ahead of time by `node web/scripts/review-example.mjs` (about 40 s on 15 threads) into `web/public/example-review.json`, 13 KB gzipped, so the page shows it at once, also on a phone. The numbers are the ones Replay computes live for the same game: the same module, seeds and playouts per point; `web/src/review.test.ts` plays a sample of points again and compares. Rerun the script after any change to the engine, the bots or the elites that changes playouts.
+
 ## Speed
 
 The benchmark on the Engine tab and `node web/scripts/selfplay-node.mjs` play the same random games as `catan_selfplay` (same seed, same checksum) on one thread. For 5 000, 20 000 and 100 000 games the tab knows the native checksums (`NATIVE_CHECKSUMS` in `facts.ts`) and says whether the browser matched. Parallel work in the browser (win chances, the setup review) runs on several Web Workers, each a separate copy of the module. WebAssembly threads proper are left out on purpose: they need `SharedArrayBuffer`, which a browser only allows on pages served with cross-origin isolation headers, and GitHub Pages cannot set headers. The review will run one game at a time per worker instead.
@@ -61,4 +83,4 @@ node web/scripts/selfplay-node.mjs --games 20000
 ## Not done yet
 
 - Hidden information: the viewer shows everything (stolen cards, development cards), which is right for reviewing a finished game. A "seen by player X" view comes with the move grades, which must judge a move only by what the player knew.
-- Records from other sites: a platform-neutral converter interface is step 13c, built and tested on catan-project records only. Colonist records need the company's written permission first (step 17, see [plan.md](plan.md#why-the-colonist-step-is-conditional)).
+- Records from other sites: the converter interface ([converters.md](converters.md)) has one adapter, catan-project's. Colonist records need the company's written permission first (step 17, see [plan.md](plan.md#why-the-colonist-step-is-conditional)).

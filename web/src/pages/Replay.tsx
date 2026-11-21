@@ -1,14 +1,16 @@
-// The replay viewer: open a record (or the example), step through it by
-// hand or let it play.
+// The replay viewer: open a record (a file, an example, or the game the
+// opening page hands over), step through it by hand or let it play.
 
 import { useEffect, useState } from 'react';
+import { readRecord } from '../adapters';
 import { GameBoard } from '../components/GameBoard';
 import { MoveLog, Players, Status } from '../components/GamePanels';
 import { LuckPanel, WinChart } from '../components/WinChances';
 import { useWinChances } from '../chances';
 import { SetupHeat, SetupPanel } from '../components/SetupReview';
 import { focusMove, useSetupReview } from '../setup';
-import { EXAMPLES, exampleRecord, readRecordBytes } from '../engine';
+import { EXAMPLES, exampleRecord } from '../engine';
+import { expectsHandoff, receiveFromOpener } from '../handoff';
 import { useOpenGame, usePlayback } from '../hooks';
 import { turnStart } from '../nav';
 
@@ -30,20 +32,59 @@ export function Replay() {
   // The setup review, in its own workers, also from the start.
   const setup = useSetupReview(game ? (source?.text ?? null) : null);
 
-  // The example opens by itself, so the tab is never empty.
+  // Opened by the game page ("Review this game"): wait for its record.
+  // Otherwise the example opens by itself, so the tab is never empty.
+  const [waiting, setWaiting] = useState(() => expectsHandoff(location.hash));
   useEffect(() => {
-    exampleRecord().then(
-      (text) => setSource((s) => s ?? { text, label: EXAMPLES[0].label }),
-      (e) => setMessage(`Cannot load the example game: ${e.message}`),
-    );
+    const showExample = () =>
+      exampleRecord().then(
+        (text) => setSource((s) => s ?? { text, label: EXAMPLES[0].label }),
+        (e) => setMessage(`Cannot load the example game: ${e.message}`),
+      );
+    if (!expectsHandoff(location.hash)) {
+      void showExample();
+      return;
+    }
+    const stop = receiveFromOpener((h, origin) => {
+      setWaiting(false);
+      if (h.type === 'catan-review:error') {
+        setMessage(`The game page could not send the game: ${h.message}`);
+        return;
+      }
+      const label = h.label ?? `a game from ${new URL(origin).host}`;
+      readRecord(h.record).then(
+        ({ text }) => {
+          setSource({ text, label });
+          setMessage('');
+        },
+        (e) => setMessage(`${label}: cannot read it, because ${e instanceof Error ? e.message : String(e)}.`),
+      );
+    });
+    if (!stop) {
+      setWaiting(false);
+      setMessage('This link waits for a game from the page that opened it, and no page did. Here is the example game instead.');
+      void showExample();
+      return;
+    }
+    // The game page answers within a second; after that it was probably closed.
+    const late = setTimeout(() => {
+      setWaiting((w) => {
+        if (w) setMessage('The game page has not sent the game. Is its tab still open? Try "Review this game" again.');
+        return false;
+      });
+    }, 15000);
+    return () => {
+      stop();
+      clearTimeout(late);
+    };
   }, []);
 
   const openFile = async (file: File) => {
     try {
-      setSource({ text: await readRecordBytes(await file.arrayBuffer()), label: file.name });
+      setSource({ text: (await readRecord(await file.arrayBuffer())).text, label: file.name });
       setMessage('');
     } catch (e) {
-      setMessage(`${file.name}: cannot read it (${e instanceof Error ? e.message : String(e)}).`);
+      setMessage(`${file.name}: cannot read it, because ${e instanceof Error ? e.message : String(e)}.`);
     }
   };
 
@@ -232,6 +273,10 @@ export function Replay() {
             <LuckPanel run={chances} players={game.record.players} pos={pos} />
           </section>
         </div>
+      ) : waiting && !shownError ? (
+        <p className="message" role="status">
+          Waiting for the game from the page that opened this one…
+        </p>
       ) : (
         !shownError && <div className="board-area placeholder viewer-placeholder" aria-busy="true" />
       )}

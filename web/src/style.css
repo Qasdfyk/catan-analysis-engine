@@ -146,6 +146,14 @@ footer {
 .stat-value.green { color: var(--green); }
 .stat-label { color: var(--muted); font-size: 13px; margin-top: 2px; }
 
+.how { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr)); gap: 16px; }
+.how h3 { margin: 10px 0 6px; }
+.how p { color: var(--muted); font-size: 14px; }
+.how-step {
+  display: grid; place-items: center; width: 28px; height: 28px; border-radius: 50%;
+  border: 2px solid var(--gold); color: var(--gold); font-family: var(--mono); font-size: 14px;
+}
+
 .blocks { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr)); gap: 16px; }
 .block h3 { margin: 12px 0 6px; }
 .block p { color: var(--muted); font-size: 14px; }
@@ -392,3 +400,4 @@ footer {
 .verdict.best { color: var(--green); }
 .verdict.noise { color: var(--gold); }
 .verdict.loss { color: var(--danger); }
+.example-review .charts { align-items: start; }

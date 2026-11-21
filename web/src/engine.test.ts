@@ -4,7 +4,8 @@
 import { readFileSync, readdirSync } from 'node:fs';
 import { gunzipSync } from 'node:zlib';
 import { describe, expect, it } from 'vitest';
-import { EXAMPLES, OpenGame, loadEngine, readRecordBytes, topology } from './engine';
+import { readRecord } from './adapters';
+import { EXAMPLES, OpenGame, loadEngine, topology } from './engine';
 import { NATIVE_ZOO_CHECKSUMS } from './facts';
 
 const dataDir = new URL('../../tests/data/', import.meta.url);
@@ -76,11 +77,11 @@ describe('engine in WebAssembly', () => {
     expect(record.players[record.result.winner_seat].bot_level).toBe('expert');
   });
 
-  it('reads gzip and plain JSON alike', async () => {
-    const plain = new TextEncoder().encode('{"a": 1}');
-    const zipped = readFileSync(new URL('../public/example.json.gz', import.meta.url));
-    expect(await readRecordBytes(plain.buffer)).toBe('{"a": 1}');
-    const text = await readRecordBytes(zipped.buffer.slice(zipped.byteOffset, zipped.byteOffset + zipped.byteLength));
-    expect(JSON.parse(text).format).toBe('catan-game-record');
+  it('reads every test record and example through the adapters, unchanged', async () => {
+    for (const { name, text } of records) {
+      const read = await readRecord(text);
+      expect(read.text, name).toBe(text);
+      expect(read.from).toBe('a catan-project record');
+    }
   });
 });
