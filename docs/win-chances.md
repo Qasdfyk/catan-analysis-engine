@@ -123,7 +123,8 @@ What it says:
   ±10 points in the upper buckets.
 - **For people it will be worse.** Every game here was played by bots of the
   same family as the playouts. A human plays differently from any zoo bot, and
-  that gap is what the calibration on Colonist games (step 16a) will measure.
+  that gap is what the calibration on human set H (games of people on
+  catan-project, see [plan.md](plan.md)) will measure.
 
 ## Speed
 

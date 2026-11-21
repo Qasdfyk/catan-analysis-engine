@@ -65,7 +65,7 @@ The hard bot's setup rule (`hard_setup` and `spot_value` in `src/zoo.cpp`: score
 | +11.3 .. +19.6 pp | 120 | 25.0% [18.8, 32.2] |
 | +19.6 .. +53.5 pp | 120 | 15.0% [9.6, 21.2] |
 
-So the review measures something real: in games it never played, the seats it grades worse win less, monotonically by quarter. The effect is a rough one (the intervals overlap between neighbouring quarters), as it should be for one decision out of a whole game, and these are games between bots; games of people will be the real test (step 16a).
+So the review measures something real: in games it never played, the seats it grades worse win less, monotonically by quarter. The effect is a rough one (the intervals overlap between neighbouring quarters), as it should be for one decision out of a whole game, and these are games between bots; games of people will be the real test (human set H, see [plan.md](plan.md)).
 
 ## What it does not do yet
 

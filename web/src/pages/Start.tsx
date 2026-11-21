@@ -57,11 +57,12 @@ const BUILDING_BLOCKS = [
 ];
 
 const ROADMAP = [
-  { done: true, title: 'Rules engine in C++20', text: 'Full rules, difference-tested against the Python game, profiled with perf' },
-  { done: true, title: 'Replay in the browser', text: "WebAssembly, with each player's chance to win from Monte Carlo in Web Workers" },
+  { done: true, title: 'Rules engine in the browser', text: "C++20, difference-tested against the Python game, built to WebAssembly with each player's chance to win" },
   { done: true, title: 'Bots and search', text: 'A zoo of bot styles, an SPRT arena, and an ISMCTS bot that sees only its own cards' },
-  { done: false, title: 'Value network', text: 'A learned evaluation of positions, trained on self-play' },
-  { done: false, title: 'Post-game review', text: 'Which moves won or lost the game, shown here move by move' },
+  { done: false, title: 'Review after the game', text: 'Finish a game on catan-project, answer "Review this game?", and the review opens' },
+  { done: false, title: 'Move review', text: 'Which moves won or lost the game, shown here move by move' },
+  { done: false, title: 'Value network', text: 'A learned evaluation of positions, trained on self-play only' },
+  { done: false, title: 'Colonist games', text: "Only with Colonist's written permission, which its Terms require" },
 ];
 
 export function Start() {
