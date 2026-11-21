@@ -59,7 +59,7 @@ Set A of [arena.md](arena.md) scores a whole position: who wins from here. Step 
 build/release/tools/catan_golden --per-game 2 --threads 14 --out data/golden-b.jsonl records/*.json
 ```
 
-From each of 600 tournament games of the platform (the records of [win-chances.md](win-chances.md)) it takes two decisions the searching bot would search, one from each half of the game, so the set covers the setup, the middle and the end. Each one is labelled the way the setup review grades corners ([setup-review.md](setup-review.md)):
+From each of 600 tournament games of the platform (the 200 hard and 400 zoo games of the zoo tournament of [zoo.md](zoo.md), unpacked as `hard-game-*.json` and `zoo-game-*.json`; the tool reads plain JSON) it takes two decisions the searching bot would search, one from each half of the game, so the set covers the setup, the middle and the end. Each one is labelled the way the setup review grades corners ([setup-review.md](setup-review.md)):
 
 - **Halving.** Every move the bot would consider gets 128 playouts; the better half gets twice as many more, and so on until 3 finalists are left.
 - **Confirmation.** The finalists and the move played in the game get 2 400 fresh playouts each. A move's value comes from these alone, so the best move is not inflated by the noise that picked it (the winner's curse of [map-elites.md](map-elites.md)).
