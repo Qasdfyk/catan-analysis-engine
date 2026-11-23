@@ -49,6 +49,11 @@ struct TablePosition {
 // refused move).
 [[nodiscard]] TablePosition table_from_record(const nlohmann::json& record);
 
+// One more event of the record applied to `position`, with the same
+// bookkeeping: what table_from_record does for each event, for a reader that
+// walks a game and stops at every decision (review.hpp).
+void apply_record_event(TablePosition& position, const nlohmann::json& event);
+
 struct ExpertSettings {
   MctsSettings search;  // search.iterations: playouts in all, over every thread
   int threads = 4;      // root parallelization (merge_searches)

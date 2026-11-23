@@ -22,38 +22,41 @@ constexpr std::uint64_t mix(std::uint64_t a, std::uint64_t b) noexcept {
 
 }  // namespace
 
+void apply_record_event(TablePosition& p, const json& event) {
+  // The same bookkeeping as play_arena_game (arena.cpp), in the same order.
+  p.memory.sync(p.game);
+  const Game before = p.game;
+  const Error e = apply_event(p.game, event);
+  if (e != Error::kNone) {
+    throw RecordError("event " + std::to_string(p.events) + " (" + event.value("action", "?") +
+                      ") is refused by the rules");
+  }
+  const std::optional<Action> action = action_from_event(event);
+  const int seat = event["seat"].get<int>();
+  if (action && action->kind != ActionKind::kBuildSettlement) p.memory.record(seat, *action);
+  for (int s = 0; s < p.game.player_count; ++s) {
+    const Player& was = before.players[at(s)];
+    const Player& now = p.game.players[at(s)];
+    for_each_node(now.settlements & ~was.settlements, [&](int n) {
+      p.built.push_back({Built::Kind::kSettlement, s, n});
+      Action placed;
+      placed.kind = ActionKind::kBuildSettlement;
+      placed.target = n;
+      p.memory.record(s, placed);
+    });
+    for_each_node(now.cities & ~was.cities, [&](int n) { p.built.push_back({Built::Kind::kCity, s, n}); });
+    for_each_edge(now.roads & ~was.roads, [&](int n) { p.built.push_back({Built::Kind::kRoad, s, n}); });
+  }
+  p.belief.observe(before, p.game);
+  ++p.events;
+  p.memory.sync(p.game);
+}
+
 TablePosition table_from_record(const json& record) {
   TablePosition p;
   p.game = game_from_record(record);
   if (!record.contains("events") || !record["events"].is_array()) throw RecordError("record has no events");
-  for (const json& event : record["events"]) {
-    // The same bookkeeping as play_arena_game (arena.cpp), in the same order.
-    p.memory.sync(p.game);
-    const Game before = p.game;
-    const Error e = apply_event(p.game, event);
-    if (e != Error::kNone) {
-      throw RecordError("event " + std::to_string(p.events) + " (" + event.value("action", "?") +
-                        ") is refused by the rules");
-    }
-    const std::optional<Action> action = action_from_event(event);
-    const int seat = event["seat"].get<int>();
-    if (action && action->kind != ActionKind::kBuildSettlement) p.memory.record(seat, *action);
-    for (int s = 0; s < p.game.player_count; ++s) {
-      const Player& was = before.players[at(s)];
-      const Player& now = p.game.players[at(s)];
-      for_each_node(now.settlements & ~was.settlements, [&](int n) {
-        p.built.push_back({Built::Kind::kSettlement, s, n});
-        Action placed;
-        placed.kind = ActionKind::kBuildSettlement;
-        placed.target = n;
-        p.memory.record(s, placed);
-      });
-      for_each_node(now.cities & ~was.cities, [&](int n) { p.built.push_back({Built::Kind::kCity, s, n}); });
-      for_each_edge(now.roads & ~was.roads, [&](int n) { p.built.push_back({Built::Kind::kRoad, s, n}); });
-    }
-    p.belief.observe(before, p.game);
-    ++p.events;
-  }
+  for (const json& event : record["events"]) apply_record_event(p, event);
   p.memory.sync(p.game);
   return p;
 }
