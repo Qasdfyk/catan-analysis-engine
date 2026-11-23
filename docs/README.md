@@ -17,3 +17,4 @@ Design notes and benchmark write-ups land here, one per step, with the numbers a
 - [setup-review.md](setup-review.md): the initial placement graded corner by corner: successive halving, a confirmation round against the winner's curse, and whether a better setup wins more often.
 - [mcts.md](mcts.md): the searching bot: ISMCTS over its own turn, what a seat knows of the hidden cards and states drawn to match it, PUCT with the zoo bot as a prior, tuning, the arena, speed and root parallelization.
 - [expert.md](expert.md): the searching bot as the platform's expert level, a separate process fed the game's record, and golden positions B: 1 200 decisions labelled once by deep Monte Carlo.
+- [move-review.md](move-review.md): every decision of a game graded from best to blunder by the chance to win it gave away, judged on what the player knew; paired errors, checks against the golden positions and planted blunders, the thresholds.

@@ -35,11 +35,11 @@ GoldenLabel label_position(const Game& truth, int seat, const std::array<Cards, 
   TableMemory synced = memory;
   synced.sync(truth);
   const std::optional<Action> zoo_move = zoo_decide(truth, seat, hard, synced);
-  for (const Action& a : search_candidates(truth, seat, zoo_move)) label.moves.push_back({a, {}, {}, false});
+  for (const Action& a : search_candidates(truth, seat, zoo_move)) label.moves.push_back({a, {}, {}, {}, false});
   if (played) {
     const auto it = std::find_if(label.moves.begin(), label.moves.end(),
                                  [&](const GoldenMove& m) { return m.action == *played; });
-    if (it == label.moves.end()) label.moves.push_back({*played, {}, {}, false});
+    if (it == label.moves.end()) label.moves.push_back({*played, {}, {}, {}, false});
     label.played = static_cast<int>(std::find_if(label.moves.begin(), label.moves.end(),
                                                  [&](const GoldenMove& m) { return m.action == *played; }) -
                                     label.moves.begin());
@@ -47,7 +47,8 @@ GoldenLabel label_position(const Game& truth, int seat, const std::array<Cards, 
   if (label.moves.empty()) return label;
 
   // Playouts first .. first + count - 1 of one move.
-  const auto play = [&](GoldenMove& m, int first, int count, WinCounts& into) {
+  const auto play = [&](GoldenMove& m, int first, int count, WinCounts& into,
+                        std::vector<std::uint8_t>* won = nullptr) {
     for (int i = first; i < first + count; ++i) {
       Rng rng(mix(config.seed, static_cast<std::uint64_t>(i)));
       ZooTable t;
@@ -66,6 +67,7 @@ GoldenLabel label_position(const Game& truth, int seat, const std::array<Cards, 
         winner = -1;
       }
       ++into.playouts;
+      if (won != nullptr) won->push_back(winner == seat ? 1 : 0);
       if (winner >= 0) {
         ++into.wins[at(winner)];
       } else {
@@ -101,7 +103,8 @@ GoldenLabel label_position(const Game& truth, int seat, const std::array<Cards, 
     const int i = alive[k];
     if (static_cast<int>(k) < config.finalists || i == label.played) {
       label.moves[at(i)].finalist = true;
-      play(label.moves[at(i)], kConfirmFirst, config.confirm_playouts, label.moves[at(i)].confirm);
+      GoldenMove& m = label.moves[at(i)];
+      play(m, kConfirmFirst, config.confirm_playouts, m.confirm, &m.confirm_won);
     }
   }
   label.best = alive.front();

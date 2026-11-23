@@ -66,7 +66,8 @@ add_library(catan_record STATIC
   src/expert.cpp
   src/golden.cpp
   src/record.cpp
-  src/replay.cpp)
+  src/replay.cpp
+  src/review.cpp)
 target_link_libraries(catan_record PUBLIC catan nlohmann_json::nlohmann_json PRIVATE catan_warnings)
 set_target_properties(catan_record PROPERTIES POSITION_INDEPENDENT_CODE ON)
 

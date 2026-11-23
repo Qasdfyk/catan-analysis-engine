@@ -49,6 +49,10 @@ struct GoldenMove {
   Action action;
   WinCounts halving;
   WinCounts confirm;  // finalists and the move played only
+  // Playout by playout of the confirmation: 1 where the seat won. Playout i
+  // of every move draws the same hidden cards and chance, so two moves can
+  // be compared pair by pair (review.cpp uses it for the error of a loss).
+  std::vector<std::uint8_t> confirm_won;
   bool finalist = false;
 };
 

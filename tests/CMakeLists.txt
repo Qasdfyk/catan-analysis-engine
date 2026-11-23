@@ -10,6 +10,7 @@ add_executable(catan_tests
   golden_test.cpp
   record_test.cpp
   replay_test.cpp
+  review_test.cpp
   random_player_test.cpp
   setup_review_test.cpp
   winrate_test.cpp

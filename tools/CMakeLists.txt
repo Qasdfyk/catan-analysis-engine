@@ -33,3 +33,6 @@ target_link_libraries(catan_expert PRIVATE catan_record catan_warnings Threads::
 
 add_executable(catan_golden golden.cpp)
 target_link_libraries(catan_golden PRIVATE catan_record catan_warnings Threads::Threads)
+
+add_executable(catan_review review.cpp)
+target_link_libraries(catan_review PRIVATE catan_record catan_warnings Threads::Threads)
