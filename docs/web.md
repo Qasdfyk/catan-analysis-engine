@@ -70,11 +70,11 @@ Code: `web/src/handoff.ts` here, `frontend/src/net/review.ts` in catan-project, 
 
 ## The start page
 
-The start page is for players: it replays the example game with Alice's review following along (the chance curve, the luck split, the setup heat map while the settlements go down). The review is computed ahead of time by `node web/scripts/review-example.mjs` (about 40 s on 15 threads) into `web/public/example-review.json`, 13 KB gzipped, so the page shows it at once, also on a phone. The numbers are the ones Replay computes live for the same game: the same module, seeds and playouts per point; `web/src/review.test.ts` plays a sample of points again and compares. Rerun the script after any change to the engine, the bots or the elites that changes playouts.
+The start page is for players: it replays the example game with Alice's review following along (the chance curve, the luck split, the setup heat map while the settlements go down), and the moves that lost the runner-up the most, each with the best move and why. The review is computed ahead of time by `node web/scripts/review-example.mjs` (about 40 s on 15 threads) into `web/public/example-review.json`, 13 KB gzipped, so the page shows it at once, also on a phone. The numbers are the ones Replay computes live for the same game: the same module, seeds and playouts per point; `web/src/review.test.ts` plays a sample of points again and compares. Rerun the script after any change to the engine, the bots or the elites that changes playouts.
 
 ## Speed
 
-The benchmark on the Engine tab and `node web/scripts/selfplay-node.mjs` play the same random games as `catan_selfplay` (same seed, same checksum) on one thread. For 5 000, 20 000 and 100 000 games the tab knows the native checksums (`NATIVE_CHECKSUMS` in `facts.ts`) and says whether the browser matched. Parallel work in the browser (win chances, the setup review) runs on several Web Workers, each a separate copy of the module. WebAssembly threads proper are left out on purpose: they need `SharedArrayBuffer`, which a browser only allows on pages served with cross-origin isolation headers, and GitHub Pages cannot set headers. The review will run one game at a time per worker instead.
+The benchmark on the Engine tab and `node web/scripts/selfplay-node.mjs` play the same random games as `catan_selfplay` (same seed, same checksum) on one thread. For 5 000, 20 000 and 100 000 games the tab knows the native checksums (`NATIVE_CHECKSUMS` in `facts.ts`) and says whether the browser matched. Parallel work in the browser (win chances, the setup review) runs on several Web Workers, each a separate copy of the module. WebAssembly threads proper are left out on purpose: they need `SharedArrayBuffer`, which a browser only allows on pages served with cross-origin isolation headers, and GitHub Pages cannot set headers. The move review runs one decision at a time per worker instead ([move-review.md](move-review.md#on-the-page)).
 
 ```sh
 build/release/tools/catan_selfplay --games 20000
@@ -83,5 +83,5 @@ node web/scripts/selfplay-node.mjs --games 20000
 
 ## Not done yet
 
-- Hidden information: the viewer shows everything (stolen cards, development cards), which is right for reviewing a finished game. A "seen by player X" view comes with the move grades, which must judge a move only by what the player knew.
+- Hidden information: the viewer shows everything (stolen cards, development cards), which is right for reviewing a finished game. The move grades judge a move only by what the player knew ([move-review.md](move-review.md)), but the board still shows every hand.
 - Records from other sites: the converter interface ([converters.md](converters.md)) has one adapter, catan-project's. Colonist records need the company's written permission first (step 17, see [plan.md](plan.md#why-the-colonist-step-is-conditional)).

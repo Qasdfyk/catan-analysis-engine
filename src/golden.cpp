@@ -21,7 +21,55 @@ constexpr std::uint64_t mix(std::uint64_t a, std::uint64_t b) noexcept {
 // Playout indices of the confirmation, far above those of the halving.
 constexpr int kConfirmFirst = 1 << 24;
 
+// Playouts first .. first + count - 1 of move m into `into`; with `confirm`
+// also m's playout-by-playout record. `memory` is already synced. Answers
+// the number of playouts.
+int play_into(const Game& truth, int seat, const std::array<Cards, kMaxPlayers>& known, const TableMemory& memory,
+              GoldenMove& m, int first, int count, std::uint64_t seed, std::span<const ZooBot> pool,
+              WinCounts& into, bool confirm) {
+  const ZooBot hard = hard_bot();
+  for (int i = first; i < first + count; ++i) {
+    Rng rng(mix(seed, static_cast<std::uint64_t>(i)));
+    ZooTable t;
+    t.game = determinize(truth, seat, known, rng);
+    t.memory = memory;
+    for (int s = 0; s < t.game.player_count; ++s) {
+      t.bots[at(s)] = s == seat || pool.empty() ? hard : pool[at(rng.below(static_cast<int>(pool.size())))];
+    }
+    int winner = -1;
+    if (apply_action(t.game, seat, m.action, rng) == Error::kNone) {
+      t.memory.record(seat, m.action);
+      winner = t.game.game_over ? t.game.winner : play_out_zoo(t, rng).winner;
+    }
+    // else: not legal in this draw (it cannot happen for the seat's own
+    // moves, which depend only on what it sees); counts as not won.
+    ++into.playouts;
+    if (confirm) {
+      m.confirm_won.push_back(winner == seat ? 1 : 0);
+      // turn_number counts turns ended: unchanged means the seat won in the
+      // turn of the move.
+      if (winner == seat && t.game.turn_number == truth.turn_number) ++m.confirm_now;
+    }
+    if (winner >= 0) {
+      ++into.wins[at(winner)];
+    } else {
+      ++into.unfinished;
+    }
+  }
+  return count;
+}
+
 }  // namespace
+
+GoldenMove play_move(const Game& truth, int seat, const std::array<Cards, kMaxPlayers>& known,
+                     const TableMemory& memory, const Action& action, int first, int count, std::uint64_t seed,
+                     std::span<const ZooBot> pool) {
+  TableMemory synced = memory;
+  synced.sync(truth);
+  GoldenMove m{action, {}, {}, {}, 0, true};
+  play_into(truth, seat, known, synced, m, first, count, seed, pool, m.confirm, true);
+  return m;
+}
 
 double golden_value(const GoldenMove& m, int seat) noexcept {
   return m.confirm.playouts > 0 ? m.confirm.share(seat) : m.halving.share(seat);
@@ -35,11 +83,11 @@ GoldenLabel label_position(const Game& truth, int seat, const std::array<Cards, 
   TableMemory synced = memory;
   synced.sync(truth);
   const std::optional<Action> zoo_move = zoo_decide(truth, seat, hard, synced);
-  for (const Action& a : search_candidates(truth, seat, zoo_move)) label.moves.push_back({a, {}, {}, {}, false});
+  for (const Action& a : search_candidates(truth, seat, zoo_move)) label.moves.push_back({a, {}, {}, {}, 0, false});
   if (played) {
     const auto it = std::find_if(label.moves.begin(), label.moves.end(),
                                  [&](const GoldenMove& m) { return m.action == *played; });
-    if (it == label.moves.end()) label.moves.push_back({*played, {}, {}, {}, false});
+    if (it == label.moves.end()) label.moves.push_back({*played, {}, {}, {}, 0, false});
     label.played = static_cast<int>(std::find_if(label.moves.begin(), label.moves.end(),
                                                  [&](const GoldenMove& m) { return m.action == *played; }) -
                                     label.moves.begin());
@@ -47,34 +95,8 @@ GoldenLabel label_position(const Game& truth, int seat, const std::array<Cards, 
   if (label.moves.empty()) return label;
 
   // Playouts first .. first + count - 1 of one move.
-  const auto play = [&](GoldenMove& m, int first, int count, WinCounts& into,
-                        std::vector<std::uint8_t>* won = nullptr) {
-    for (int i = first; i < first + count; ++i) {
-      Rng rng(mix(config.seed, static_cast<std::uint64_t>(i)));
-      ZooTable t;
-      t.game = determinize(truth, seat, known, rng);
-      t.memory = synced;
-      for (int s = 0; s < t.game.player_count; ++s) {
-        t.bots[at(s)] = s == seat || pool.empty() ? hard : pool[at(rng.below(static_cast<int>(pool.size())))];
-      }
-      int winner = -1;
-      if (apply_action(t.game, seat, m.action, rng) == Error::kNone) {
-        t.memory.record(seat, m.action);
-        winner = t.game.game_over ? t.game.winner : play_out_zoo(t, rng).winner;
-      } else {
-        // Not legal in this draw (it cannot happen for the seat's own moves,
-        // which depend only on what it sees); counts as not won.
-        winner = -1;
-      }
-      ++into.playouts;
-      if (won != nullptr) won->push_back(winner == seat ? 1 : 0);
-      if (winner >= 0) {
-        ++into.wins[at(winner)];
-      } else {
-        ++into.unfinished;
-      }
-      ++label.playouts;
-    }
+  const auto play = [&](GoldenMove& m, int first, int count, WinCounts& into, bool confirm = false) {
+    label.playouts += play_into(truth, seat, known, synced, m, first, count, config.seed, pool, into, confirm);
   };
   const auto value = [&](int i) { return label.moves[at(i)].halving.share(seat); };
   const auto better = [&](int a, int b) { return value(a) != value(b) ? value(a) > value(b) : a < b; };
@@ -104,7 +126,7 @@ GoldenLabel label_position(const Game& truth, int seat, const std::array<Cards, 
     if (static_cast<int>(k) < config.finalists || i == label.played) {
       label.moves[at(i)].finalist = true;
       GoldenMove& m = label.moves[at(i)];
-      play(m, kConfirmFirst, config.confirm_playouts, m.confirm, &m.confirm_won);
+      play(m, kConfirmFirst, config.confirm_playouts, m.confirm, true);
     }
   }
   label.best = alive.front();

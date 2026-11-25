@@ -50,7 +50,8 @@ class ReplayLog {
 // The positions behind the indices of state_json() and board_json(): the
 // cube coordinates of every hex, and every corner and side as (hex,
 // direction) in its canonical spelling, the form game records and
-// catan-project's board use. Sides also list their two corners.
+// catan-project's board use. Corners also list their land hexes, sides their
+// two corners.
 [[nodiscard]] nlohmann::json topology_json();
 
 }  // namespace cae

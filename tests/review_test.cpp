@@ -6,9 +6,12 @@
 #include "catan/expert.hpp"
 #include "catan/record.hpp"
 #include "catan/review.hpp"
+#include "catan/topology.hpp"
 
 #include <gtest/gtest.h>
 
+#include <bit>
+#include <cmath>
 #include <fstream>
 #include <sstream>
 #include <string>
@@ -123,6 +126,77 @@ TEST(Review, CardsThePlayerCouldNotSeeDoNotChangeTheReview) {
     EXPECT_DOUBLE_EQ(a.best_value, b.best_value);
     EXPECT_EQ(a.grade, b.grade);
   }
+}
+
+// "Why": facts only for an inaccuracy or worse, and the first kind that applies.
+TEST(Review, WhyNamesAWinOnTheSpot) {
+  const json record = read_record("hard-game-00030.json");
+  const int winner = record["result"]["winner_seat"].get<int>();
+  ReviewDecision d = review_decisions(record, winner).back();
+  d.played = Action{};
+  d.played.kind = ActionKind::kEndTurn;
+  MoveReview r = review_decision(d, small(), {});
+  EXPECT_DOUBLE_EQ(r.best_now, 1.0);   // the best move ends the game
+  EXPECT_DOUBLE_EQ(r.played_now, 0.0);  // ending the turn cannot win in it
+  r.grade = Grade::kGood;
+  EXPECT_TRUE(explain(d, r).is_null());
+  r.grade = Grade::kMistake;
+  EXPECT_EQ(explain(d, r)["kind"], "wins_now");
+}
+
+TEST(Review, WhyCountsThePipsTheRobberBlocks) {
+  const json record = read_record("hard-game-00030.json");
+  for (const ReviewDecision& d : review_decisions(record)) {
+    if (d.played.kind != ActionKind::kMoveRobber) continue;
+    const Game& g = d.game;
+    // The desert blocks nothing; any hex with a building blocks its pips
+    // once per settlement and twice per city.
+    int desert = -1;
+    for (int h = 0; h < kHexCount; ++h) {
+      if (g.board.number[at(h)] == 0) desert = h;
+    }
+    MoveReview r;
+    r.seat = d.seat;
+    r.played = d.played;
+    r.best = d.played;
+    r.best.target = desert;
+    r.grade = Grade::kBlunder;
+    const json why = explain(d, r);
+    ASSERT_EQ(why["kind"], "robber");
+    for (const json& n : why["best_blocks"]) EXPECT_EQ(n, 0);
+    const int hex = d.played.target;
+    const int number = g.board.number[at(hex)];
+    const int pips = 6 - std::abs(7 - number);
+    for (int s = 0; s < g.player_count; ++s) {
+      const Player& p = g.players[at(s)];
+      const NodeMask corners = kTopology.hex_node_mask[at(hex)];
+      const int expected = pips * (std::popcount(p.settlements & corners) + 2 * std::popcount(p.cities & corners));
+      EXPECT_EQ(why["played_blocks"][at(s)], expected);
+    }
+    EXPECT_NE(why["leader"], d.seat);
+    return;
+  }
+  FAIL() << "no robber move in the game";
+}
+
+TEST(Review, WhyNamesThePointsOfABuilding) {
+  const json record = read_record("hard-game-00030.json");
+  for (const ReviewDecision& d : review_decisions(record)) {
+    if (d.played.kind != ActionKind::kUpgradeCity) continue;
+    MoveReview r;
+    r.seat = d.seat;
+    r.best = d.played;  // the city as the best move, ending the turn as the one played
+    r.played = Action{};
+    r.played.kind = ActionKind::kEndTurn;
+    r.grade = Grade::kInaccuracy;
+    const json why = explain(d, r);
+    // A city scores a point unless the turn's points were the Longest Road's.
+    if (why["kind"] == "longest_road" || why["kind"] == "largest_army") continue;
+    ASSERT_EQ(why["kind"], "points");
+    EXPECT_EQ(why["best_points"].get<int>(), why["played_points"].get<int>() + 1);
+    return;
+  }
+  FAIL() << "no city in the game";
 }
 
 TEST(Review, AReviewIsReproducibleAndSummed) {

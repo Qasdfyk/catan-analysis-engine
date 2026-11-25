@@ -32,11 +32,19 @@
 // iterations, seed, worker) runs worker `worker`'s part of decision k (its
 // own seed, as catan_mcts --workers does), and the page merges the parts of
 // its Web Workers at the root. Playouts seat the elites of setElites().
+//
+// Move review (review.hpp): reviewDecisionsJson(seat) lists the decisions of
+// that seat the review grades; reviewMove(seat, k, seed, first, finalists, confirm) grades decision k
+// (the page passes catan_review's budget: 32 playouts a move to start, 2
+// finalists, 800 to confirm) and answers the review with its "why". Each worker grades whole
+// decisions, so the move list fills in decision by decision.
 
 #include "catan/elites.hpp"
 #include "catan/mcts.hpp"
 #include "catan/random_player.hpp"
+#include "catan/record.hpp"
 #include "catan/replay.hpp"
+#include "catan/review.hpp"
 #include "catan/setup_review.hpp"
 #include "catan/winrate.hpp"
 #include "catan/zoo.hpp"
@@ -96,7 +104,8 @@ nlohmann::json review_json(const cae::SetupReview& r) {
 
 class Replay {
  public:
-  explicit Replay(const std::string& record_text) : log_(cae::ReplayLog::from_text(record_text)) {}
+  explicit Replay(const std::string& record_text)
+      : log_(cae::ReplayLog::from_text(record_text)), text_(record_text) {}
 
   int eventCount() const { return log_.event_count(); }
   int stateCount() const { return log_.state_count(); }
@@ -189,8 +198,56 @@ class Replay {
         .dump();
   }
 
+  // [{state, turn, kind}] of the decisions of `seat` the review grades;
+  // {"failed": why} when the record does not replay. (Not "error": a review
+  // has a field of that name, the standard error of its loss.)
+  std::string reviewDecisionsJson(int seat) {
+    try {
+      nlohmann::json out = nlohmann::json::array();
+      for (const cae::ReviewDecision& d : review_list(seat)) {
+        out.push_back({{"state", d.state},
+                       {"turn", d.game.turn_number},
+                       {"kind", std::string(cae::action_name(d.played.kind))}});
+      }
+      return out.dump();
+    } catch (const std::exception& e) {
+      return nlohmann::json{{"failed", e.what()}}.dump();
+    }
+  }
+  // The review of decision k of `seat`, with "why"; the same as catan_review
+  // with --seed, --first, --finalists and --confirm (the page passes its
+  // defaults, 32, 2 and 800) for that decision.
+  std::string reviewMove(int seat, int k, double seed, int first, int finalists, int confirm) {
+    try {
+      const std::vector<cae::ReviewDecision>& list = review_list(seat);
+      if (k < 0 || k >= static_cast<int>(list.size()) || first < 1 || finalists < 1 || confirm < 2) return "null";
+      cae::ReviewConfig config;
+      config.label.seed = static_cast<std::uint64_t>(seed);
+      config.label.first_playouts = first;
+      config.label.finalists = finalists;
+      config.label.confirm_playouts = confirm;
+      const cae::ReviewDecision& d = list[static_cast<std::size_t>(k)];
+      const cae::MoveReview r = cae::review_decision(d, config, elites());
+      nlohmann::json out = cae::review_json(r);
+      out["why"] = cae::explain(d, r);
+      return out.dump();
+    } catch (const std::exception& e) {
+      return nlohmann::json{{"failed", e.what()}}.dump();
+    }
+  }
+
  private:
   cae::ReplayLog log_;
+  std::string text_;
+  std::map<int, std::vector<cae::ReviewDecision>> review_lists_;
+
+  const std::vector<cae::ReviewDecision>& review_list(int seat) {
+    auto it = review_lists_.find(seat);
+    if (it == review_lists_.end()) {
+      it = review_lists_.emplace(seat, cae::review_decisions(nlohmann::json::parse(text_), seat)).first;
+    }
+    return it->second;
+  }
   std::map<int, std::unique_ptr<cae::SetupReview>> reviews_;
   std::map<int, std::vector<cae::RecordDecision>> decisions_;
 
@@ -258,7 +315,9 @@ EMSCRIPTEN_BINDINGS(catan_engine) {
       .function("setupMovesJson", &Replay::setupMovesJson)
       .function("setupReviewStep", &Replay::setupReviewStep)
       .function("mctsDecisionsJson", &Replay::mctsDecisionsJson)
-      .function("mctsSearch", &Replay::mctsSearch);
+      .function("mctsSearch", &Replay::mctsSearch)
+      .function("reviewDecisionsJson", &Replay::reviewDecisionsJson)
+      .function("reviewMove", &Replay::reviewMove);
   emscripten::function("topologyJson", &topologyJson);
   emscripten::function("setElites", &setElites);
   emscripten::function("selfplay", &selfplay);

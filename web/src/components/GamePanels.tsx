@@ -5,6 +5,7 @@ import { memo, useEffect, useRef, useState, type CSSProperties, type ReactNode }
 import { PLAYER_COLORS } from '@platform/utils/labels';
 import type { OpenGame } from '../engine';
 import { eventText, isTradeTalk } from '../events';
+import { GRADE_LABEL, GRADE_MARK, shown, type MoveReview } from '../grades';
 import { DEV_CARDS, RESOURCES, type GameState, type RecordPlayer } from '../types';
 
 export function seatName(players: RecordPlayer[], seat: number | null): string {
@@ -115,8 +116,16 @@ export function Players({ state, players }: { state: GameState; players: RecordP
   );
 }
 
-/** Every move of the game, by turn. Built once per game; only the highlight follows pos. */
-const MoveList = memo(function MoveList({ game, onPick }: { game: OpenGame; onPick: (pos: number) => void }) {
+/** Every move of the game, by turn. Built once per game (and per new grade); only the highlight follows pos. */
+const MoveList = memo(function MoveList({
+  game,
+  marks,
+  onPick,
+}: {
+  game: OpenGame;
+  marks?: Map<number, MoveReview>;
+  onPick: (pos: number) => void;
+}) {
   const players = game.record.players;
   const items: ReactNode[] = [];
   let turn = -1;
@@ -130,17 +139,35 @@ const MoveList = memo(function MoveList({ game, onPick }: { game: OpenGame; onPi
         </li>,
       );
     }
+    const graded = marks?.get(i);
+    const g = graded && shown(graded.grade);
     items.push(
       <li key={i} data-i={i} className={`event${isTradeTalk(e) ? ' talk' : ''}`} onClick={() => onPick(i + 1)}>
         <Chip seat={e.seat} players={players} />
         <b>{seatName(players, e.seat)}</b> {eventText(e, players)}
+        {g && (
+          <span className={`grade-mark ${g}`} title={GRADE_LABEL[g]}>
+            {GRADE_MARK[g]}
+          </span>
+        )}
       </li>,
     );
   });
   return <>{items}</>;
 });
 
-export function MoveLog({ game, pos, onPick }: { game: OpenGame; pos: number; onPick: (pos: number) => void }) {
+export function MoveLog({
+  game,
+  pos,
+  marks,
+  onPick,
+}: {
+  game: OpenGame;
+  pos: number;
+  /** Grades of the player the review is for, by event index. */
+  marks?: Map<number, MoveReview>;
+  onPick: (pos: number) => void;
+}) {
   const list = useRef<HTMLOListElement>(null);
   const [showTalk, setShowTalk] = useState(true);
 
@@ -158,7 +185,7 @@ export function MoveLog({ game, pos, onPick }: { game: OpenGame; pos: number; on
         el.scrollTop = top - el.clientHeight / 2;
       }
     }
-  }, [pos, game]);
+  }, [pos, game, marks]);
 
   return (
     <div className="panel log-panel">
@@ -169,7 +196,7 @@ export function MoveLog({ game, pos, onPick }: { game: OpenGame; pos: number; on
         </label>
       </div>
       <ol ref={list} className={`log${showTalk ? '' : ' hide-talk'}`}>
-        <MoveList game={game} onPick={onPick} />
+        <MoveList game={game} marks={marks} onPick={onPick} />
       </ol>
     </div>
   );

@@ -59,6 +59,10 @@ struct Job {
   double golden_loss = 0;
   bool golden_best = false;
   double golden_error = 0;
+  // A planted move: valued again on fresh playouts (see golden_job).
+  bool planted = false;
+  double golden_best_value = 0;
+  double golden_best_var = 0;
 };
 
 std::vector<std::string> read_lines(const std::string& path) {
@@ -73,7 +77,10 @@ std::vector<std::string> read_lines(const std::string& path) {
 
 // A golden position as a decision to review, and its deep loss. With
 // `plant`, the move played is replaced by the worst move of the label (by the
-// halving, which every move has): a planted blunder.
+// halving, which every move has): a planted blunder. The halving's value of
+// that move is the minimum of many noisy estimates, so it is too low (the
+// loser's curse); main() values the planted move again on fresh playouts
+// (fresh_planted) and takes the deep loss from those.
 Job golden_job(const json& g, bool plant) {
   Job job;
   job.game = g.at("id").get<std::string>();
@@ -112,6 +119,9 @@ Job golden_job(const json& g, bool plant) {
     };
     job.golden_loss = value(b) - value(p);
     job.golden_error = std::sqrt(var(b) + var(p));
+    job.planted = plant;
+    job.golden_best_value = value(b);
+    job.golden_best_var = var(b);
   }
   return job;
 }
@@ -175,6 +185,19 @@ void print_golden(const std::vector<Job>& jobs, const cae::GradeThresholds& t) {
     for (int q = 0; q < cae::kGradeCount; ++q) std::printf("%11d", table[at(d)][at(q)]);
     std::printf("\n");
   }
+}
+
+// The deep loss of a planted move from fresh playouts: as many as the
+// label's confirmation of the best move, on a seed neither the label nor the
+// review uses.
+void fresh_planted(Job& job, const std::vector<cae::ZooBot>& pool) {
+  const cae::ReviewDecision& d = job.decision;
+  const int count = 2400;  // golden.hpp's confirm_playouts for set B
+  const cae::GoldenMove m =
+      cae::play_move(d.game, d.seat, d.known, d.memory, d.played, 0, count, 0x9a17ed0ULL, pool);
+  const double v = m.confirm.share(d.seat);
+  job.golden_loss = job.golden_best_value - v;
+  job.golden_error = std::sqrt(job.golden_best_var + v * (1 - v) / count);
 }
 
 }  // namespace
@@ -267,6 +290,7 @@ int main(int argc, char** argv) {
           Job& job = jobs[at(i)];
           job.review = cae::review_decision(job.decision, config, pool);
           playouts += job.review.playouts;
+          if (job.planted) fresh_planted(job, pool);
           const int n = ++finished;
           if (n % 200 == 0) {
             const double s = std::chrono::duration<double>(std::chrono::steady_clock::now() - t0).count();
@@ -284,6 +308,7 @@ int main(int argc, char** argv) {
       if (!out) throw std::runtime_error("cannot write " + out_path);
       for (const Job& j : jobs) {
         json line = cae::review_json(j.review);
+        line["why"] = cae::explain(j.decision, j.review);
         line["game"] = j.game;
         line["level"] = j.level;
         if (!golden_path.empty()) {
@@ -295,6 +320,19 @@ int main(int argc, char** argv) {
       }
     }
     if (golden_path.empty()) {
+      // Every review with its "why", as the WebAssembly module answers it
+      // (wasm/bindings.cpp, reviewMove), folded into one number in the order
+      // of the decisions: scripts/check.sh compares it with
+      // web/scripts/review-node.mjs.
+      std::uint64_t checksum = 0xcbf29ce484222325ULL;
+      for (const Job& j : jobs) {
+        json line = cae::review_json(j.review);
+        line["why"] = cae::explain(j.decision, j.review);
+        for (const char c : line.dump()) {
+          checksum = (checksum ^ static_cast<unsigned char>(c)) * 0x100000001b3ULL;
+        }
+      }
+      std::printf("review checksum %016llx\n\n", static_cast<unsigned long long>(checksum));
       print_summary(jobs, config.thresholds);
     } else {
       print_golden(jobs, config.thresholds);

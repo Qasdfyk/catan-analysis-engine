@@ -100,6 +100,10 @@ struct MoveReview {
   double error_unpaired = 0; // the same, treating the two values as independent
   Grade grade = Grade::kBest;
   bool within_noise = false; // not best, and the loss is within z errors of zero
+  // Share of the confirmation playouts the seat won before its turn was
+  // over, after each move: "the best move wins on the spot".
+  double best_now = 0;
+  double played_now = 0;
   int candidates = 0;
   long long playouts = 0;
 };
@@ -114,8 +118,39 @@ struct MoveReview {
 [[nodiscard]] MoveReview review_decision(const ReviewDecision& d, const ReviewConfig& config,
                                          std::span<const ZooBot> pool);
 
+// Why the best move is better, as facts the page puts into words: an object
+// {"kind", ...} for an inaccuracy or worse, null otherwise. The first kind
+// that applies, in this order:
+//
+//   wins_now      the best move wins this turn in most playouts, the move
+//                 played far less often {best_now, played_now}
+//   robber        both moves place the robber: the pips each one blocks,
+//                 per seat {best_hex, played_hex, best_blocks[], played_blocks[], leader}
+//   victim        both steal: whom {best_victim, played_victim, points[], cards[]}
+//   longest_road  the best move takes the Longest Road, the move played does not
+//   largest_army  the same for the Largest Army
+//   points        the best move scores more points now {best_points, played_points}
+//   production    the best move builds where it adds more pips {node, pips, numbers[], played_pips}
+//   port          the best move settles on a port of a kind the player has
+//                 none of, the move played does not {node, port: "3:1" or a resource}
+//   enables       the best move is a trade or a card after which the player
+//                 can pay for something the move played cannot {builds[]}
+//   road_spot     the best road reaches a new corner to settle on {node, pips, numbers[]}
+//   road_length   the best road makes the player's road longer {best_length,
+//                 played_length, holder, holder_length}
+//   ended_turn    the move played ends the turn, the best move builds or buys
+//   dev_card      the best move buys a development card: what the player had
+//                 not seen yet {unseen, points, knights, my_knights, holder, holder_knights}
+//   later         none of the above: the difference shows up later in the game
+//
+// The facts come from making each move on the true position (the player's
+// own moves need nothing hidden). They describe what the moves do; the
+// grade itself comes from the playouts alone.
+[[nodiscard]] nlohmann::json explain(const ReviewDecision& d, const MoveReview& r);
+
 // A review as JSON: {"state", "seat", "turn", "played", "best", "played_value",
-// "best_value", "loss", "error", "grade", "within_noise", "candidates"}.
+// "best_value", "loss", "error", "grade", "within_noise", "candidates",
+// "best_now", "played_now"}.
 [[nodiscard]] nlohmann::json review_json(const MoveReview& r);
 
 // How a player did over a game: decisions per grade and the mean loss

@@ -6,6 +6,7 @@
 import { useRef, type PointerEvent } from 'react';
 import { PLAYER_COLORS } from '@platform/utils/labels';
 import { chancesFrom, completePasses, luckError, split, turnAt, type ChanceRun } from '../chances';
+import { shown as gradeShown, type MoveReview } from '../grades';
 import type { RecordPlayer } from '../types';
 import { fmt } from './Charts';
 import { seatName } from './GamePanels';
@@ -36,7 +37,19 @@ function Progress({ run }: { run: ChanceRun }) {
   );
 }
 
-export function WinChart({ run, players, stateCount, pos, focus, onSeek }: Props & { onSeek: (pos: number) => void }) {
+export function WinChart({
+  run,
+  players,
+  stateCount,
+  pos,
+  focus,
+  onSeek,
+  graded = [],
+}: Props & {
+  onSeek: (pos: number) => void;
+  /** Graded moves of `focus`: inaccuracies and worse get a mark on the line. */
+  graded?: (MoveReview | undefined)[];
+}) {
   const svg = useRef<SVGSVGElement>(null);
   const w = 760;
   const h = 190;
@@ -61,6 +74,18 @@ export function WinChart({ run, players, stateCount, pos, focus, onSeek }: Props
   if (run) {
     for (let i = 0; i < run.points.length && run.points[i].state <= pos; i++) shown = chances[i] ?? shown;
   }
+
+  // The focused player's chance just after a move: the last point at or before it.
+  const chanceAfter = (state: number) => {
+    let c: number | null = null;
+    if (run) for (let i = 0; i < run.points.length && run.points[i].state <= state; i++) c = chances[i]?.[focus] ?? c;
+    return c;
+  };
+  const marks = graded.flatMap((r) => {
+    if (!r || gradeShown(r.grade) === 'good') return [];
+    const c = chanceAfter(r.state + 1);
+    return c === null ? [] : [{ r, x: x(r.state + 1), y: y(c) }];
+  });
 
   const seek = (e: PointerEvent) => {
     const box = svg.current?.getBoundingClientRect();
@@ -106,6 +131,14 @@ export function WinChart({ run, players, stateCount, pos, focus, onSeek }: Props
                 <path key={seat} d={paths[seat]} className={`points-line ${seat === focus ? 'focus' : 'faded'}`} stroke={seatColor(players, seat)} />
               ),
           )}
+        {marks.map(({ r, x: mx, y: my }) => (
+          <g key={r.state} className={`chart-grade ${gradeShown(r.grade)}`}>
+            <title>
+              turn {r.turn}: {gradeShown(r.grade)}, −{(100 * r.loss).toFixed(1)} pp
+            </title>
+            <circle cx={mx} cy={my} r={gradeShown(r.grade) === 'blunder' ? 6 : gradeShown(r.grade) === 'mistake' ? 5 : 4} />
+          </g>
+        ))}
         <line className="cursor" x1={x(pos)} x2={x(pos)} y1={pad.t - 4} y2={h - pad.b} />
         {shown?.map((c, seat) => (
           <circle key={seat} cx={x(pos)} cy={y(c)} r={seat === focus ? 5 : 3} fill={seatColor(players, seat)} className="cursor-dot" />

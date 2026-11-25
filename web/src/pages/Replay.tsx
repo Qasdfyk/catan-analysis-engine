@@ -1,13 +1,16 @@
 // The replay viewer: open a record (a file, an example, or the game the
 // opening page hands over), step through it by hand or let it play.
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { readRecord } from '../adapters';
 import { GameBoard } from '../components/GameBoard';
 import { MoveLog, Players, Status } from '../components/GamePanels';
 import { LuckPanel, WinChart } from '../components/WinChances';
 import { useWinChances } from '../chances';
 import { SetupHeat, SetupPanel } from '../components/SetupReview';
+import { BestMoveSpot, MoveReviewPanel } from '../components/MoveReview';
+import { byEvent, useMoveGrades } from '../grades';
+import { PLAYER_COLORS } from '@platform/utils/labels';
 import { focusMove, useSetupReview } from '../setup';
 import { EXAMPLES, exampleRecord } from '../engine';
 import { expectsHandoff, receiveFromOpener } from '../handoff';
@@ -39,6 +42,9 @@ export function Replay() {
   const chances = useWinChances(game ? (source?.text ?? null) : null);
   // The setup review, in its own workers, also from the start.
   const setup = useSetupReview(game ? (source?.text ?? null) : null, focus);
+  // Every decision of the player in focus graded, also from the start.
+  const grades = useMoveGrades(game ? (source?.text ?? null) : null, focus);
+  const marks = useMemo(() => byEvent(grades), [grades]);
 
   // Opened by the game page ("Review this game"): wait for its record.
   // Otherwise the example opens by itself, so the tab is never empty.
@@ -151,12 +157,13 @@ export function Replay() {
   };
 
   // The heat map of the setup settlement at this move, if there is one.
+  // Else the best move, while a graded move of the player in focus is shown.
   const heat = () => {
-    if (!setup || !topo || !game) return null;
-    const m = focusMove(setup.moves, pos);
-    const review = m === null ? undefined : setup.reviews[m];
-    if (m === null || !review) return null;
-    return <SetupHeat review={review} move={setup.moves[m]} topo={topo} players={game.record.players} />;
+    if (!topo || !game) return null;
+    const m = setup ? focusMove(setup.moves, pos) : null;
+    const review = m === null ? undefined : setup?.reviews[m];
+    if (setup && m !== null && review) return <SetupHeat review={review} move={setup.moves[m]} topo={topo} players={game.record.players} />;
+    return <BestMoveSpot run={grades} pos={pos} topo={topo} color={PLAYER_COLORS[game.record.players[focus]?.color] ?? '#888'} />;
   };
 
   const shownError = message || (error && `${source?.label}: ${error}`) || (game?.error && `${source?.label}: the engine stopped early: ${game.error}`);
@@ -167,8 +174,8 @@ export function Replay() {
         <div>
           <h1>Replay</h1>
           <p className="lede">
-            Step through a finished game, rebuilt state by state by the engine in WebAssembly, and watch each player's chance
-            to win change.
+            Step through a finished game, rebuilt state by state by the engine in WebAssembly: each player's chance to win,
+            and every decision of the player under review graded against the best move.
           </p>
         </div>
         <div className="open">
@@ -282,14 +289,29 @@ export function Replay() {
             <p className="position">
               Move {pos} of {game.stateCount - 1} · turn {game.state(pos).turn} · {source?.label}
             </p>
-            <WinChart run={chances} players={game.record.players} stateCount={game.stateCount} pos={pos} focus={focus} onSeek={step} />
+            <WinChart
+              run={chances}
+              players={game.record.players}
+              stateCount={game.stateCount}
+              pos={pos}
+              focus={focus}
+              onSeek={step}
+              graded={grades?.seat === focus ? grades.reviews : []}
+            />
           </section>
           <aside className="side">
             <Status game={game} pos={pos} />
             <Players state={game.state(pos)} players={game.record.players} />
-            <MoveLog game={game} pos={pos} onPick={step} />
+            <MoveLog game={game} pos={pos} marks={marks} onPick={step} />
           </aside>
           <section className="charts">
+            <MoveReviewPanel
+              run={grades}
+              names={{ players: game.record.players, board: game.board, topo }}
+              pos={pos}
+              focus={focus}
+              onSeek={step}
+            />
             <SetupPanel run={setup} players={game.record.players} pos={pos} focus={focus} onSeek={step} />
             <LuckPanel run={chances} players={game.record.players} pos={pos} focus={focus} />
           </section>
