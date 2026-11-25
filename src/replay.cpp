@@ -63,8 +63,14 @@ json topology_json() {
   json hexes = json::array();
   for (const Cube& c : t.hex_cube) hexes.push_back({{"q", c.q}, {"r", c.r}});
   json nodes = json::array();
-  for (const Spelling& s : t.node_spelling) {
-    nodes.push_back({{"q", s.hex.q}, {"r", s.hex.r}, {"direction", s.direction}});
+  for (int n = 0; n < kNodeCount; ++n) {
+    const Spelling& s = t.node_spelling[at(n)];
+    // The land hexes around the corner, to name it by its numbers.
+    json around = json::array();
+    for (const std::int8_t h : t.node_hexes[at(n)]) {
+      if (h >= 0) around.push_back(h);
+    }
+    nodes.push_back({{"q", s.hex.q}, {"r", s.hex.r}, {"direction", s.direction}, {"hexes", around}});
   }
   json edges = json::array();
   for (int e = 0; e < kEdgeCount; ++e) {

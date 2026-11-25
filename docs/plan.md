@@ -24,6 +24,7 @@ Status: **done**, **next**, **later**, or **conditional** (depends on someone el
 | 12b | The ISMCTS bot as the platform's expert level, and golden positions B | [expert.md](expert.md) |
 | 13a–13c | "Review this game" on catan-project's end screen, a start page for players, the converter interface | [web.md](web.md#review-this-game), [converters.md](converters.md) |
 | 13, engine | Every decision graded by the chance to win it gave away, on what the player knew; `catan_review`, checks on the golden positions and planted blunders | [move-review.md](move-review.md) |
+| 13, page | **Release 4:** grades in the viewer's move list and on the chance curve, the best move on the board, a short "why"; planted blunders measured on fresh playouts (94% caught); golden positions read back with their whole development deck | [move-review.md](move-review.md#on-the-page) |
 
 ## Stage A: a demo of the full post-game flow
 
@@ -42,7 +43,7 @@ This does not depend on Colonist (below) and runs alongside stage A.
 | Step | Status | What |
 |---|---|---|
 | H | later | Human set H: games of people on catan-project, played with their consent, player names removed. Used to measure (calibration, setup review, move grades, the network), never to train. It will be small, tens of games rather than thousands, so its numbers will have wide intervals. |
-| 13 | in progress | The move review: each decision graded by the drop in win chances against the best move, judged on what the player knew, with the best move and a short reason. Grade thresholds are set on bot games first and checked on set H. The engine half is done ([move-review.md](move-review.md)); next are the grades in the viewer's move list, a short reason for each, and **release 4**. |
+| 13 | done, but one part | The move review: each decision graded by the drop in win chances against the best move, judged on what the player knew, with the best move and a short reason, in the viewer (**release 4**, [move-review.md](move-review.md)). Grade thresholds are set on bot games first and checked on set H. Left: an accuracy score per player, once it is clear what measures strength (the mean loss alone may not). |
 | 14 | later | Self-play data from a league (the network, its older versions, the zoo); a policy and value network trained in PyTorch. |
 | 15 | later | Running the network in the browser: ONNX Runtime Web against our own inference in C++. |
 | 16 | later | One network with a policy and a value head; the network guides the search and the search gives it better targets. A new checkpoint must win an SPRT match against the last one and must not be worse on sets A, B, C and H. |

@@ -97,10 +97,22 @@ TEST(Golden, ALabelIsReproducible) {
   EXPECT_EQ(a.best, b.best);
 }
 
+// A stored position plays out like the position in the game: the same
+// playouts give the same wins (this failed for every position where
+// development cards had been bought, until the snapshot kept the drawn part).
 TEST(Golden, AStoredPositionComesBackTheSame) {
-  for (const Decision& d : decisions("zoo-game-00206.json", 6)) {
+  for (const Decision& d : decisions("zoo-game-00206.json", 12)) {
     const Game back = game_from_snapshot(board_json(d.table.game.board), snapshot(d.table.game));
     EXPECT_EQ(snapshot(back), snapshot(d.table.game));
+    // The snapshot lists only the cards left in the deck; the cards drawn
+    // must come back too, or hidden cards are dealt from cards nobody has.
+    EXPECT_EQ(back.dev_deck_next, d.table.game.dev_deck_next);
+    EXPECT_EQ(played_dev_cards(back), played_dev_cards(d.table.game));
+    if (!d.played) continue;
+    const auto& known = d.table.belief.known[at(d.seat)];
+    const GoldenMove a = play_move(d.table.game, d.seat, known, d.table.memory, *d.played, 0, 24, 5, {});
+    const GoldenMove b = play_move(back, d.seat, known, d.table.memory, *d.played, 0, 24, 5, {});
+    EXPECT_EQ(a.confirm.wins, b.confirm.wins);
     const TableMemory m = memory_from_json(memory_json(d.table.memory));
     EXPECT_EQ(memory_json(m), memory_json(d.table.memory));
   }

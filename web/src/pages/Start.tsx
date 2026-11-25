@@ -7,6 +7,7 @@ import { useEffect, useState } from 'react';
 import { PLAYER_COLORS } from '@platform/utils/labels';
 import { GameBoard } from '../components/GameBoard';
 import { SetupHeat, SetupPanel } from '../components/SetupReview';
+import { KeyMoves } from '../components/MoveReview';
 import { LuckPanel, WinChart } from '../components/WinChances';
 import { exampleRecord, type OpenGame } from '../engine';
 import { CORRECTNESS, PLATFORM_URL, REPO_URL, SPEED } from '../facts';
@@ -54,7 +55,7 @@ const HOW = [
   },
   {
     title: 'See where it was won',
-    text: 'The chance to win after every move, how much of it the dice gave or took, and how your opening settlements compare with every other corner you could have taken.',
+    text: 'The chance to win after every move, how much of it the dice gave or took, how your opening settlements compare with every other corner, and every later decision graded against the best move, with why.',
   },
 ];
 
@@ -80,7 +81,8 @@ const ROADMAP = [
   { done: true, title: 'Rules engine in the browser', text: "C++20, difference-tested against the Python game, built to WebAssembly with each player's chance to win" },
   { done: true, title: 'Bots and search', text: "A zoo of bot styles, an SPRT arena, and an ISMCTS bot that sees only its own cards, now the game's expert level" },
   { done: true, title: 'Review after the game', text: 'Finish a game on catan-project, click "Review this game", and the review opens here' },
-  { done: false, title: 'Move review', text: 'Every decision graded against the best move, judged only on what the player could see' },
+  { done: true, title: 'Move review', text: 'Every decision graded against the best move, judged only on what the player could see, with a short why' },
+  { done: false, title: 'How strong a player is', text: 'An accuracy score from the grades, checked on games of people' },
   { done: false, title: 'Value network', text: 'A learned evaluation of positions, trained on self-play only' },
   { done: false, title: 'Colonist games', text: "Only with Colonist's written permission, which its Terms require" },
 ];
@@ -104,8 +106,8 @@ export function Start() {
           <p className="eyebrow">A post-game review for Catan</p>
           <h1>Was it the dice, or your decisions?</h1>
           <p className="lede">
-            After a game, see each player's chance to win move by move, how much of it the dice decided, and how good the
-            opening settlements were. It is computed in your browser by a C++ engine that plays the rest of the game out
+            After a game, see each player's chance to win move by move, how much of it the dice decided, how good the opening
+            settlements were, and which decisions cost the game. It is computed in your browser by a C++ engine that plays the rest of the game out
             thousands of times.
           </p>
           <div className="cta">
@@ -123,7 +125,7 @@ export function Start() {
         {game && topo ? <LiveBoard game={game} topo={topo} pos={pos} review={review} /> : <div className="board-area placeholder" aria-busy="true" />}
       </section>
 
-      {game && review && (
+      {game && topo && review && (
         <section className="section example-review">
           <div className="section-head">
             <h2>The example game, reviewed</h2>
@@ -137,6 +139,15 @@ export function Start() {
             <LuckPanel run={review.chances} players={game.record.players} pos={pos} focus={focus} />
             <SetupPanel run={review.setup} players={game.record.players} pos={pos} focus={focus} onSeek={go} />
           </div>
+          <div className="section-head sub">
+            <h3>Every decision, graded</h3>
+            <p>
+              Alice was out of the game early, so here are the moves of {game.record.players[review.grades.seat]?.name}, who lost
+              by a point: each against the best move, judged only on what that player could see. Click one to see it on the board; in <a href="#/replay">Replay</a> every
+              move of the game is graded, and the best move is drawn on the board.
+            </p>
+          </div>
+          <KeyMoves run={review.grades} names={{ players: game.record.players, board: game.board, topo }} onSeek={go} />
         </section>
       )}
 

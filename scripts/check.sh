@@ -5,7 +5,7 @@
 # random games, zoo games, a short arena match, a tiny MAP-Elites search,
 # the validation set and the sanity positions, the Catanatron bridge where Catanatron is installed,
 # the difference test against catan-project's Python rules,
-# the WebAssembly build (same games, win chances and setup review as native) with
+# the WebAssembly build (same games, win chances, setup and move review as native) with
 # the web viewer's tests.
 #
 # Usage: scripts/check.sh                  all checks
@@ -178,6 +178,13 @@ else
   echo "native: $native"
   echo "wasm:   $wasm"
   [ "$native" = "$wasm" ] || { echo "setup reviews differ" >&2; exit 1; }
+
+  step "WebAssembly: same move review as the native build"
+  native="$(build/release/tools/catan_review --seat 0 --first 4 --confirm 40 --threads "$jobs" tests/data/zoo-game-00088.json | grep 'review checksum')"
+  wasm="$(node web/scripts/review-node.mjs --seat 0 --first 4 --confirm 40 tests/data/zoo-game-00088.json | grep 'review checksum')"
+  echo "native: $native"
+  echo "wasm:   $wasm"
+  [ "$native" = "$wasm" ] || { echo "move reviews differ" >&2; exit 1; }
 
   step "WebAssembly: same search as the native build"
   native="$(build/release/tools/catan_mcts --decisions 4 --iterations 30 --workers 2 tests/data/zoo-game-00088.json | grep 'mcts checksum')"

@@ -409,3 +409,40 @@ label.check { display: inline-flex; align-items: center; gap: 6px; margin-top: 8
 .verdict.noise { color: var(--gold); }
 .verdict.loss { color: var(--danger); }
 .example-review .charts { align-items: start; }
+
+/* Move review: chess-style marks, green for best/good, then yellow, orange,
+   red as the loss grows. */
+.grade-mark { display: inline-block; min-width: 1.6em; margin-left: 6px; padding: 0 4px; border-radius: 5px; font: 700 11px/1.6 var(--mono); text-align: center; color: #15181d; }
+.grade-mark.good { background: transparent; color: var(--green); margin-left: 4px; min-width: 0; }
+.grade-mark.inaccuracy { background: #e8c547; }
+.grade-mark.mistake { background: #f0883e; }
+.grade-mark.blunder { background: var(--danger); color: #fff; }
+.move-review h3 { display: flex; align-items: center; gap: 8px; }
+.grade-counts { display: flex; flex-wrap: wrap; gap: 6px 16px; margin: 6px 0 12px; font-size: 13px; color: var(--muted); }
+.grade-count .grade-mark { margin-left: 0; }
+.move-card { border: 1px solid var(--line-2); border-left: 4px solid var(--green); border-radius: 10px; padding: 10px 12px; background: var(--panel-2); }
+.move-card.inaccuracy { border-left-color: #e8c547; }
+.move-card.mistake { border-left-color: #f0883e; }
+.move-card.blunder { border-left-color: var(--danger); }
+.move-card p { margin: 6px 0 0; }
+.move-card-head { display: flex; align-items: baseline; gap: 8px; }
+.move-card-head .grade-mark { margin-left: 0; }
+.move-card-head .muted { margin-left: auto; }
+.move-card .why { color: var(--text); }
+.best-move-text { color: #fff; text-decoration: underline dashed rgba(255, 255, 255, .6); text-underline-offset: 3px; }
+.move-card-empty { margin: 0; }
+.move-review h4 { margin: 14px 0 4px; font-weight: 500; }
+.worst { list-style: none; margin: 0; padding: 0; }
+.worst button { display: flex; align-items: baseline; gap: 4px; width: 100%; text-align: left; background: transparent; border: 0; border-radius: 6px; padding: 3px 6px; color: var(--text); font-size: 13px; cursor: pointer; }
+.worst button:hover, .worst button.on { background: var(--panel-2); }
+.worst button .grade-mark { margin: 0 4px 0 0; }
+.worst button .mono { margin-left: auto; color: var(--muted); }
+.best-move { position: absolute; inset: 0; pointer-events: none; }
+.chart-grade circle { stroke: #111; stroke-width: 1.5; }
+.chart-grade.inaccuracy circle { fill: #e8c547; }
+.chart-grade.mistake circle { fill: #f0883e; }
+.chart-grade.blunder circle { fill: var(--danger); }
+.key-moves { display: grid; gap: 10px; }
+.key-move { display: block; width: 100%; padding: 0; border: 0; background: transparent; text-align: left; color: inherit; font: inherit; cursor: pointer; }
+.key-move:hover .move-card { border-color: var(--gold-dim); }
+.section-head.sub { margin: 28px 0 12px; }

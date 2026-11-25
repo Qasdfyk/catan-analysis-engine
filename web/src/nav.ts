@@ -48,3 +48,18 @@ export function reviewSeat(players: { seat: number; kind: string }[], asked?: nu
   if (asked !== undefined && players.some((p) => p.seat === asked)) return asked;
   return players.find((p) => p.kind === 'human')?.seat ?? 0;
 }
+
+/**
+ * The player who came closest to winning without winning (most points, the
+ * first such seat on a tie), 0 for a record without a result. The start
+ * page grades this player's moves in the example game.
+ */
+export function runnerUp(record: { players: { seat: number }[]; result?: { winner_seat?: number | null; victory_points?: number[] } | null }): number {
+  const points = record.result?.victory_points ?? [];
+  let best = -1;
+  for (const p of record.players) {
+    if (p.seat === record.result?.winner_seat) continue;
+    if (best < 0 || (points[p.seat] ?? 0) > (points[best] ?? 0)) best = p.seat;
+  }
+  return Math.max(0, best);
+}

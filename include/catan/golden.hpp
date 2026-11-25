@@ -53,6 +53,9 @@ struct GoldenMove {
   // of every move draws the same hidden cards and chance, so two moves can
   // be compared pair by pair (review.cpp uses it for the error of a loss).
   std::vector<std::uint8_t> confirm_won;
+  // Confirmation playouts the seat won before its turn was over: the move
+  // wins on the spot (review.cpp's "why" uses it).
+  int confirm_now = 0;
   bool finalist = false;
 };
 
@@ -71,6 +74,14 @@ struct GoldenLabel {
 [[nodiscard]] GoldenLabel label_position(const Game& truth, int seat, const std::array<Cards, kMaxPlayers>& known,
                                          const TableMemory& memory, const std::optional<Action>& played,
                                          const GoldenConfig& config, std::span<const ZooBot> pool);
+
+// `count` playouts of one move from playout index `first` on, the way
+// label_position plays them (the same draws for the same index and seed).
+// The planted blunders of catan_review value their move with it, on
+// playouts the halving that picked the move never saw.
+[[nodiscard]] GoldenMove play_move(const Game& truth, int seat, const std::array<Cards, kMaxPlayers>& known,
+                                   const TableMemory& memory, const Action& action, int first, int count,
+                                   std::uint64_t seed, std::span<const ZooBot> pool);
 
 // The value of a move: its confirmation if it has one, else the halving.
 [[nodiscard]] double golden_value(const GoldenMove& m, int seat) noexcept;

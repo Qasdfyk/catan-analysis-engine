@@ -51,7 +51,7 @@ export interface GameRecord {
 /** topologyJson(): the position behind each index, in the spelling of game records. */
 export interface Topology {
   hexes: { q: number; r: number }[];
-  nodes: { q: number; r: number; direction: number }[];
+  nodes: { q: number; r: number; direction: number; hexes: number[] }[];
   edges: { q: number; r: number; direction: number; nodes: [number, number] }[];
 }
 

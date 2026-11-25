@@ -1,5 +1,7 @@
 #include "catan/record.hpp"
 
+#include "catan/belief.hpp"
+
 #include <algorithm>
 #include <fstream>
 #include <optional>
@@ -633,13 +635,29 @@ Game from_snapshot(const json& board_j, const json& st) {
   const json& players = field(st, "players");
   const int n = static_cast<int>(players.size());
   if (n < 2 || n > kMaxPlayers) throw RecordError("a game has 2 to 4 players");
-  std::vector<DevCard> deck;
+  // The snapshot lists the cards still in the deck. The cards drawn before
+  // go in front of them (the full deck minus what is left, in any order),
+  // so that dev_deck_next counts the cards drawn, as in the game: hidden
+  // cards are dealt from what was not drawn yet (played_dev_cards,
+  // determinize in belief.cpp), and a deck starting at 0 would hand the
+  // opponents cards nobody has.
+  std::vector<DevCard> rest;
+  std::array<int, kDevCardKinds> drawn = kDevDeckComposition;
   for (const json& card : field(st, "dev_deck")) {
     const auto c = parse_dev_card(card.get<std::string>());
     if (!c) throw RecordError("unknown development card");
-    deck.push_back(*c);
+    rest.push_back(*c);
+    --drawn[at(static_cast<int>(*c))];
   }
+  std::vector<DevCard> deck;
+  for (int c = 0; c < kDevCardKinds; ++c) {
+    if (drawn[at(c)] < 0) throw RecordError("more development cards than the game has");
+    deck.insert(deck.end(), static_cast<std::size_t>(drawn[at(c)]), static_cast<DevCard>(c));
+  }
+  const int next = static_cast<int>(deck.size());
+  deck.insert(deck.end(), rest.begin(), rest.end());
   Game g = Game::create(board, Settings{}, n, 0, deck);
+  g.dev_deck_next = next;
   for (int s = 0; s < n; ++s) {
     const json& pj = players[at(s)];
     Player& p = g.players[at(s)];
